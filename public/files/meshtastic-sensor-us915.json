@@ -1,0 +1,40 @@
+{
+  "$comment": "Meshtastic config preset — Sensor node, US915. Base preset plus telemetry and sensor module settings.",
+  "schemaVersion": 1,
+  "nodeType": "sensor",
+  "lora": {
+    "region": "US",
+    "usePreset": true,
+    "modemPreset": "LONG_FAST",
+    "hopLimit": 5,
+    "txEnabled": true,
+    "txPower": 22,
+    "sx126xRxBoostedGain": true
+  },
+  "device": {
+    "role": "SENSOR",
+    "rebroadcastMode": "LOCAL_ONLY",
+    "nodeInfoBroadcastSecs": 10800
+  },
+  "position": {
+    "positionBroadcastSecs": 43200,
+    "fixedPosition": true,
+    "gpsMode": "NOT_PRESENT"
+  },
+  "power": {
+    "isPowerSaving": true,
+    "lsSecs": 300,
+    "minWakeSecs": 10
+  },
+  "telemetry": {
+    "deviceUpdateInterval": 1800,
+    "environmentUpdateInterval": 900,
+    "environmentMeasurementEnabled": true,
+    "environmentScreenEnabled": false,
+    "airQualityEnabled": true,
+    "airQualityInterval": 900
+  },
+  "bluetooth": {
+    "enabled": false
+  }
+}
