@@ -5,8 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite --config config/vite.config.ts",
-    "build": "npm run typecheck && vite build --config config/vite.config.ts",
+    "build": "npm run lint && vite build --config config/vite.config.ts",
     "preview": "vite preview --config config/vite.config.ts",
+    "lint": "npm run lint:structure && npm run typecheck",
+    "lint:structure": "node scripts/check-structure.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
