@@ -1,0 +1,25 @@
+.problem-teaser { transition: border-color 160ms var(--ease), transform 160ms var(--ease); }
+.problem-teaser:hover { border-color: var(--line-strong); transform: translateY(-2px); }
+.problem-teaser__icon { display: inline-flex; }
+
+.baseline-row { padding-bottom: var(--s-3); border-bottom: 1px solid var(--line); }
+.baseline-row:last-child { border-bottom: none; padding-bottom: 0; }
+
+.log__row { padding-block: var(--s-4); border-bottom: 1px solid var(--line); }
+.log__row:last-child { border-bottom: none; }
+.log__date { flex: none; width: 6.5rem; padding-top: 0.15rem; }
+@media (max-width: 560px) {
+  .log__row { flex-direction: column; gap: var(--s-1); }
+  .log__date { width: auto; }
+}
+
+.goal__num { flex: none; width: 2.25rem; }
+.goal__total { padding-top: var(--s-4); border-top: 1px solid var(--line); }
+
+.roadmap__row { padding-block: var(--s-4); border-bottom: 1px solid var(--line); }
+.roadmap__row:last-child { border-bottom: none; }
+.roadmap__when { flex: none; width: 4rem; padding-top: 0.3rem; }
+@media (max-width: 560px) {
+  .roadmap__row { flex-direction: column; gap: var(--s-1); }
+  .roadmap__when { width: auto; }
+}
