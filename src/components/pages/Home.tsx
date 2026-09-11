@@ -26,7 +26,7 @@ export function HomePage() {
     const copy = homeContent
 
     return (
-        <Page title='Home' headed={false}>
+        <Page headed={false}>
             <Section space='lg' grid>
                 <Stack gap={8}>
                     <Stack gap={5} align='center'>

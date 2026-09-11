@@ -5,13 +5,14 @@ import { useLocation } from 'react-router-dom'
 import { Container, Stack } from '@components/shared/primitives/Layout'
 import { Eyebrow, Heading } from '@components/shared/typography/Heading'
 import { Text } from '@components/shared/typography/Text'
+import { SITE } from '@core/config/site'
 
 /** Sets the document title and scrolls a fresh route to the top. */
-function useRouteChrome(title: string) {
+function useRouteChrome(title: string | undefined) {
     const { pathname, hash } = useLocation()
 
     useEffect(() => {
-        document.title = `${title} — Mesh Fire Detection`
+        document.title = title ? `${title} — ${SITE.name}` : SITE.name
     }, [title])
 
     useEffect(() => {
@@ -33,7 +34,7 @@ export function Page({
     children,
     headed = true,
 }: {
-    title: string
+    title?: string | undefined
     eyebrow?: string | undefined
     lede?: string | undefined
     aside?: ReactNode | undefined
@@ -44,7 +45,7 @@ export function Page({
 
     return (
         <Stack as='main' id='main' tabIndex={-1} gap={0} className='page'>
-            {headed ? (
+            {headed && title ? (
                 <Container as='header' className='page_head'>
                     <Stack gap={4}>
                         {eyebrow ? <Eyebrow>{eyebrow}</Eyebrow> : null}
