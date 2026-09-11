@@ -34,7 +34,6 @@
             "@config/*": ["./config/*"],
             "@core/*": ["./src/core/*"],
             "@components/*": ["./src/components/*"],
-            "@styles/*": ["./src/assets/styles/*"],
             "@assets/*": ["./src/assets/*"]
         }
     },

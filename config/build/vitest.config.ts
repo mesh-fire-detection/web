@@ -14,7 +14,6 @@ export default defineConfig({
             '@config': path.join(rootDir, 'config'),
             '@core': path.join(rootDir, 'src/core'),
             '@components': path.join(rootDir, 'src/components'),
-            '@styles': path.join(rootDir, 'src/assets/styles'),
             '@assets': path.join(rootDir, 'src/assets'),
         },
     },

@@ -2,6 +2,13 @@ export const SITE = {
     name: 'Mesh Fire Detection',
     short: 'MFD',
     tagline: 'A wildfire detection network you can afford to lose nodes from.',
+    /**
+     * Public site root for absolute sitemap/robots URLs. No trailing slash.
+     * Custom domain: `https://meshfiredetection.org`.
+     * Project Pages without a custom domain: `https://org.github.io/repo`.
+     * Do not fold in `BASE_PATH` — that is only Vite's asset base.
+     */
+    url: 'https://meshfiredetection.org',
     github: 'https://github.com/mesh-fire-detection',
     discussions: 'https://github.com/orgs/mesh-fire-detection/discussions/',
     discord: 'https://discord.gg/mesh-fire-detection',

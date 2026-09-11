@@ -7,7 +7,7 @@ data/
 *.db
 .env
 .env.*
-!.env.example
+!config/.env.example
 .husky/_/
 package-lock.json
 docs/
