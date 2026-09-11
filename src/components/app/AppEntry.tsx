@@ -2,6 +2,7 @@ import type { ComponentType } from 'react'
 import { Route, Routes } from 'react-router-dom'
 
 import { ErrorBoundary } from '@components/app/ErrorBoundary'
+import { useNavMenu } from '@components/app/NavMenuProvider'
 import { Footer } from '@components/layout/Footer'
 import { Header } from '@components/layout/Header'
 import { AboutPage } from '@components/pages/About'
@@ -28,18 +29,24 @@ const PAGES: Record<RouteId, ComponentType> = {
 }
 
 const AppEntry = () => {
+    const { open } = useNavMenu()
+
     return (
         <>
-            <SkipLink to='#main'>Skip to content</SkipLink>
+            <div inert={open ? true : undefined}>
+                <SkipLink to='#main'>Skip to content</SkipLink>
+            </div>
             <Header />
-            <Routes>
-                {APP_ROUTES.map((route) => {
-                    const Page = PAGES[route.id]
-                    return <Route key={route.id} element={<Page />} path={route.path} />
-                })}
-                <Route element={<NotFoundPage />} path='*' />
-            </Routes>
-            <Footer />
+            <div inert={open ? true : undefined}>
+                <Routes>
+                    {APP_ROUTES.map((route) => {
+                        const Page = PAGES[route.id]
+                        return <Route key={route.id} element={<Page />} path={route.path} />
+                    })}
+                    <Route element={<NotFoundPage />} path='*' />
+                </Routes>
+                <Footer />
+            </div>
         </>
     )
 }
