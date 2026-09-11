@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 
-import { useNavMenu, OVERLAY_NAV_ID } from '@components/app/NavMenuProvider'
+import { useNavMenu, OVERLAY_NAV_ID, OVERLAY_TOGGLE_ID } from '@components/app/NavMenuProvider'
 import { Wordmark } from '@components/layout/Wordmark'
 import { Container, Row, Stack } from '@components/shared/primitives/Layout'
 import { Text } from '@components/shared/typography/Text'
 import { Button, ButtonLink, IconLink, NavLink } from '@components/shared/widgets/Action'
 import { Icon } from '@components/shared/widgets/Icon'
-import { HEADER_NAV } from '@core/config/routes'
+import { NAV_ROUTES } from '@core/config/routes'
 import { SITE } from '@core/config/site'
 
 export function Header() {
@@ -35,7 +35,7 @@ export function Header() {
                     <Wordmark />
 
                     <Row gap={6} wrap={false} className='header_nav' as='nav' ariaLabel='Primary'>
-                        {HEADER_NAV.map((item) => (
+                        {NAV_ROUTES.map((item) => (
                             <NavLink key={item.path} to={item.path}>
                                 {item.label}
                             </NavLink>
@@ -53,6 +53,7 @@ export function Header() {
                             variant='ghost'
                             size='sm'
                             className='header_toggle'
+                            id={OVERLAY_TOGGLE_ID}
                             label={open ? 'Close menu' : 'Open menu'}
                             ariaControls={OVERLAY_NAV_ID}
                             ariaExpanded={open}
@@ -76,7 +77,7 @@ export function Header() {
                         ariaLabel='Primary, mobile'
                         id={OVERLAY_NAV_ID}
                     >
-                        {HEADER_NAV.map((item) => (
+                        {NAV_ROUTES.map((item) => (
                             <Row
                                 key={item.path}
                                 className='header_drawer_row'

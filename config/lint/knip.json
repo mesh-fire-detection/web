@@ -3,7 +3,6 @@
     "entry": [
         "src/index.tsx",
         "tests/setup.ts",
-        "tests/**/*.test.{ts,tsx}",
         "config/build/vite.config.ts",
         "config/build/vitest.config.ts",
         "config/lint/eslint.config.mjs",
@@ -11,6 +10,12 @@
     ],
     "project": ["src/**/*.{ts,tsx}", "config/**/*.{ts,mjs,cjs}", "tests/**/*.{ts,tsx}"],
     "include": ["files", "exports", "types", "duplicates"],
+    "ignoreDependencies": [
+        "@testing-library/react",
+        "@testing-library/dom",
+        "@testing-library/user-event",
+        "jsdom"
+    ],
     "ignoreIssues": {
         "src/components/shared/primitives/Layout.tsx": ["exports"],
         "src/components/shared/typography/Text.tsx": ["exports"]
