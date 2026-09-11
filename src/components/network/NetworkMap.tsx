@@ -76,7 +76,14 @@ export function NetworkMap({
             'bottom-right'
         )
 
-        map.on('error', () => {
+        map.on('error', (event) => {
+            // Tile/sprite/source failures are transient; only style/WebGL-level
+            // errors (no sourceId) take the map down for good.
+            const sourceId =
+                'sourceId' in event && typeof event.sourceId === 'string'
+                    ? event.sourceId
+                    : undefined
+            if (sourceId !== undefined) return
             setFailed(true)
         })
 
