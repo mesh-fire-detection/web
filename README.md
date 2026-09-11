@@ -1,7 +1,7 @@
 # Mesh Fire Detection
 
 Marketing and documentation site for an open wildfire-detection mesh network.
-React 19 + TypeScript + Vite, built from `docs/idea.md`, `docs/idea.ext.md` and `docs/ui.md`.
+React 19 + TypeScript + Vite, built from `docs/web/idea.md`, `docs/web/idea.ext.md` and `docs/web/ui.md`.
 
 ```bash
 npm install
