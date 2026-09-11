@@ -14,7 +14,9 @@ export * from './core/Layout'
 export * from './core/Icon'
 
 export * from './controls/Action'
+export type { ExternalHref } from './controls/ExternalLink'
 export * from './controls/Field'
+export { NavHit } from './controls/NavHit'
 
 export * from './display/Badge'
 export * from './display/List'

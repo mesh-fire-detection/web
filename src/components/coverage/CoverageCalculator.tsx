@@ -1,4 +1,8 @@
 import { useMemo, useState } from 'react'
+
+import { decimal, money, plural, signed } from '@/lib/format'
+import { DEFAULT_LINK, PRESETS, TERRAINS, computeLink, nodesForCorridor } from '@/lib/linkBudget'
+import type { LinkInput } from '@/lib/linkBudget'
 import {
   Badge,
   Box,
@@ -16,9 +20,7 @@ import {
   Text,
   Value,
 } from '@/ui'
-import { DEFAULT_LINK, PRESETS, TERRAINS, computeLink, nodesForCorridor } from '@/lib/linkBudget'
-import type { LinkInput, Preset, Terrain } from '@/lib/linkBudget'
-import { decimal, money, plural, signed } from '@/lib/format'
+
 import { LinkProfile } from './LinkProfile'
 
 const VERDICT = {
@@ -54,8 +56,7 @@ export function CoverageCalculator() {
 
   const set =
     <K extends keyof LinkInput>(key: K) =>
-    (value: LinkInput[K]) =>
-      setInput((prev) => ({ ...prev, [key]: value }))
+    (value: LinkInput[K]) => { setInput((prev) => ({ ...prev, [key]: value })); }
 
   const verdict = VERDICT[result.verdict]
   const nodesNeeded = nodesForCorridor(CORRIDOR_KM, result.maxRangeKm)
@@ -68,7 +69,7 @@ export function CoverageCalculator() {
             <Heading level={3} size="md">
               The link
             </Heading>
-            <Button variant="ghost" size="sm" onClick={() => setInput(DEFAULT_LINK)}>
+            <Button variant="ghost" size="sm" onClick={() => { setInput(DEFAULT_LINK); }}>
               Reset
             </Button>
           </Row>
@@ -106,7 +107,7 @@ export function CoverageCalculator() {
             label="Terrain between them"
             value={input.terrain}
             options={TERRAIN_OPTIONS}
-            onChange={set('terrain') as (next: Terrain) => void}
+            onChange={set('terrain')}
             hint={TERRAINS.find((terrain) => terrain.id === input.terrain)?.note}
           />
 
@@ -114,7 +115,7 @@ export function CoverageCalculator() {
             label="Meshtastic preset"
             value={input.preset}
             options={PRESET_OPTIONS}
-            onChange={set('preset') as (next: Preset) => void}
+            onChange={set('preset')}
           />
 
           <Divider space={0} />
@@ -268,7 +269,7 @@ function BudgetRow({
         justify="between"
         gap={3}
         wrap={false}
-        className={emphasis ? 'budget--emphasis' : undefined}
+        className={emphasis ? 'budget_emphasis' : undefined}
       >
         <Text as="span" size="sm" tone={emphasis ? 'default' : 'muted'} weight={emphasis ? 600 : 400}>
           {label}

@@ -1,0 +1,16 @@
+{
+    "$schema": "https://unpkg.com/knip@6/schema.json",
+    "entry": [
+        "src/main.tsx",
+        "config/vite.config.ts",
+        "config/lint/eslint.config.mjs",
+        "config/lint/stylelint.config.cjs",
+        "config/lint/checkStructure.ts"
+    ],
+    "project": ["src/**/*.{ts,tsx}", "config/**/*.{ts,mjs,cjs}"],
+    "include": ["files", "exports", "types", "duplicates"],
+    "ignoreIssues": {
+        "src/ui/core/Layout.tsx": ["exports"],
+        "src/ui/core/Text.tsx": ["exports"]
+    }
+}

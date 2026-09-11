@@ -1,38 +1,38 @@
 {
-  "$comment": "Meshtastic config preset — Base node, US915. Import via the Meshtastic client: Settings > Import configuration.",
-  "schemaVersion": 1,
-  "nodeType": "base",
-  "lora": {
-    "region": "US",
-    "usePreset": true,
-    "modemPreset": "LONG_FAST",
-    "hopLimit": 5,
-    "txEnabled": true,
-    "txPower": 22,
-    "sx126xRxBoostedGain": true
-  },
-  "device": {
-    "role": "ROUTER",
-    "rebroadcastMode": "ALL",
-    "nodeInfoBroadcastSecs": 10800
-  },
-  "position": {
-    "positionBroadcastSecs": 43200,
-    "positionBroadcastSmartEnabled": false,
-    "fixedPosition": true,
-    "gpsMode": "NOT_PRESENT"
-  },
-  "power": {
-    "isPowerSaving": true,
-    "lsSecs": 300,
-    "minWakeSecs": 10
-  },
-  "telemetry": {
-    "deviceUpdateInterval": 1800,
-    "environmentUpdateInterval": 0,
-    "environmentMeasurementEnabled": false
-  },
-  "bluetooth": {
-    "enabled": false
-  }
+    "$comment": "Meshtastic config preset — Base node, US915. Import via the Meshtastic client: Settings > Import configuration.",
+    "schemaVersion": 1,
+    "nodeType": "base",
+    "lora": {
+        "region": "US",
+        "usePreset": true,
+        "modemPreset": "LONG_FAST",
+        "hopLimit": 5,
+        "txEnabled": true,
+        "txPower": 22,
+        "sx126xRxBoostedGain": true
+    },
+    "device": {
+        "role": "ROUTER",
+        "rebroadcastMode": "ALL",
+        "nodeInfoBroadcastSecs": 10800
+    },
+    "position": {
+        "positionBroadcastSecs": 43200,
+        "positionBroadcastSmartEnabled": false,
+        "fixedPosition": true,
+        "gpsMode": "NOT_PRESENT"
+    },
+    "power": {
+        "isPowerSaving": true,
+        "lsSecs": 300,
+        "minWakeSecs": 10
+    },
+    "telemetry": {
+        "deviceUpdateInterval": 1800,
+        "environmentUpdateInterval": 0,
+        "environmentMeasurementEnabled": false
+    },
+    "bluetooth": {
+        "enabled": false
+    }
 }

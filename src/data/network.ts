@@ -8,7 +8,7 @@
 export type NodeType = 'base' | 'cellular' | 'sensor' | 'vision'
 export type NodeStatus = 'online' | 'degraded' | 'offline'
 
-export interface MeshNode {
+export type MeshNode = {
   id: string
   name: string
   type: NodeType
@@ -28,7 +28,7 @@ export interface MeshNode {
   note?: string
 }
 
-export interface MeshLink {
+export type MeshLink = {
   from: string
   to: string
   /** dBm at the receiving end. */
@@ -241,7 +241,7 @@ export const NODES: readonly MeshNode[] = [
 export const LINKS: readonly MeshLink[] = [
   { from: 'cel-01', to: 'bas-01', rssi: -91, snr: 8.5, distanceKm: 1.8 },
   { from: 'bas-01', to: 'sen-01', rssi: -98, snr: 6.2, distanceKm: 0.7 },
-  { from: 'bas-01', to: 'bas-02', rssi: -104, snr: 4.1, distanceKm: 2.0 },
+  { from: 'bas-01', to: 'bas-02', rssi: -104, snr: 4.1, distanceKm: 2 },
   { from: 'bas-02', to: 'vis-01', rssi: -87, snr: 10.4, distanceKm: 0.3 },
   { from: 'bas-02', to: 'bas-03', rssi: -112, snr: -2.5, distanceKm: 2.4 },
   { from: 'bas-01', to: 'bas-03', rssi: -118, snr: -7.8, distanceKm: 4.3 },
@@ -254,7 +254,7 @@ export const LINKS: readonly MeshLink[] = [
   { from: 'bas-03', to: 'bas-05', rssi: -117, snr: -6.9, distanceKm: 4.9 },
 ]
 
-export interface NodeTypeSpec {
+export type NodeTypeSpec = {
   type: NodeType
   name: string
   role: string
@@ -307,10 +307,12 @@ export function nodesByType(type: NodeType): readonly MeshNode[] {
 }
 
 export function countByStatus(): Record<NodeStatus, number> {
-  return NODES.reduce(
-    (acc, node) => ({ ...acc, [node.status]: acc[node.status] + 1 }),
-    { online: 0, degraded: 0, offline: 0 } as Record<NodeStatus, number>,
-  )
+    const counts: Record<NodeStatus, number> = { online: 0, degraded: 0, offline: 0 }
+    for (const node of NODES) {
+        const current = counts[node.status]
+        counts[node.status] = current + 1
+    }
+    return counts
 }
 
 export function findNode(id: string): MeshNode | undefined {

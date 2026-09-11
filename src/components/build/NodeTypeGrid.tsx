@@ -1,42 +1,49 @@
-import { Badge, Box, Grid, Heading, Icon, Row, Stack, Text } from '@/ui'
 import { NODE_TYPES, nodesByType } from '@/data/network'
 import { money, plural } from '@/lib/format'
+import { Badge, Box, Grid, Heading, Icon, Row, Stack, Text } from '@/ui'
 
 export function NodeTypeGrid() {
-  return (
-    <Grid columns={4} minColumnWidth={230} gap={4}>
-      {NODE_TYPES.map((spec) => {
-        const deployed = nodesByType(spec.type).length
-        return (
-          <Box key={spec.type} tone="surface" padding={5} radius="md" className="ntype" grow>
-            <Stack gap={4} grow>
-              <Row justify="between" gap={3}>
-                <Text as="span" tone="fire" className="ntype__icon">
-                  <Icon name={spec.icon} size={20} />
-                </Text>
-                <Badge>{money(spec.unitCost)}</Badge>
-              </Row>
+    return (
+        <Grid columns={4} minColumnWidth={230} gap={4}>
+            {NODE_TYPES.map((spec) => {
+                const deployed = nodesByType(spec.type).length
+                return (
+                    <Box
+                        key={spec.type}
+                        tone='surface'
+                        padding={5}
+                        radius='md'
+                        className='ntype'
+                        grow
+                    >
+                        <Stack gap={4} grow>
+                            <Row justify='between' gap={3}>
+                                <Text as='span' tone='fire' className='ntype_icon'>
+                                    <Icon name={spec.icon} size={20} />
+                                </Text>
+                                <Badge>{money(spec.unitCost)}</Badge>
+                            </Row>
 
-              <Stack gap={1}>
-                <Heading level={3} size="md">
-                  {spec.name}
-                </Heading>
-                <Text size="xs" mono uppercase tone="fire" weight={600}>
-                  {spec.role}
-                </Text>
-              </Stack>
+                            <Stack gap={1}>
+                                <Heading level={3} size='md'>
+                                    {spec.name}
+                                </Heading>
+                                <Text size='xs' mono uppercase tone='fire' weight={600}>
+                                    {spec.role}
+                                </Text>
+                            </Stack>
 
-              <Text size="sm" tone="muted" className="grow">
-                {spec.detail}
-              </Text>
+                            <Text size='sm' tone='muted' className='grow'>
+                                {spec.detail}
+                            </Text>
 
-              <Text size="2xs" mono tone="faint" uppercase>
-                {deployed} {plural(deployed, 'node')} deployed
-              </Text>
-            </Stack>
-          </Box>
-        )
-      })}
-    </Grid>
-  )
+                            <Text size='2xs' mono tone='faint' uppercase>
+                                {deployed} {plural(deployed, 'node')} deployed
+                            </Text>
+                        </Stack>
+                    </Box>
+                )
+            })}
+        </Grid>
+    )
 }

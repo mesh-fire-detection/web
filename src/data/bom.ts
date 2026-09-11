@@ -1,6 +1,6 @@
 import type { NodeType } from './network'
 
-export interface BomPart {
+export type BomPart = {
   name: string
   detail: string
   sku?: string
@@ -12,7 +12,7 @@ export interface BomPart {
   inheritedFromBase?: boolean
 }
 
-export interface Bom {
+export type Bom = {
   type: NodeType
   title: string
   summary: string
@@ -211,7 +211,7 @@ export function bomFor(type: NodeType): Bom {
   return found
 }
 
-export interface Download {
+export type Download = {
   name: string
   detail: string
   href: string
@@ -261,7 +261,7 @@ export const DOWNLOADS: readonly Download[] = [
   {
     name: 'meshtastic-base-us915.json',
     detail: 'Channel, region, hop limit and power settings for a Base node.',
-    href: '/files/meshtastic-base-us915.json',
+    href: `${import.meta.env.BASE_URL}files/meshtastic-base-us915.json`,
     kind: 'json',
     size: '3 KB',
     available: true,
@@ -269,14 +269,14 @@ export const DOWNLOADS: readonly Download[] = [
   {
     name: 'meshtastic-sensor-us915.json',
     detail: 'Base preset plus telemetry intervals and sensor module config.',
-    href: '/files/meshtastic-sensor-us915.json',
+    href: `${import.meta.env.BASE_URL}files/meshtastic-sensor-us915.json`,
     kind: 'json',
     size: '4 KB',
     available: true,
   },
 ]
 
-export interface AssemblyStep {
+export type AssemblyStep = {
   title: string
   detail: string
   minutes: number

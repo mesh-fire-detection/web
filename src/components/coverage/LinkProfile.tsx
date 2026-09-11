@@ -1,6 +1,6 @@
-import { Box, Row, Stack, Text } from '@/ui'
-import type { LinkInput, LinkResult } from '@/lib/linkBudget'
 import { decimal } from '@/lib/format'
+import type { LinkInput, LinkResult } from '@/lib/linkBudget'
+import { Box, Row, Stack, Text } from '@/ui'
 
 const W = 600
 const H = 210
@@ -95,36 +95,36 @@ export function LinkProfile({ input, result }: { input: LinkInput; result: LinkR
             d={`${upper.join(' ')} ${lower.join(' ')} Z`}
             fill="url(#fresnel)"
             clipPath="url(#above-ground)"
-            className="profile__fresnel"
+            className="profile_fresnel"
           />
 
           <path
             d={`${ground.join(' ')} L ${xAt(distance)} ${H} L ${xAt(0)} ${H} Z`}
-            className="profile__ground"
+            className="profile_ground"
           />
-          <path d={ground.join(' ')} className="profile__horizon" />
+          <path d={ground.join(' ')} className="profile_horizon" />
 
-          <line x1={xAt(0)} y1={groundY} x2={xAt(0)} y2={txTop} className="profile__mast" />
-          <line x1={xAt(distance)} y1={groundY} x2={xAt(distance)} y2={rxTop} className="profile__mast" />
+          <line x1={xAt(0)} y1={groundY} x2={xAt(0)} y2={txTop} className="profile_mast" />
+          <line x1={xAt(distance)} y1={groundY} x2={xAt(distance)} y2={rxTop} className="profile_mast" />
 
           <line
             x1={xAt(0)}
             y1={txTop}
             x2={xAt(distance)}
             y2={rxTop}
-            className={`profile__los profile__los--${tone}`}
+            className={`profile_los profile_los_${tone}`}
           />
 
-          <circle cx={xAt(0)} cy={txTop} r={4} className={`profile__node profile__node--${tone}`} />
-          <circle cx={xAt(distance)} cy={rxTop} r={4} className={`profile__node profile__node--${tone}`} />
+          <circle cx={xAt(0)} cy={txTop} r={4} className={`profile_node_${tone}`} />
+          <circle cx={xAt(distance)} cy={rxTop} r={4} className={`profile_node_${tone}`} />
 
-          <text x={xAt(0)} y={groundY + 18} className="profile__label" textAnchor="middle">
+          <text x={xAt(0)} y={groundY + 18} className="profile_label" textAnchor="middle">
             {input.txHeightM} m
           </text>
-          <text x={xAt(distance)} y={groundY + 18} className="profile__label" textAnchor="middle">
+          <text x={xAt(distance)} y={groundY + 18} className="profile_label" textAnchor="middle">
             {input.rxHeightM} m
           </text>
-          <text x={W / 2} y={groundY + 18} className="profile__label" textAnchor="middle">
+          <text x={W / 2} y={groundY + 18} className="profile_label" textAnchor="middle">
             {decimal(distance)} km
           </text>
         </svg>

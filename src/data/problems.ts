@@ -1,6 +1,6 @@
 export type ProblemStatus = 'open' | 'in-progress' | 'has-candidate'
 
-export interface OpenProblem {
+export type OpenProblem = {
   slug: string
   title: string
   question: string

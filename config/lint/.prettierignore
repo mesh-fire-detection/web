@@ -1,0 +1,14 @@
+node_modules/
+.cursor/
+dist/
+coverage/
+logs/
+data/
+*.db
+.env
+.env.*
+!.env.example
+.husky/_/
+package-lock.json
+docs/
+init.plan.md

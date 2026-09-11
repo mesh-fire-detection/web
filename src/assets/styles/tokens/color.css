@@ -1,0 +1,42 @@
+:root {
+    color-scheme: dark;
+
+    --bg: #080b0a;
+    --bg_sunken: #050706;
+    --surface: #0e1312;
+    --surface_2: #141a19;
+    --surface_3: #1b2321;
+    --overlay: rgb(8 11 10 / 82%);
+    --map_canvas: #070a09;
+    --selection_fg: #0b0b0b;
+    --on_fire: #120704;
+
+    --line: #1f2927;
+    --line_strong: #2c3a37;
+    --line_hover: #3b4c48;
+
+    --text: #e8efec;
+    --text_2: #a3b2ad;
+    --text_3: #6f807b;
+
+    --fire: #ff6b35;
+    --fire_dim: #b8461f;
+    --fire_hover: #ff824f;
+    --fire_link_hover: #ff9366;
+    --fire_wash: color-mix(in srgb, var(--fire) 12%, transparent);
+    --fire_wash_strong: color-mix(in srgb, var(--fire) 7%, transparent);
+    --fire_border: color-mix(in srgb, var(--fire) 35%, transparent);
+    --live: #4ade80;
+    --live_wash: color-mix(in srgb, var(--live) 12%, transparent);
+    --live_border: color-mix(in srgb, var(--live) 30%, transparent);
+    --warn: #fbbf24;
+    --warn_wash: color-mix(in srgb, var(--warn) 12%, transparent);
+    --warn_border: color-mix(in srgb, var(--warn) 30%, transparent);
+    --dead: #f4574f;
+    --dead_wash: color-mix(in srgb, var(--dead) 12%, transparent);
+    --dead_border: color-mix(in srgb, var(--dead) 35%, transparent);
+    --dead_hover: color-mix(in srgb, var(--dead) 20%, transparent);
+    --link: #60a5fa;
+    --link_hover: #93c5fd;
+    --table_hover: color-mix(in srgb, var(--text) 2%, transparent);
+}

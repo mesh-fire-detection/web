@@ -1,0 +1,92 @@
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html {
+    text-size-adjust: 100%;
+    scroll-behavior: smooth;
+}
+
+/* stylelint-disable declaration-no-important */
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+/* stylelint-enable declaration-no-important */
+
+body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-size: var(--fs_md);
+    line-height: 1.6;
+    font-family: var(--font_sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+}
+
+#root {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+::selection {
+    background: var(--fire);
+    color: var(--selection_fg);
+}
+
+:focus-visible {
+    border-radius: var(--r_sm);
+    outline: 2px solid var(--fire);
+    outline-offset: 2px;
+}
+
+button {
+    border: none;
+    background: none;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+}
+
+input,
+select,
+textarea {
+    color: inherit;
+    font: inherit;
+}
+
+/* Faint topographic grid behind hero + map sections. It lives on a pseudo
+   element so its fade mask never touches the section's own content. */
+.bg_grid {
+    position: relative;
+    isolation: isolate;
+}
+
+.bg_grid::before {
+    z-index: -1;
+    position: absolute;
+    inset: 0;
+    background-image:
+        linear-gradient(var(--line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-position: center;
+    background-size: 56px 56px;
+    content: '';
+    -webkit-mask-image: radial-gradient(ellipse 90% 80% at 50% 0%, #000 25%, transparent 75%);
+    mask-image: radial-gradient(ellipse 90% 80% at 50% 0%, #000 25%, transparent 75%);
+    pointer-events: none;
+}

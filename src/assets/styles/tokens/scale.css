@@ -1,0 +1,49 @@
+:root {
+    --font_sans:
+        'Inter var', 'Inter', -apple-system, blinkmacsystemfont, 'Segoe UI', roboto,
+        'Helvetica Neue', arial, sans-serif;
+    --font_mono:
+        'JetBrains Mono', 'SF Mono', ui-monospace, sfmono-regular, menlo, consolas, monospace;
+
+    --fs_2xs: 0.6875rem;
+    --fs_xs: 0.78125rem;
+    --fs_sm: 0.875rem;
+    --fs_md: 1rem;
+    --fs_lg: 1.125rem;
+    --fs_xl: 1.375rem;
+    --fs_2xl: 1.75rem;
+    --fs_3xl: clamp(2rem, 4.2vw, 2.75rem);
+    --fs_4xl: clamp(2.5rem, 6.5vw, 4.25rem);
+    --fs_5xl: clamp(3rem, 11vw, 7.5rem);
+
+    --s_0: 0;
+    --s_hair: 0.15rem;
+    --s_1: 0.25rem;
+    --s_2: 0.5rem;
+    --s_3: 0.75rem;
+    --s_4: 1rem;
+    --s_5: 1.5rem;
+    --s_6: 2rem;
+    --s_7: 3rem;
+    --s_8: 4rem;
+    --s_9: 6rem;
+    --s_10: 8rem;
+    --s_list: 1.15rem;
+    --s_list_num: 1.75rem;
+
+    --r_sm: 4px;
+    --r_md: 8px;
+    --r_lg: 14px;
+    --r_full: 999px;
+
+    --container: 1180px;
+    --container_narrow: 760px;
+    --container_wide: 1440px;
+    --header_height: 62px;
+    --icon_hit: 34px;
+    --dot_size: 7px;
+    --slider_thumb_offset: -5.5px;
+
+    --shadow_lg: 0 24px 60px -24px rgb(0 0 0 / 85%);
+    --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}

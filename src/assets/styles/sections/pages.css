@@ -1,0 +1,86 @@
+.problem_teaser {
+    transition:
+        border-color 160ms var(--ease),
+        transform 160ms var(--ease);
+}
+
+.problem_teaser:hover {
+    transform: translateY(-2px);
+    border-color: var(--line_strong);
+}
+
+.problem_teaser_icon {
+    display: inline-flex;
+}
+
+.baseline_row {
+    padding-bottom: var(--s_3);
+    border-bottom: 1px solid var(--line);
+}
+
+.baseline_row:last-child {
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+.log_row {
+    padding-block: var(--s_4);
+    border-bottom: 1px solid var(--line);
+}
+
+.log_row:last-child {
+    border-bottom: none;
+}
+
+.log_date {
+    flex: none;
+    width: 6.5rem;
+    padding-top: var(--s_hair);
+}
+
+@media (width <= 560px) {
+    .log_row {
+        flex-direction: column;
+        gap: var(--s_1);
+    }
+
+    .log_date {
+        width: auto;
+    }
+}
+
+.goal_num {
+    flex: none;
+    width: 2.25rem;
+}
+
+.goal_total {
+    padding-top: var(--s_4);
+    border-top: 1px solid var(--line);
+}
+
+.roadmap_row {
+    padding-block: var(--s_4);
+    border-bottom: 1px solid var(--line);
+}
+
+.roadmap_row:last-child {
+    border-bottom: none;
+}
+
+.roadmap_when {
+    flex: none;
+    width: 4rem;
+    padding-top: var(--s_1);
+}
+
+@media (width <= 560px) {
+    .roadmap_row {
+        flex-direction: column;
+        gap: var(--s_1);
+    }
+
+    .roadmap_when {
+        width: auto;
+    }
+}

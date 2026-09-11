@@ -1,0 +1,24 @@
+/* stylelint-disable */
+/* maplibre-gl vendor overrides ============================================== */
+.maplibregl-map {
+    font: inherit;
+}
+.maplibregl-ctrl-group {
+    border: 1px solid var(--line) !important;
+    background: var(--surface_2) !important;
+    box-shadow: none !important;
+}
+.maplibregl-ctrl-group button + button {
+    border-top: 1px solid var(--line) !important;
+}
+.maplibregl-ctrl-group button .maplibregl-ctrl-icon {
+    filter: invert(1) hue-rotate(180deg) brightness(1.4);
+}
+.maplibregl-ctrl-attrib {
+    background: var(--overlay) !important;
+    color: var(--text_3) !important;
+    font-size: var(--fs_2xs) !important;
+}
+.maplibregl-ctrl-attrib a {
+    color: var(--text_2) !important;
+}

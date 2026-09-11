@@ -3,8 +3,9 @@ export const SITE = {
   short: 'MFD',
   tagline: 'A wildfire detection network you can afford to lose nodes from.',
   github: 'https://github.com/mesh-fire-detection',
+  discussions: 'https://github.com/orgs/mesh-fire-detection/discussions/',
   discord: 'https://discord.gg/mesh-fire-detection',
-  contact: 'mailto:hello@meshfiredetection.org',
+  contact: 'mailto:contact@meshfiredetection.org',
   licenses: {
     hardware: { name: 'CERN-OHL-S v2', href: 'https://cern-ohl.web.cern.ch/' },
     firmware: { name: 'MIT', href: 'https://opensource.org/license/mit' },
@@ -13,7 +14,7 @@ export const SITE = {
   disclaimer: 'Not an emergency service.',
 } as const
 
-export interface NavItem {
+export type NavItem = {
   label: string
   to: string
 }
@@ -26,7 +27,7 @@ export const PRIMARY_NAV: readonly NavItem[] = [
   { label: 'About', to: '/about' },
 ]
 
-export interface FooterColumn {
+export type FooterColumn = {
   title: string
   links: readonly NavItem[]
 }
