@@ -1,7 +1,6 @@
 import type { ReactNode } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { NavLink as RouterNavLink } from 'react-router-dom'
 
-import { Pressable } from '@components/shared/primitives/Pressable'
 import { cx } from '@core/format/cx'
 
 type NavHitProperties = {
@@ -13,11 +12,10 @@ type NavHitProperties = {
     readonly accessibleLabel?: string | undefined
 }
 
-const pathOf = (to: string): string => {
-    const hash = to.indexOf('#')
-    return hash === -1 ? to : to.slice(0, hash)
-}
-
+/**
+ * In-app navigation as a real `<a href>`. React Router handles the client
+ * transition; middle-click, copy-link, and crawlers see a normal URL.
+ */
 export const NavHit = ({
     to,
     children,
@@ -26,24 +24,14 @@ export const NavHit = ({
     end = false,
     accessibleLabel,
 }: NavHitProperties) => {
-    const navigate = useNavigate()
-    const location = useLocation()
-    const path = pathOf(to)
-    const isActive = end
-        ? location.pathname === path
-        : location.pathname === path || (path !== '/' && location.pathname.startsWith(path))
-
     return (
-        <Pressable
-            accessibleLabel={accessibleLabel}
-            ariaCurrent={isActive ? 'page' : undefined}
-            className={cx(className, isActive && activeClassName)}
-            onActivate={() => {
-                void navigate(to)
-            }}
-            role='link'
+        <RouterNavLink
+            aria-label={accessibleLabel}
+            className={({ isActive }) => cx(className, isActive && activeClassName)}
+            end={end}
+            to={to}
         >
             {children}
-        </Pressable>
+        </RouterNavLink>
     )
 }

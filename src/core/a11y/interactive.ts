@@ -1,15 +1,28 @@
-import { isActivationKey } from '@core/a11y/keys'
+import { isButtonActivationKey } from '@core/a11y/keys'
 
 /**
- * The site navigates with neutral elements instead of `a`/`button`, so
- * Enter/Space activation has to be re-implemented wherever something is
- * clickable. Prefer `Pressable` for activate-on-click controls.
+ * Enter/Space for `role='button'`. Prefer `Pressable` for activate-on-click
+ * controls that are not native anchors.
  */
 export const activationKeyDown = (
     event: { key: string; preventDefault: () => void },
     activate: () => void
 ): void => {
-    if (!isActivationKey(event.key)) return
+    if (!isButtonActivationKey(event.key)) return
+
+    event.preventDefault()
+    activate()
+}
+
+/**
+ * Native links activate on Enter only; Space scrolls the page. Use this when
+ * a neutral element still carries `role='link'` (e.g. SkipLink).
+ */
+export const linkActivationKeyDown = (
+    event: { key: string; preventDefault: () => void },
+    activate: () => void
+): void => {
+    if (event.key !== 'Enter') return
 
     event.preventDefault()
     activate()

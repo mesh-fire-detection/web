@@ -1,2 +1,2 @@
-/** Enter and Space — the keys that activate a native button or link. */
-export const isActivationKey = (key: string): boolean => key === 'Enter' || key === ' '
+/** Enter and Space — keys that activate a native button. */
+export const isButtonActivationKey = (key: string): boolean => key === 'Enter' || key === ' '

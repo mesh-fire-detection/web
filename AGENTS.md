@@ -58,12 +58,14 @@ These rules are enforced by ESLint (`no-restricted-syntax` plus `jsx-a11y`).
   element is a lint error. Adding one means editing `ALLOWED_ELEMENTS` in
   `config/lint/eslint.config.mjs` and justifying it here.
 - All visual appearance comes from CSS classes (`snake_case`).
-- Client navigation uses `NavHit` (no `href` on host elements).
-- Leaving the site is the one exception. `ExternalLink` renders a real `<a href>`
-  with `rel='noopener noreferrer'`.
-- Because nothing is a native control, every clickable element must carry a
-  literal `role`, `tabIndex={0}`, and an `onKeyDown` honouring Enter and Space
-  (`activationKeyDown` in `src/core/a11y/interactive.ts`). Prefer `Pressable`.
+- Client navigation uses `NavHit`, which renders a real `<a href>` via
+  react-router `NavLink`. Leaving the site uses `ExternalLink` (`<a>` with
+  `rel='noopener noreferrer'`). The host-element `a` is allowed only in those
+  two files; `href` stays banned everywhere else.
+- Because most clickables are not native controls, every non-anchor interactive
+  element must carry a literal `role`, `tabIndex={0}`, and an `onKeyDown`
+  honouring Enter and Space for buttons (`activationKeyDown`) or Enter only for
+  `role='link'` (`linkActivationKeyDown`). Prefer `Pressable`.
 
 ## CSS Standards
 

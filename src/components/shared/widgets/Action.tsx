@@ -36,6 +36,7 @@ export function Button({
     className,
     ariaControls,
     ariaExpanded,
+    id,
 }: ActionBase & {
     onClick?: (() => void) | undefined
     disabled?: boolean | undefined
@@ -43,6 +44,7 @@ export function Button({
     label?: string | undefined
     ariaControls?: string | undefined
     ariaExpanded?: boolean | undefined
+    id?: string | undefined
 }) {
     return (
         <Pressable
@@ -51,6 +53,7 @@ export function Button({
             ariaExpanded={ariaExpanded}
             className={actionClass(variant, size, full, className)}
             disabled={disabled}
+            id={id}
             onActivate={() => {
                 onClick?.()
             }}

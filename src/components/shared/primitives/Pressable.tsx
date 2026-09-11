@@ -1,6 +1,6 @@
 import type { KeyboardEvent as ReactKeyboardEvent, ReactNode, Ref } from 'react'
 
-import { activationKeyDown } from '@core/a11y/interactive'
+import { activationKeyDown, linkActivationKeyDown } from '@core/a11y/interactive'
 
 type PressableProperties = {
     readonly children: ReactNode
@@ -14,12 +14,14 @@ type PressableProperties = {
     readonly ariaExpanded?: boolean | undefined
     readonly ariaCurrent?: 'page' | undefined
     readonly ariaHasPopup?: boolean | 'menu' | undefined
+    readonly id?: string | undefined
     readonly ref?: Ref<HTMLDivElement> | undefined
 }
 
 /**
  * Activate-on-click control with the keyboard contract the markup rules require.
  * Roles are spelled out per branch so jsx-a11y can verify them literally.
+ * Links activate on Enter only (Space scrolls, matching native `<a>`).
  */
 export const Pressable = ({
     children,
@@ -33,11 +35,13 @@ export const Pressable = ({
     ariaExpanded,
     ariaCurrent,
     ariaHasPopup,
+    id,
     ref,
 }: PressableProperties) => {
     const onKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
         if (disabled) return
-        activationKeyDown(event, onActivate)
+        if (role === 'link') linkActivationKeyDown(event, onActivate)
+        else activationKeyDown(event, onActivate)
     }
 
     const activate = () => {
@@ -56,6 +60,7 @@ export const Pressable = ({
                 aria-haspopup={ariaHasPopup}
                 aria-label={accessibleLabel}
                 className={className}
+                id={id}
                 onClick={activate}
                 onKeyDown={onKeyDown}
                 role='link'
@@ -76,6 +81,7 @@ export const Pressable = ({
             aria-label={accessibleLabel}
             aria-pressed={pressed}
             className={className}
+            id={id}
             onClick={activate}
             onKeyDown={onKeyDown}
             role='button'

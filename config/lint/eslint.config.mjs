@@ -231,7 +231,10 @@ export default tseslint.config(
     },
 
     {
-        files: ['src/components/shared/navigation/ExternalLink.tsx'],
+        files: [
+            'src/components/shared/navigation/ExternalLink.tsx',
+            'src/components/shared/navigation/NavHit.tsx',
+        ],
         rules: {
             'no-restricted-syntax': [
                 'error',
