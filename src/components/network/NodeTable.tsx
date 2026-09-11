@@ -1,8 +1,12 @@
-import type { MeshNode } from '@/data/network'
-import { NODES } from '@/data/network'
-import { coordinate, sinceMinutes } from '@/lib/format'
-import type { Column } from '@/ui'
-import { Badge, BareButton, DataTable, Row, Stack, StatusDot, Text, Value } from '@/ui'
+import type { Column } from '@components/shared/page/DataTable'
+import { DataTable } from '@components/shared/page/DataTable'
+import { Row, Stack } from '@components/shared/primitives/Layout'
+import { Text, Value } from '@components/shared/typography/Text'
+import { BareButton } from '@components/shared/widgets/Action'
+import { Badge, StatusDot } from '@components/shared/widgets/Badge'
+import { NODES } from '@core/content/network/network'
+import type { MeshNode } from '@core/content/network/network'
+import { coordinate, sinceMinutes } from '@core/format/format'
 
 const STATUS_KIND = { online: 'live', degraded: 'warn', offline: 'dead' } as const
 

@@ -1,0 +1,111 @@
+.log_row {
+    padding-block: var(--s_4);
+    border-bottom: 1px solid var(--line);
+}
+
+.log_row:last-child {
+    border-bottom: none;
+}
+
+.log_date {
+    flex: none;
+    width: 6.5rem;
+    padding-top: var(--s_hair);
+}
+
+@media (width <= 560px) {
+    .log_row {
+        flex-direction: column;
+        gap: var(--s_1);
+    }
+
+    .log_date {
+        width: auto;
+    }
+}
+
+/* Node table ================================================================ */
+.node_row {
+    border-radius: var(--r_sm);
+    cursor: pointer;
+    transition: opacity 120ms var(--ease);
+}
+
+.node_row:hover {
+    opacity: 0.75;
+}
+
+/* Network map =============================================================== */
+.map {
+    position: relative;
+    width: 100%;
+    height: var(--map_height, 520px);
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: var(--r_md);
+    background: var(--map_canvas);
+}
+
+.map_failed {
+    display: grid;
+    place-items: center;
+    background-image:
+        linear-gradient(var(--line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size: 32px 32px;
+}
+
+.map_legend {
+    z-index: 2;
+    position: absolute;
+    top: var(--s_3);
+    left: var(--s_3);
+    padding: var(--s_3);
+    border: 1px solid var(--line);
+    border-radius: var(--r_sm);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    background: var(--overlay);
+    pointer-events: none;
+}
+
+.map_shell {
+    position: relative;
+}
+
+.node_panel {
+    z-index: 3;
+    position: absolute;
+    right: var(--s_3);
+    bottom: var(--s_6);
+    width: min(320px, calc(100% - var(--s_6)));
+    box-shadow: var(--shadow_lg);
+}
+
+@media (width <= 720px) {
+    .node_panel {
+        position: static;
+        width: 100%;
+        margin-top: var(--s_3);
+        box-shadow: none;
+    }
+
+    .map_legend {
+        position: static;
+        margin-bottom: var(--s_3);
+    }
+
+    .map_shell {
+        display: flex;
+        flex-direction: column;
+    }
+}
+
+.map_loading {
+    display: grid;
+    place-items: center;
+    background-image:
+        linear-gradient(var(--line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size: 32px 32px;
+}

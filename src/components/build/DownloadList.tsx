@@ -1,7 +1,12 @@
-import { DOWNLOADS } from '@/data/bom'
-import type { Download } from '@/data/bom'
-import { cx } from '@/lib/cx'
-import { Badge, Box, Grid, Icon, LinkCard, Row, Stack, Text, type ExternalHref } from '@/ui'
+import type { ExternalHref } from '@components/shared/navigation/ExternalLink'
+import { Box, Grid, Row, Stack } from '@components/shared/primitives/Layout'
+import { Text } from '@components/shared/typography/Text'
+import { LinkCard } from '@components/shared/widgets/Action'
+import { Badge } from '@components/shared/widgets/Badge'
+import { Icon } from '@components/shared/widgets/Icon'
+import type { Download } from '@core/content/build/bom'
+import { DOWNLOADS } from '@core/content/build/bom'
+import { cx } from '@core/format/cx'
 
 const KIND_LABEL: Record<Download['kind'], string> = {
     stl: 'STL',

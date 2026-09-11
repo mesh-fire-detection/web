@@ -1,0 +1,28 @@
+.wordmark {
+    flex: none;
+    color: inherit;
+    text-decoration: none;
+}
+
+.wordmark_mark {
+    flex: none;
+    color: var(--text_3);
+}
+
+.wordmark_hot {
+    fill: var(--fire);
+}
+
+.wordmark_cool {
+    fill: var(--live);
+}
+
+.wordmark_name {
+    letter-spacing: -0.015em;
+}
+
+@media (width <= 400px) {
+    .wordmark_name {
+        font-size: var(--fs_xs);
+    }
+}

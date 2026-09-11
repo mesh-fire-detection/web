@@ -1,6 +1,10 @@
-import { NODE_TYPES, nodesByType } from '@/data/network'
-import { money, plural } from '@/lib/format'
-import { Badge, Box, Grid, Heading, Icon, Row, Stack, Text } from '@/ui'
+import { Box, Grid, Row, Stack } from '@components/shared/primitives/Layout'
+import { Heading } from '@components/shared/typography/Heading'
+import { Text } from '@components/shared/typography/Text'
+import { Badge } from '@components/shared/widgets/Badge'
+import { Icon } from '@components/shared/widgets/Icon'
+import { NODE_TYPES, nodesByType } from '@core/content/network/network'
+import { money, plural } from '@core/format/format'
 
 export function NodeTypeGrid() {
     return (

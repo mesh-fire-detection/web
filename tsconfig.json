@@ -1,1 +1,42 @@
-{ "extends": "./config/tsconfig.json" }
+{
+    "compilerOptions": {
+        "target": "ES2023",
+        "lib": ["ES2024", "DOM", "DOM.Iterable"],
+        "module": "ESNext",
+        "moduleResolution": "bundler",
+        "allowImportingTsExtensions": true,
+        "jsx": "react-jsx",
+        "strict": true,
+        "noUncheckedIndexedAccess": true,
+        "noImplicitOverride": true,
+        "noFallthroughCasesInSwitch": true,
+        "exactOptionalPropertyTypes": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "noImplicitReturns": true,
+        "noPropertyAccessFromIndexSignature": true,
+        "noUncheckedSideEffectImports": true,
+        "strictBuiltinIteratorReturn": true,
+        "allowUnreachableCode": false,
+        "allowUnusedLabels": false,
+        "verbatimModuleSyntax": true,
+        "erasableSyntaxOnly": true,
+        "noEmit": true,
+        "skipLibCheck": true,
+        "ignoreDeprecations": "6.0",
+        "esModuleInterop": true,
+        "resolveJsonModule": true,
+        "isolatedModules": true,
+        "forceConsistentCasingInFileNames": true,
+        "baseUrl": ".",
+        "types": ["vite/client", "node"],
+        "paths": {
+            "@config/*": ["./config/*"],
+            "@core/*": ["./src/core/*"],
+            "@components/*": ["./src/components/*"],
+            "@styles/*": ["./src/assets/styles/*"],
+            "@assets/*": ["./src/assets/*"]
+        }
+    },
+    "include": ["src", "config", "tests"]
+}

@@ -1,0 +1,84 @@
+/* Node type cards =========================================================== */
+.ntype {
+    transition:
+        border-color 160ms var(--ease),
+        transform 160ms var(--ease);
+}
+
+.ntype:hover {
+    transform: translateY(-2px);
+    border-color: var(--line_strong);
+}
+
+.ntype_icon {
+    display: inline-flex;
+}
+
+/* Downloads ================================================================= */
+.dl {
+    display: flex;
+    color: inherit;
+    text-decoration: none;
+}
+
+.dl .box {
+    width: 100%;
+    transition:
+        border-color 140ms var(--ease),
+        background 140ms var(--ease);
+}
+
+.dl_icon {
+    display: inline-flex;
+    transition: color 140ms var(--ease);
+}
+
+.dl_name {
+    word-break: break-all;
+    transition: color 140ms var(--ease);
+}
+
+.dl_pending .box {
+    border-style: dashed;
+}
+
+.dl_pending .dl_name {
+    color: var(--text_2);
+}
+
+.dl:hover .box {
+    border-color: var(--line_strong);
+    background: var(--surface_2);
+}
+
+.dl:hover .dl_name {
+    color: var(--fire);
+}
+
+.dl:hover .dl_icon {
+    color: var(--fire);
+}
+
+/* Assembly steps ============================================================ */
+.steps {
+    position: relative;
+}
+
+.steps_row {
+    padding-block: var(--s_5);
+    border-bottom: 1px solid var(--line);
+}
+
+.steps_row:first-child {
+    padding-top: 0;
+}
+
+.steps_row:last-child {
+    border-bottom: none;
+}
+
+.steps_num {
+    flex: none;
+    width: 2rem;
+    padding-top: var(--s_hair);
+}

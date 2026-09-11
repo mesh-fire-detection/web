@@ -1,7 +1,8 @@
 import { Suspense, lazy } from 'react'
 
-import type { MeshNode } from '@/data/network'
-import { Stack, Text } from '@/ui'
+import { Stack } from '@components/shared/primitives/Layout'
+import { Text } from '@components/shared/typography/Text'
+import type { MeshNode } from '@core/content/network/network'
 
 // maplibre is ~1.2 MB. Only the pages that render a map should pay for it.
 const NetworkMap = lazy(async () => {

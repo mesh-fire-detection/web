@@ -1,23 +1,17 @@
 import { useState } from 'react'
 
-import { BOMS, bomFor, bomTotal } from '@/data/bom'
-import type { BomPart } from '@/data/bom'
-import type { NodeType } from '@/data/network'
-import { money, plural } from '@/lib/format'
-import type { Column } from '@/ui'
-import {
-    Badge,
-    Box,
-    DataTable,
-    Heading,
-    Metric,
-    Row,
-    SegmentedField,
-    Stack,
-    Text,
-    TextLink,
-    Value,
-} from '@/ui'
+import type { Column } from '@components/shared/page/DataTable'
+import { DataTable } from '@components/shared/page/DataTable'
+import { Box, Row, Stack } from '@components/shared/primitives/Layout'
+import { Heading } from '@components/shared/typography/Heading'
+import { Text, Value } from '@components/shared/typography/Text'
+import { TextLink } from '@components/shared/widgets/Action'
+import { Badge, Metric } from '@components/shared/widgets/Badge'
+import { SegmentedField } from '@components/shared/widgets/Field'
+import type { BomPart } from '@core/content/build/bom'
+import { BOMS, bomFor, bomTotal } from '@core/content/build/bom'
+import type { NodeType } from '@core/content/network/network'
+import { money, plural } from '@core/format/format'
 
 const OPTIONS = BOMS.map((bom) => ({ value: bom.type, label: bom.title.replace(' node', '') }))
 

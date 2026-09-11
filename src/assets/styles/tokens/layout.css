@@ -1,0 +1,9 @@
+:root {
+    --container: 1180px;
+    --container_narrow: 760px;
+    --container_wide: 1440px;
+    --header_height: 62px;
+    --icon_hit: 34px;
+    --dot_size: 7px;
+    --slider_thumb_offset: -5.5px;
+}

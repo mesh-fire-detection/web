@@ -1,0 +1,73 @@
+/* Coverage / profile ======================================================== */
+.profile {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+}
+
+.profile_fresnel {
+    stroke: var(--fire);
+    stroke-dasharray: 3 4;
+    stroke-opacity: 0.55;
+    stroke-width: 1;
+}
+
+.profile_ground {
+    fill: var(--surface_2);
+    stroke: none;
+}
+
+.profile_horizon {
+    fill: none;
+    stroke: var(--line_strong);
+    stroke-width: 1.25;
+}
+
+.profile_mast {
+    stroke: var(--text_2);
+    stroke-width: 1.75;
+}
+
+.profile_los {
+    stroke-dasharray: none;
+    stroke-width: 1.75;
+}
+
+.profile_los_live {
+    stroke: var(--live);
+}
+
+.profile_los_warn {
+    stroke: var(--warn);
+    stroke-dasharray: 5 4;
+}
+
+.profile_los_dead {
+    stroke: var(--dead);
+    stroke-dasharray: 3 4;
+}
+
+.profile_node_live {
+    fill: var(--live);
+}
+
+.profile_node_warn {
+    fill: var(--warn);
+}
+
+.profile_node_dead {
+    fill: var(--dead);
+}
+
+.profile_label {
+    fill: var(--text_3);
+    font-size: var(--fs_2xs);
+    font-family: var(--font_mono);
+}
+
+.budget_emphasis {
+    margin-top: var(--s_1);
+    padding-top: var(--s_2);
+    border-top: 1px solid var(--line);
+}

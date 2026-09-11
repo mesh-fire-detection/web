@@ -1,7 +1,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 
-type Severity = 'error' | 'warn'
+export type Severity = 'error' | 'warn'
 
 export type StructureRule = {
     readonly label: string
@@ -54,10 +54,20 @@ export const RULES: readonly StructureRule[] = [
         warnFileLines: 500,
         errorFileLines: 1000,
     },
-    // A config directory legitimately holds a single file.
+    // Tooling and tests are held to the same shape as product code, with a
+    // looser floor: a config directory legitimately holds a single file.
     {
         label: 'Configuration root',
         target: 'config',
+        minEntries: 1,
+        warnEntries: 8,
+        errorEntries: 12,
+        warnFileLines: 500,
+        errorFileLines: 1000,
+    },
+    {
+        label: 'Test root',
+        target: 'tests',
         minEntries: 1,
         warnEntries: 8,
         errorEntries: 12,
@@ -111,7 +121,7 @@ export const parseArgs = (argv: readonly string[]): CliOptions => {
 }
 
 /** `null` means "within limits"; thresholds are exclusive upper bounds. */
-const getLevel = (
+export const getLevel = (
     value: number,
     warnThreshold: number,
     errorThreshold: number
@@ -201,7 +211,7 @@ export const collectFileLengthViolations = (
     return violations.toSorted((left, right) => right.lineCount - left.lineCount)
 }
 
-const CSS_FILENAME_PATTERN = /^[a-z0-9]+(_[a-z0-9]+)*\.css$/
+export const CSS_FILENAME_PATTERN = /^[a-z0-9]+(_[a-z0-9]+)*\.css$/
 
 export const collectCssFilenameViolations = (
     rootDir: string,

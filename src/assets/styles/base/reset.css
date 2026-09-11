@@ -37,12 +37,6 @@ body {
     font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
 }
 
-#root {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-}
-
 ::selection {
     background: var(--fire);
     color: var(--selection_fg);

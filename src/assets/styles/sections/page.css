@@ -1,0 +1,22 @@
+.page {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+}
+
+.page_head {
+    padding-block: var(--s_8) var(--s_7);
+    border-bottom: 1px solid var(--line);
+    background-image: radial-gradient(
+        120% 100% at 50% 0%,
+        var(--fire_wash_strong),
+        transparent 62%
+    );
+    background-color: var(--bg);
+}
+
+@media (width <= 640px) {
+    .page_head {
+        padding-block: var(--s_7) var(--s_6);
+    }
+}

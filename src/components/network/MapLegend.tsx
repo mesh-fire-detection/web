@@ -1,4 +1,6 @@
-import { Row, Stack, StatusDot, Text } from '@/ui'
+import { Row, Stack } from '@components/shared/primitives/Layout'
+import { Text } from '@components/shared/typography/Text'
+import { StatusDot } from '@components/shared/widgets/Badge'
 
 const STATUSES = [
     { kind: 'live' as const, label: 'Online' },

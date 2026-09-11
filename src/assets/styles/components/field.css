@@ -1,0 +1,122 @@
+/* -------------------------------------------------------------- Fields --- */
+.control {
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--line_strong);
+    border-radius: var(--r_sm);
+    background: var(--surface_2);
+    transition: border-color 120ms var(--ease);
+}
+
+.control:focus-within {
+    border-color: var(--fire);
+}
+
+.control_input {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding: var(--s_2) var(--s_3);
+    border: none;
+    outline: none;
+    background: transparent;
+    color: var(--text);
+    font-size: var(--fs_sm);
+    font-family: var(--font_mono);
+    font-variant-numeric: tabular-nums;
+}
+
+.control_input_select {
+    appearance: none;
+    padding-right: var(--s_6);
+    background-image:
+        linear-gradient(45deg, transparent 50%, var(--text_3) 50%),
+        linear-gradient(135deg, var(--text_3) 50%, transparent 50%);
+    background-position:
+        right 1rem center,
+        right 0.7rem center;
+    background-size:
+        5px 5px,
+        5px 5px;
+    background-repeat: no-repeat;
+    cursor: pointer;
+}
+
+.control_input_select option {
+    background: var(--surface_2);
+    color: var(--text);
+}
+
+.control_suffix {
+    flex: none;
+    padding-right: var(--s_3);
+}
+
+.slider {
+    appearance: none;
+    width: 100%;
+    height: 20px;
+    background: transparent;
+    cursor: pointer;
+}
+
+.slider::-webkit-slider-runnable-track {
+    height: 3px;
+    border-radius: var(--r_full);
+    background: var(--line_strong);
+}
+
+.slider::-moz-range-track {
+    height: 3px;
+    border-radius: var(--r_full);
+    background: var(--line_strong);
+}
+
+.slider::-webkit-slider-thumb {
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    margin-top: var(--slider_thumb_offset);
+    border: 2px solid var(--bg);
+    border-radius: var(--r_full);
+    background: var(--fire);
+}
+
+.slider::-moz-range-thumb {
+    width: 14px;
+    height: 14px;
+    border: 2px solid var(--bg);
+    border-radius: var(--r_full);
+    background: var(--fire);
+}
+
+.segmented {
+    width: fit-content;
+    max-width: 100%;
+    overflow: hidden;
+    border: 1px solid var(--line_strong);
+    border-radius: var(--r_sm);
+    background: var(--surface_2);
+}
+
+.segmented_item {
+    padding: var(--s_2) var(--s_3);
+    color: var(--text_3);
+    white-space: nowrap;
+    transition:
+        background 120ms var(--ease),
+        color 120ms var(--ease);
+}
+
+.segmented_item + .segmented_item {
+    border-left: 1px solid var(--line_strong);
+}
+
+.segmented_item:hover {
+    background: var(--surface_3);
+    color: var(--text_2);
+}
+
+.segmented_item_on {
+    background: var(--fire_wash);
+    color: var(--fire);
+}

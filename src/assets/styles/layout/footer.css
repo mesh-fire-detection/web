@@ -1,0 +1,10 @@
+.footer {
+    margin-top: auto;
+    padding-block: var(--s_8) var(--s_6);
+    border-top: 1px solid var(--line);
+    background: var(--bg_sunken);
+}
+
+.footer_bottom {
+    padding-bottom: var(--s_2);
+}

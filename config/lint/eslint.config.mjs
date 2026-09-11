@@ -38,6 +38,30 @@ const inlineStyleRule = {
 
 const markupRestrictedSyntax = [hostElementRule(ALLOWED_ELEMENTS), hrefRule, inlineStyleRule]
 
+const contentPlugin = {
+    rules: {
+        'require-satisfies': {
+            meta: {
+                type: 'problem',
+                schema: [],
+                messages: {
+                    missing:
+                        'A content export must close with `as const satisfies <shape>` from @core/content/types, so a page and its content cannot drift apart.',
+                },
+            },
+            create(context) {
+                return {
+                    'ExportNamedDeclaration > VariableDeclaration > VariableDeclarator'(node) {
+                        if (node.init?.type === 'TSSatisfiesExpression') return
+
+                        context.report({ node, messageId: 'missing' })
+                    },
+                }
+            },
+        },
+    },
+}
+
 const promoteWarnings = (rules) =>
     Object.fromEntries(
         Object.entries(rules).map(([name, entry]) => {
@@ -123,24 +147,34 @@ export default tseslint.config(
                     basePath: repoRoot,
                     zones: [
                         {
-                            target: './src/lib',
-                            from: ['./src/ui', './src/layout', './src/components', './src/pages'],
-                            message: 'lib must not import from ui, layout, components, or pages.',
+                            target: './src/core',
+                            from: './src/components',
+                            message: 'core must not import from components.',
                         },
                         {
-                            target: './src/data',
-                            from: ['./src/ui', './src/layout', './src/components', './src/pages'],
-                            message: 'data must not import from ui, layout, components, or pages.',
+                            target: './src/core/config',
+                            from: './src/core/content',
+                            message: 'core/config must not import from core/content.',
                         },
                         {
-                            target: './src/ui',
-                            from: ['./src/pages', './src/components', './src/layout'],
-                            message: 'ui must not import from pages, components, or layout.',
+                            target: './src/components/shared',
+                            from: './src/components/pages',
+                            message: 'shared must not import from pages.',
                         },
                         {
-                            target: './src/layout',
-                            from: './src/pages',
+                            target: './src/components/layout',
+                            from: './src/components/pages',
                             message: 'layout must not import from pages.',
+                        },
+                        {
+                            target: './src/components/pages/coverage',
+                            from: './src/components/pages/problems',
+                            message: 'coverage pages must not import problems pages.',
+                        },
+                        {
+                            target: './src/components/pages/problems',
+                            from: './src/components/pages/coverage',
+                            message: 'problems pages must not import coverage pages.',
                         },
                     ],
                 },
@@ -169,7 +203,10 @@ export default tseslint.config(
             ],
             'unicorn/filename-case': [
                 'error',
-                { cases: { camelCase: true, pascalCase: true }, ignore: ['vite.config.ts'] },
+                {
+                    cases: { camelCase: true, pascalCase: true },
+                    ignore: ['vite.config.ts', 'vitest.config.ts'],
+                },
             ],
             'unicorn/prevent-abbreviations': 'off',
             'unicorn/name-replacements': 'off',
@@ -194,7 +231,7 @@ export default tseslint.config(
     },
 
     {
-        files: ['src/ui/controls/ExternalLink.tsx'],
+        files: ['src/components/shared/navigation/ExternalLink.tsx'],
         rules: {
             'no-restricted-syntax': [
                 'error',
@@ -205,7 +242,7 @@ export default tseslint.config(
     },
 
     {
-        files: ['src/ui/controls/Field.tsx'],
+        files: ['src/components/shared/widgets/Field.tsx'],
         rules: {
             'no-restricted-syntax': [
                 'error',
@@ -217,7 +254,7 @@ export default tseslint.config(
     },
 
     {
-        files: ['src/ui/core/Icon.tsx'],
+        files: ['src/components/shared/widgets/Icon.tsx'],
         rules: {
             'no-restricted-syntax': [
                 'error',
@@ -229,7 +266,7 @@ export default tseslint.config(
     },
 
     {
-        files: ['src/layout/Wordmark.tsx'],
+        files: ['src/components/layout/Wordmark.tsx'],
         rules: {
             'no-restricted-syntax': [
                 'error',
@@ -241,7 +278,7 @@ export default tseslint.config(
     },
 
     {
-        files: ['src/components/coverage/LinkProfile.tsx'],
+        files: ['src/components/pages/coverage/LinkProfile.tsx'],
         rules: {
             'no-restricted-syntax': [
                 'error',
@@ -266,9 +303,10 @@ export default tseslint.config(
 
     {
         files: [
-            'src/ui/core/Layout.tsx',
-            'src/ui/core/Text.tsx',
-            'src/ui/display/Table.tsx',
+            'src/components/shared/primitives/Layout.tsx',
+            'src/components/shared/typography/Text.tsx',
+            'src/components/shared/typography/Heading.tsx',
+            'src/components/shared/page/DataTable.tsx',
             'src/components/network/NetworkMap.tsx',
             'src/components/network/LazyNetworkMap.tsx',
         ],
@@ -285,20 +323,30 @@ export default tseslint.config(
     },
 
     {
-        files: [
-            'src/components/**/*.tsx',
-            'src/ui/**/*.tsx',
-            'src/layout/**/*.tsx',
-            'src/pages/**/*.tsx',
-        ],
+        files: ['src/components/**/*.tsx'],
         rules: {
             'unicorn/filename-case': ['error', { case: 'pascalCase', checkDirectories: false }],
         },
     },
     {
-        files: ['src/lib/**/*.ts', 'src/data/**/*.ts'],
+        files: ['src/components/**/*.ts'],
         rules: {
             'unicorn/filename-case': ['error', { case: 'camelCase', checkDirectories: false }],
+        },
+    },
+    {
+        files: ['src/core/**/*.{ts,tsx}'],
+        rules: {
+            'unicorn/filename-case': ['error', { case: 'camelCase', checkDirectories: false }],
+        },
+    },
+
+    {
+        files: ['src/core/content/**/*.ts'],
+        ignores: ['src/core/content/types.ts'],
+        plugins: { content: contentPlugin },
+        rules: {
+            'content/require-satisfies': 'error',
         },
     },
 
@@ -307,6 +355,17 @@ export default tseslint.config(
         rules: {
             'unicorn/no-process-exit': 'off',
             'no-console': 'off',
+        },
+    },
+
+    {
+        files: ['tests/**/*.{ts,tsx}'],
+        rules: {
+            'unicorn/consistent-function-scoping': 'off',
+            'unicorn/no-top-level-assignment-in-function': 'off',
+            '@typescript-eslint/no-empty-function': 'off',
+            'no-restricted-syntax': 'off',
+            '@typescript-eslint/no-non-null-assertion': 'off',
         },
     },
 

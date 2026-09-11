@@ -1,1 +1,6 @@
-@import url('./ui.css');
+@import url('./text.css');
+@import url('./layout.css');
+@import url('./action.css');
+@import url('./display.css');
+@import url('./field.css');
+@import url('./icon.css');

@@ -1,20 +1,12 @@
-import type { MeshNode } from '@/data/network'
-import { LINKS, findNode, linkQuality } from '@/data/network'
-import { coordinate, sinceMinutes } from '@/lib/format'
-import {
-    Badge,
-    Box,
-    Button,
-    Divider,
-    Grid,
-    Heading,
-    Icon,
-    Metric,
-    Row,
-    Stack,
-    StatusLabel,
-    Text,
-} from '@/ui'
+import { Box, Divider, Grid, Row, Stack } from '@components/shared/primitives/Layout'
+import { Heading } from '@components/shared/typography/Heading'
+import { Text } from '@components/shared/typography/Text'
+import { Button } from '@components/shared/widgets/Action'
+import { Badge, Metric, StatusLabel } from '@components/shared/widgets/Badge'
+import { Icon } from '@components/shared/widgets/Icon'
+import { LINKS, findNode, linkQuality } from '@core/content/network/network'
+import type { MeshNode } from '@core/content/network/network'
+import { coordinate, sinceMinutes } from '@core/format/format'
 
 const STATUS_KIND = { online: 'live', degraded: 'warn', offline: 'dead' } as const
 

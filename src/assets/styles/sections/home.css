@@ -1,0 +1,51 @@
+.problem_teaser {
+    transition:
+        border-color 160ms var(--ease),
+        transform 160ms var(--ease);
+}
+
+.problem_teaser:hover {
+    transform: translateY(-2px);
+    border-color: var(--line_strong);
+}
+
+.problem_teaser_icon {
+    display: inline-flex;
+}
+
+.baseline_row {
+    padding-bottom: var(--s_3);
+    border-bottom: 1px solid var(--line);
+}
+
+.baseline_row:last-child {
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+/* Cost comparison =========================================================== */
+.cost_col {
+    position: relative;
+    overflow: hidden;
+}
+
+.cost_col_ours {
+    border-color: var(--fire_border);
+    box-shadow: var(--shadow_lg);
+}
+
+.cost_col_ours::before {
+    position: absolute;
+    height: 2px;
+    inset: 0 0 auto;
+    background: linear-gradient(90deg, var(--fire), transparent);
+    content: '';
+}
+
+.cost_col_incumbent {
+    opacity: 0.82;
+}
+
+.cost_ratio {
+    padding-top: var(--s_1);
+}

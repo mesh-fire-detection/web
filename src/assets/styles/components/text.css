@@ -1,0 +1,169 @@
+/* ---------------------------------------------------------------- Text --- */
+.txt {
+    margin: 0;
+}
+
+.txt_2xs {
+    font-size: var(--fs_2xs);
+    line-height: 1.45;
+}
+
+.txt_xs {
+    font-size: var(--fs_xs);
+    line-height: 1.5;
+}
+
+.txt_sm {
+    font-size: var(--fs_sm);
+    line-height: 1.6;
+}
+
+.txt_md {
+    font-size: var(--fs_md);
+    line-height: 1.65;
+}
+
+.txt_lg {
+    font-size: var(--fs_lg);
+    line-height: 1.6;
+}
+
+.txt_xl {
+    font-size: var(--fs_xl);
+    line-height: 1.45;
+}
+
+.txt_inherit {
+    font-size: inherit;
+    line-height: inherit;
+}
+
+.txt_mono {
+    font-family: var(--font_mono);
+    font-variant-numeric: tabular-nums;
+}
+
+.txt_upper {
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+}
+
+.txt_clamp {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.w_400 {
+    font-weight: 400;
+}
+
+.w_500 {
+    font-weight: 500;
+}
+
+.w_600 {
+    font-weight: 600;
+}
+
+.w_700 {
+    font-weight: 700;
+}
+
+.align_center {
+    text-align: center;
+}
+
+.align_end {
+    text-align: right;
+}
+
+.tone_default {
+    color: var(--text);
+}
+
+.tone_muted {
+    color: var(--text_2);
+}
+
+.tone_faint {
+    color: var(--text_3);
+}
+
+.tone_fire {
+    color: var(--fire);
+}
+
+.tone_live {
+    color: var(--live);
+}
+
+.tone_warn {
+    color: var(--warn);
+}
+
+.tone_dead {
+    color: var(--dead);
+}
+
+.tone_inherit {
+    color: inherit;
+}
+
+.eyebrow {
+    letter-spacing: 0.16em;
+}
+
+.break {
+    display: block;
+    height: 0;
+}
+
+.hd {
+    margin: 0;
+    font-weight: 600;
+    line-height: 1.12;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+}
+
+.hd_sm {
+    font-size: var(--fs_md);
+    letter-spacing: -0.01em;
+}
+
+.hd_md {
+    font-size: var(--fs_lg);
+    letter-spacing: -0.01em;
+}
+
+.hd_lg {
+    font-size: var(--fs_xl);
+}
+
+.hd_xl {
+    font-size: var(--fs_2xl);
+}
+
+.hd_2xl {
+    font-size: var(--fs_3xl);
+}
+
+.hd_3xl {
+    font-size: var(--fs_4xl);
+    line-height: 1.03;
+    letter-spacing: -0.035em;
+}
+
+.hd_4xl {
+    font-size: var(--fs_4xl);
+    line-height: 1.03;
+    letter-spacing: -0.035em;
+}
+
+.hd_5xl {
+    font-weight: 700;
+    font-size: var(--fs_5xl);
+    line-height: 0.92;
+    letter-spacing: -0.045em;
+}

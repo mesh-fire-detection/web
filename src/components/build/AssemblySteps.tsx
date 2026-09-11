@@ -1,5 +1,7 @@
-import { ASSEMBLY } from '@/data/bom'
-import { Box, Heading, Row, Stack, Text } from '@/ui'
+import { Box, Row, Stack } from '@components/shared/primitives/Layout'
+import { Heading } from '@components/shared/typography/Heading'
+import { Text } from '@components/shared/typography/Text'
+import { ASSEMBLY } from '@core/content/build/bom'
 
 export function AssemblySteps() {
     const total = ASSEMBLY.reduce((sum, step) => sum + step.minutes, 0)

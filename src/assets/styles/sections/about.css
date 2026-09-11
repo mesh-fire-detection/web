@@ -1,0 +1,35 @@
+.goal_num {
+    flex: none;
+    width: 2.25rem;
+}
+
+.goal_total {
+    padding-top: var(--s_4);
+    border-top: 1px solid var(--line);
+}
+
+.roadmap_row {
+    padding-block: var(--s_4);
+    border-bottom: 1px solid var(--line);
+}
+
+.roadmap_row:last-child {
+    border-bottom: none;
+}
+
+.roadmap_when {
+    flex: none;
+    width: 4rem;
+    padding-top: var(--s_1);
+}
+
+@media (width <= 560px) {
+    .roadmap_row {
+        flex-direction: column;
+        gap: var(--s_1);
+    }
+
+    .roadmap_when {
+        width: auto;
+    }
+}

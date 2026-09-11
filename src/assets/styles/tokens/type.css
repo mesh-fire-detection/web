@@ -1,0 +1,18 @@
+:root {
+    --font_sans:
+        'Inter var', 'Inter', -apple-system, blinkmacsystemfont, 'Segoe UI', roboto,
+        'Helvetica Neue', arial, sans-serif;
+    --font_mono:
+        'JetBrains Mono', 'SF Mono', ui-monospace, sfmono-regular, menlo, consolas, monospace;
+
+    --fs_2xs: 0.6875rem;
+    --fs_xs: 0.78125rem;
+    --fs_sm: 0.875rem;
+    --fs_md: 1rem;
+    --fs_lg: 1.125rem;
+    --fs_xl: 1.375rem;
+    --fs_2xl: 1.75rem;
+    --fs_3xl: clamp(2rem, 4.2vw, 2.75rem);
+    --fs_4xl: clamp(2.5rem, 6.5vw, 4.25rem);
+    --fs_5xl: clamp(3rem, 11vw, 7.5rem);
+}
