@@ -14,16 +14,18 @@ import { Metric } from '@components/shared/widgets/Badge'
 import { CostComparison } from '@components/shared/widgets/CostComparison'
 import { Icon } from '@components/shared/widgets/Icon'
 import { SampleDataBanner } from '@components/shared/widgets/SampleDataBanner'
+import { branchHardwareCost, nodeCost } from '@core/content/build/bom'
 import { homeContent } from '@core/content/home'
 import type { MeshNode } from '@core/content/network/network'
-import { countByStatus } from '@core/content/network/network'
+import { countByStatus, NODES } from '@core/content/network/network'
 import { PROBLEMS } from '@core/content/problems/problems'
-import { plural } from '@core/format/format'
+import { money, plural } from '@core/format/format'
 
 export function HomePage() {
     const [selected, setSelected] = useState<MeshNode | null>(null)
     const counts = countByStatus()
     const copy = homeContent
+    const baseCost = money(nodeCost('base'))
 
     return (
         <Page headed={false}>
@@ -34,7 +36,7 @@ export function HomePage() {
                         <Heading level={1} size='5xl' align='center' measure={20}>
                             {copy.hero.titleBefore}
                             <Break />
-                            {copy.hero.titleAfter}
+                            {copy.hero.titleAfter.split('{baseCost}').join(baseCost)}
                         </Heading>
                         <Text size='lg' tone='muted' align='center' measure={68}>
                             {copy.hero.lede}
@@ -100,7 +102,7 @@ export function HomePage() {
                         <Metric label='Offline' value={counts.offline} tone='dead' size='lg' />
                         <Metric
                             label='Hardware cost'
-                            value={copy.network.hardwareCost}
+                            value={money(branchHardwareCost(NODES))}
                             size='lg'
                             hint='all fourteen nodes'
                         />

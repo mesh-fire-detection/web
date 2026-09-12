@@ -8,21 +8,68 @@ import { Text, Value } from '@components/shared/typography/Text'
 import { TextLink } from '@components/shared/widgets/Action'
 import { Badge, Metric } from '@components/shared/widgets/Badge'
 import { SegmentedField } from '@components/shared/widgets/Field'
-import type { BomPart } from '@core/content/build/bom'
-import { BOMS, bomFor, bomTotal } from '@core/content/build/bom'
+import type { Basket, BomLine } from '@core/content/build/bom'
+import {
+    BOMS,
+    bomFor,
+    bomTotal,
+    lineCost,
+    orderCount,
+    supplierBaskets,
+} from '@core/content/build/bom'
+import { buildContent } from '@core/content/build/content'
+import { PARTS, primaryVendor, type CatalogPart } from '@core/content/build/parts'
+import { storeFor, type Store } from '@core/content/build/stores'
 import type { NodeType } from '@core/content/network/network'
 import { money, plural } from '@core/format/format'
 
 const OPTIONS = BOMS.map((bom) => ({ value: bom.type, label: bom.title.replace(' node', '') }))
 
-const withRunningTotals = (
-    parts: readonly BomPart[]
-): readonly { part: BomPart; running: number }[] => {
-    const rows: { part: BomPart; running: number }[] = []
+const { orders: ordersCopy } = buildContent.bom
+
+/** Catalogue prices are whole dollars; published shipping rates are not. */
+const price = (value: number): string => money(value, !Number.isSafeInteger(value))
+
+const fill = (template: string, amount: number): string =>
+    template.split('{amount}').join(price(amount))
+
+function shippingCaption(store: Store, subtotal: number): string {
+    const { shipping } = store
+    switch (shipping.kind) {
+        case 'free_over': {
+            return fill(
+                subtotal >= shipping.threshold ? ordersCopy.freeOverMet : ordersCopy.freeOver,
+                shipping.threshold
+            )
+        }
+        case 'flat': {
+            return fill(ordersCopy.flat, shipping.amount)
+        }
+        case 'from': {
+            return fill(ordersCopy.from, shipping.amount)
+        }
+        case 'checkout': {
+            return ordersCopy.checkout
+        }
+        case 'none': {
+            return ordersCopy.none
+        }
+    }
+}
+
+type BomRow = {
+    line: BomLine
+    item: CatalogPart
+    running: number
+    index: number
+}
+
+const withRunningTotals = (parts: readonly BomLine[]): readonly BomRow[] => {
+    const rows: BomRow[] = []
     let running = 0
-    for (const part of parts) {
-        running += part.unitPrice * part.quantity
-        rows.push({ part, running })
+    for (const [index, line] of parts.entries()) {
+        running += lineCost(line)
+        rows.push({ line, item: PARTS[line.part], running, index })
     }
     return rows
 }
@@ -33,39 +80,45 @@ export function BomTable() {
     const total = bomTotal(bom)
     const rows = withRunningTotals(bom.parts)
 
-    type RowShape = (typeof rows)[number]
-
-    const columns: readonly Column<RowShape>[] = [
+    const columns: readonly Column<BomRow>[] = [
         {
             key: 'part',
             header: 'Part',
-            render: ({ part }: { part: BomPart }) => (
-                <Stack gap={1} align='start'>
-                    <Row gap={2}>
-                        <TextLink to={part.url} tone='quiet' size='sm'>
-                            {part.name}
-                        </TextLink>
-                        {part.inheritedFromBase ? <Badge size='xs'>base</Badge> : null}
-                    </Row>
-                    <Text size='xs' tone='faint' measure={66}>
-                        {part.detail}
-                    </Text>
-                </Stack>
-            ),
+            render: ({ line, item }) => {
+                const primary = primaryVendor(item)
+                return (
+                    <Stack gap={1} align='start'>
+                        <Row gap={2}>
+                            <TextLink to={primary.url} tone='quiet' size='sm'>
+                                {item.component}
+                            </TextLink>
+                            {line.inheritedFromBase ? <Badge size='xs'>base</Badge> : null}
+                        </Row>
+                        <Text size='xs' tone='muted' measure={66}>
+                            {primary.product}
+                        </Text>
+                        <Text size='xs' tone='faint' measure={66}>
+                            {item.detail}
+                        </Text>
+                    </Stack>
+                )
+            },
         },
         {
-            key: 'supplier',
-            header: 'Supplier',
-            render: ({ part }) => (
-                <Stack gap={0} align='start'>
-                    <Text size='xs' tone='muted'>
-                        {part.supplier}
-                    </Text>
-                    {part.sku ? (
-                        <Text size='2xs' mono tone='faint'>
-                            {part.sku}
-                        </Text>
-                    ) : null}
+            key: 'stores',
+            header: 'Stores',
+            render: ({ item }) => (
+                <Stack gap={2} align='start'>
+                    {item.vendors.map((vendor) => (
+                        <Stack key={vendor.url} gap={0} align='start'>
+                            <TextLink to={vendor.url} tone='quiet' size='xs'>
+                                {storeFor(vendor.store).name}
+                            </TextLink>
+                            <Text size='xs' tone='faint'>
+                                {money(vendor.unitPrice)}
+                            </Text>
+                        </Stack>
+                    ))}
                 </Stack>
             ),
         },
@@ -73,13 +126,13 @@ export function BomTable() {
             key: 'qty',
             header: 'Qty',
             align: 'end',
-            render: ({ part }) => <Value tone='faint'>{part.quantity}</Value>,
+            render: ({ line }) => <Value tone='faint'>{line.quantity}</Value>,
         },
         {
             key: 'price',
             header: 'Price',
             align: 'end',
-            render: ({ part }) => <Value>{money(part.unitPrice * part.quantity)}</Value>,
+            render: ({ line }) => <Value>{money(lineCost(line))}</Value>,
         },
         {
             key: 'running',
@@ -100,6 +153,7 @@ export function BomTable() {
                 />
                 <Row gap={5} wrap>
                     <Metric label='Parts' value={bom.parts.length} size='sm' />
+                    <Metric label={ordersCopy.label} value={orderCount(bom)} size='sm' />
                     <Metric label='Build time' value={`${bom.buildMinutes} min`} size='sm' />
                     <Metric
                         label='Unit cost'
@@ -115,7 +169,7 @@ export function BomTable() {
                 </Row>
             </Row>
 
-            <Box tone='surface' padding={0} radius='md'>
+            <Box tone='surface' padding={0} radius='md' className='clip'>
                 <Stack gap={0}>
                     <Box tone='transparent' border={false} padding={5} radius='none'>
                         <Stack gap={2}>
@@ -131,12 +185,13 @@ export function BomTable() {
                     <DataTable
                         columns={columns}
                         rows={rows}
-                        getRowKey={({ part }) => part.name}
+                        getRowKey={({ line, index }) => `${line.part}-${String(index)}`}
                         footer={
                             <Row justify='between' gap={3}>
                                 <Text size='xs' tone='faint'>
                                     {bom.parts.length} {plural(bom.parts.length, 'line')} · prices
-                                    checked 2026-08-30 · excludes shipping and sales tax
+                                    checked {buildContent.bom.pricesCheckedOn} · excludes shipping
+                                    and sales tax
                                 </Text>
                                 <Value tone='fire' size='md' weight={700}>
                                     {money(total)}
@@ -146,6 +201,51 @@ export function BomTable() {
                     />
                 </Stack>
             </Box>
+
+            <OrderPlan baskets={supplierBaskets(bom)} />
         </Stack>
+    )
+}
+
+/** The bill of materials regrouped the way it is actually paid for. */
+function OrderPlan({ baskets }: { baskets: readonly Basket[] }) {
+    return (
+        <Box tone='surface' padding={5} radius='md'>
+            <Stack gap={4}>
+                <Stack gap={2}>
+                    <Heading level={3} size='sm'>
+                        {ordersCopy.title}
+                    </Heading>
+                    <Text size='sm' tone='muted' measure={84}>
+                        {ordersCopy.lede}
+                    </Text>
+                </Stack>
+
+                <Stack gap={3}>
+                    {baskets.map((basket) => {
+                        const store = storeFor(basket.store)
+                        return (
+                            <Stack key={basket.store} gap={1}>
+                                <Row gap={3} justify='between'>
+                                    <TextLink
+                                        to={store.policyUrl ?? store.url}
+                                        tone='quiet'
+                                        size='sm'
+                                    >
+                                        {store.name}
+                                    </TextLink>
+                                    <Value>{price(basket.subtotal)}</Value>
+                                </Row>
+                                <Text size='xs' tone='faint' measure={84}>
+                                    {basket.lines.length} {plural(basket.lines.length, 'part')} ·{' '}
+                                    {shippingCaption(store, basket.subtotal)}
+                                    {store.note ? ` · ${store.note}` : ''}
+                                </Text>
+                            </Stack>
+                        )
+                    })}
+                </Stack>
+            </Stack>
+        </Box>
     )
 }

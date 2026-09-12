@@ -15,6 +15,7 @@
         "check:types": "tsc -p tsconfig.json --noEmit",
         "test": "vitest run --config config/build/vitest.config.ts",
         "test:watch": "vitest --config config/build/vitest.config.ts",
+        "check:prices": "VITEST_LIVE=1 vitest run --config config/build/vitest.config.ts",
         "lint": "npm run lint:format && npm run lint:structure && npm run lint:js && npm run lint:css && npm run lint:deadcode",
         "lint:format": "prettier --config config/lint/.prettierrc --check . --log-level warn --ignore-path config/lint/.prettierignore",
         "lint:structure": "tsx config/lint/checkStructure.ts --strict",

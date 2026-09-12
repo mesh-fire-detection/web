@@ -7,6 +7,7 @@ import { Text, Value } from '@components/shared/typography/Text'
 import { Button } from '@components/shared/widgets/Action'
 import { Badge, Metric } from '@components/shared/widgets/Badge'
 import { NumberField, SegmentedField, SelectField, SliderField } from '@components/shared/widgets/Field'
+import { nodeCost } from '@core/content/build/bom'
 import { decimal, money, plural, signed } from '@core/format/format'
 import {
     formatDistance,
@@ -293,7 +294,7 @@ export function CoverageCalculator() {
                             </Value>{' '}
                             Base {plural(nodesNeeded, 'node')} — about{' '}
                             <Value tone='fire' size='sm'>
-                                {money(nodesNeeded * 70)}
+                                {money(nodesNeeded * nodeCost('base'))}
                             </Value>{' '}
                             in hardware. One camera site costs more than that.
                         </Text>

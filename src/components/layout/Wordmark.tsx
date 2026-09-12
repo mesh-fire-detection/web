@@ -2,6 +2,8 @@ import { NavHit } from '@components/shared/navigation/NavHit'
 import { Row, Stack } from '@components/shared/primitives/Layout'
 import { Text } from '@components/shared/typography/Text'
 import { SITE } from '@core/config/site'
+import { nodeCost } from '@core/content/build/bom'
+import { money } from '@core/format/format'
 
 /** The mark is the network: one cellular node, two hops. */
 export function Wordmark({ size = 'md' }: { size?: 'md' | 'lg' }) {
@@ -36,7 +38,7 @@ export function Wordmark({ size = 'md' }: { size?: 'md' | 'lg' }) {
                         Mesh Fire Detection
                     </Text>
                     <Text as='span' mono size='2xs' tone='faint' uppercase>
-                        Open network · $70 a node
+                        Open network · {money(nodeCost('base'))} a node
                     </Text>
                 </Stack>
             </Row>

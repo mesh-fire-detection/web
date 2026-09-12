@@ -1,3 +1,9 @@
+/* Trims square-cornered children to a rounded parent. Clip, not hidden: it
+   does not create a scroll container, so it cannot swallow a sticky child. */
+.clip {
+    overflow: clip;
+}
+
 .skip {
     z-index: 100;
     position: absolute;

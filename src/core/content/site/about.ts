@@ -19,7 +19,7 @@ export const aboutContent = {
             {
                 n: '02',
                 title: 'Radically reduce the cost of detection',
-                detail: 'A Base node is $70 against $10,000–20,000 for a camera install. This goal is met at the unit level; what is unproven is whether $70 nodes detect anything useful.',
+                detail: 'A Base node is {baseCost} against $10,000–20,000 for a camera install. This goal is met at the unit level; what is unproven is whether {baseCost} nodes detect anything useful.',
                 status: 'Met at the unit level',
                 kind: 'live',
             },

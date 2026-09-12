@@ -4,7 +4,7 @@ export const homeContent = {
     hero: {
         eyebrow: 'Open hardware · LoRa mesh · US915',
         titleBefore: 'A camera site costs $15,000.',
-        titleAfter: 'Our node costs $70.',
+        titleAfter: 'Our node costs {baseCost}.',
         lede: 'Wildfire detection fails because coverage is expensive. Make each unit cheap enough to lose and you can cover the ground that matters. Here is the bill of materials, the network, and everything we have not solved.',
         primaryCta: 'Build a Node',
         secondaryCta: 'See the network',
@@ -14,7 +14,6 @@ export const homeContent = {
         title: 'Fourteen nodes, and we show you the dead ones',
         lede: 'Node type, last heartbeat, battery, and the SNR of every link. When a node dies it stays on the map, coloured red, until someone walks up the hill and fixes it.',
         mapCta: 'Full map',
-        hardwareCost: '$1,204',
     },
     baseline: {
         eyebrow: 'The problem, quantified',
@@ -46,7 +45,7 @@ export const homeContent = {
     },
     closing: {
         title: 'Ten minutes from this page to a filled cart.',
-        lede: 'Every part is linked to a supplier with a current price. The enclosure STLs and the Meshtastic config presets are hosted here, not behind a form. If you have to ask a question to build a node, that is a bug in this site.',
+        lede: 'Every bought part is linked to two stores with a current price. The enclosure STLs and the Meshtastic config presets are hosted here, not behind a form. If you have to ask a question to build a node, that is a bug in this site.',
         primaryCta: 'Bill of materials',
         secondaryCta: 'Would it work where I live?',
     },

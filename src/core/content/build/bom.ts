@@ -1,12 +1,9 @@
+import { PARTS, primaryVendor, type PartId } from '@core/content/build/parts'
+import { isShipped, storeFor, type StoreId } from '@core/content/build/stores'
 import type { NodeType } from '@core/content/network/network'
 
-export type BomPart = {
-    name: string
-    detail: string
-    sku?: string
-    supplier: string
-    url: string
-    unitPrice: number
+export type BomLine = {
+    part: PartId
     quantity: number
     /** Parts shared with the Base build are marked so totals stay honest. */
     inheritedFromBase?: boolean
@@ -16,60 +13,23 @@ export type Bom = {
     type: NodeType
     title: string
     summary: string
-    parts: readonly BomPart[]
+    parts: readonly BomLine[]
     /** Anything not on the list: postage, printing time, hardware store bits. */
     incidentals: number
     buildMinutes: number
     confidence: 'priced' | 'estimated'
 }
 
-const BASE_PARTS: readonly BomPart[] = [
-    {
-        name: 'WisBlock Mini Meshtastic Starter Kit',
-        detail: 'RAK19003 base board, RAK4631 core, US915. The whole radio in one part.',
-        sku: 'RAK Mini Starter Kit US915',
-        supplier: 'RAKwireless',
-        url: 'https://store.rakwireless.com/products/wisblock-meshtastic-starter-kit',
-        unitPrice: 32,
-        quantity: 1,
-    },
-    {
-        name: 'Solar panel, 5.5 × 3.5 in',
-        detail: 'JST 1.5 connector. Sized to carry the node through a Cascade December.',
-        sku: '920433',
-        supplier: 'RAKwireless',
-        url: 'https://store.rakwireless.com/products/solar-panel',
-        unitPrice: 14,
-        quantity: 1,
-    },
-    {
-        name: '915 MHz whip antenna',
-        detail: 'Half-wave whip. The single cheapest dB you can buy in this build.',
-        supplier: 'Rokland',
-        url: 'https://store.rokland.com/products/915-mhz-antenna',
-        unitPrice: 10,
-        quantity: 1,
-    },
-    {
-        name: 'Samsung 50E 21700 cell',
-        detail: '5000 mAh, protected button top. Protection matters — see the offline node on the map.',
-        supplier: '18650 Battery Store',
-        url: 'https://www.18650batterystore.com/products/samsung-50e-21700',
-        unitPrice: 12,
-        quantity: 1,
-    },
-    {
-        name: 'IP65 enclosure',
-        detail: 'Printed in ASA. STL and filament cost, not a purchase.',
-        supplier: 'Self-printed',
-        url: '/build#enclosures',
-        unitPrice: 2,
-        quantity: 1,
-    },
-]
+const BASE_PARTS = [
+    { part: 'starterKit', quantity: 1 },
+    { part: 'solarPanel', quantity: 1 },
+    { part: 'antenna', quantity: 1 },
+    { part: 'battery', quantity: 1 },
+    { part: 'enclosure', quantity: 1 },
+] as const satisfies readonly BomLine[]
 
 /** Parts carried into every non-Base build. */
-const inherited = BASE_PARTS.map((part) => ({ ...part, inheritedFromBase: true }))
+const inherited = BASE_PARTS.map((line) => ({ ...line, inheritedFromBase: true as const }))
 
 export const BOMS = [
     {
@@ -89,30 +49,9 @@ export const BOMS = [
             'A Base node plus an LTE modem and the antenna to use it. One per branch, so the cost amortises across every node behind it.',
         parts: [
             ...inherited,
-            {
-                name: 'RAK13102 WisBlock LTE-M / NB-IoT module',
-                detail: 'Cat-M1 modem on the WisBlock stack. No carrier lock-in.',
-                supplier: 'RAKwireless',
-                url: 'https://store.rakwireless.com/products/wisblock-cellular',
-                unitPrice: 36,
-                quantity: 1,
-            },
-            {
-                name: 'LTE stub antenna + pigtail',
-                detail: 'u.FL to SMA, external mount through the enclosure wall.',
-                supplier: 'RAKwireless',
-                url: 'https://store.rakwireless.com/products/lte-antenna',
-                unitPrice: 9,
-                quantity: 1,
-            },
-            {
-                name: 'IoT data SIM, 12 months',
-                detail: 'Low-rate M2M plan. Roughly 30 MB per month at the current packet rate.',
-                supplier: 'Hologram / Soracom',
-                url: 'https://www.hologram.io/pricing/',
-                unitPrice: 3,
-                quantity: 1,
-            },
+            { part: 'lteModule', quantity: 1 },
+            { part: 'lteAntenna', quantity: 1 },
+            { part: 'iotSim', quantity: 1 },
         ],
         incidentals: 0,
         buildMinutes: 45,
@@ -125,30 +64,9 @@ export const BOMS = [
             'Particulate plus gas. The sensor selection here is not settled — this is the current best candidate, not a recommendation.',
         parts: [
             ...inherited,
-            {
-                name: 'Sensirion SPS30 particulate sensor',
-                detail: 'PM1.0 / PM2.5 / PM10, laser scattering. Five-year rated life.',
-                supplier: 'Mouser',
-                url: 'https://www.mouser.com/c/?q=SPS30',
-                unitPrice: 42,
-                quantity: 1,
-            },
-            {
-                name: 'Bosch BME688 gas + environment sensor',
-                detail: 'VOC and temperature/humidity, for discriminating smoke from fog.',
-                supplier: 'Adafruit',
-                url: 'https://www.adafruit.com/product/5046',
-                unitPrice: 19,
-                quantity: 1,
-            },
-            {
-                name: 'Sensor-head housing + gore vent',
-                detail: 'Printed head with a vented, water-shedding intake.',
-                supplier: 'Self-printed',
-                url: '/build#enclosures',
-                unitPrice: 3,
-                quantity: 1,
-            },
+            { part: 'sps30', quantity: 1 },
+            { part: 'bme688', quantity: 1 },
+            { part: 'sensorHead', quantity: 1 },
         ],
         incidentals: 0,
         buildMinutes: 60,
@@ -161,39 +79,10 @@ export const BOMS = [
             'A camera and enough compute to decide locally whether a frame is worth a packet. The most expensive node and the least proven.',
         parts: [
             ...inherited,
-            {
-                name: 'ESP32-S3 with OV5640 camera',
-                detail: '5 MP, runs a quantised smoke classifier on-device at roughly one frame a minute.',
-                supplier: 'Seeed Studio',
-                url: 'https://www.seeedstudio.com/xiao-series-page',
-                unitPrice: 26,
-                quantity: 1,
-            },
-            {
-                name: 'Second 21700 cell + holder',
-                detail: 'Vision duty cycle roughly doubles the daily budget.',
-                supplier: '18650 Battery Store',
-                url: 'https://www.18650batterystore.com/products/samsung-50e-21700',
-                unitPrice: 15,
-                quantity: 1,
-            },
-            {
-                name: 'Second solar panel',
-                detail: 'Paired with the extra cell to survive a week of Pacific Northwest overcast.',
-                sku: '920433',
-                supplier: 'RAKwireless',
-                url: 'https://store.rakwireless.com/products/solar-panel',
-                unitPrice: 14,
-                quantity: 1,
-            },
-            {
-                name: 'Camera window + hood',
-                detail: 'Printed hood with a glued acrylic window. Keeps rain off the lens.',
-                supplier: 'Self-printed',
-                url: '/build#enclosures',
-                unitPrice: 3,
-                quantity: 1,
-            },
+            { part: 'camera', quantity: 1 },
+            { part: 'battery', quantity: 1 },
+            { part: 'solarPanel', quantity: 1 },
+            { part: 'cameraHood', quantity: 1 },
         ],
         incidentals: 0,
         buildMinutes: 90,
@@ -201,16 +90,65 @@ export const BOMS = [
     },
 ] as const satisfies readonly Bom[]
 
+export function lineCost(line: BomLine): number {
+    return primaryVendor(PARTS[line.part]).unitPrice * line.quantity
+}
+
 export function bomTotal(bom: Bom): number {
-    return (
-        bom.parts.reduce((sum, part) => sum + part.unitPrice * part.quantity, 0) + bom.incidentals
-    )
+    return bom.parts.reduce((sum, line) => sum + lineCost(line), 0) + bom.incidentals
 }
 
 export function bomFor(type: NodeType): Bom {
     const found = BOMS.find((bom) => bom.type === type)
     if (!found) throw new Error(`No bill of materials for node type "${type}"`)
     return found
+}
+
+export function nodeCost(type: NodeType): number {
+    return bomTotal(bomFor(type))
+}
+
+/**
+ * What the build actually looks like as orders rather than as lines.
+ *
+ * The unit cost is a sum of cheapest-per-line prices, which is not a basket
+ * anyone can check out: the parts come from several storefronts, each with its
+ * own postage. Grouping the lines by store is the honest shape of the purchase,
+ * and it is what makes "buy the RAK parts together" visible as advice.
+ */
+export type Basket = {
+    store: StoreId
+    subtotal: number
+    lines: readonly BomLine[]
+}
+
+export function supplierBaskets(bom: Bom): readonly Basket[] {
+    const storeOf = (line: BomLine): StoreId => primaryVendor(PARTS[line.part]).store
+
+    const stores: StoreId[] = []
+    for (const line of bom.parts) {
+        const store = storeOf(line)
+        if (!stores.includes(store)) stores.push(store)
+    }
+
+    return stores.map((store) => {
+        const lines = bom.parts.filter((line) => storeOf(line) === store)
+
+        return {
+            store,
+            subtotal: lines.reduce((sum, line) => sum + lineCost(line), 0),
+            lines,
+        }
+    })
+}
+
+/** Baskets that carry postage. Printed parts are not an order. */
+export function orderCount(bom: Bom): number {
+    return supplierBaskets(bom).filter((basket) => isShipped(storeFor(basket.store))).length
+}
+
+export function branchHardwareCost(nodes: readonly { readonly type: NodeType }[]): number {
+    return nodes.reduce((sum, node) => sum + nodeCost(node.type), 0)
 }
 
 export type Download = {
@@ -302,13 +240,13 @@ export const ASSEMBLY = [
     },
     {
         title: 'Fit the cell and panel',
-        detail: 'Cell into the holder, panel lead through the grommet, silicone the pass-through. Check polarity twice; the board has no reverse protection.',
-        minutes: 8,
+        detail: 'Cell into the holder, panel lead through the grommet, silicone the pass-through. Heat-shrink every joint and leave no terminal bare next to the metal mounting hardware. Check polarity twice; the board has no reverse protection.',
+        minutes: 11,
     },
     {
         title: 'Seal and soak-test',
-        detail: 'Close the shell, then leave it outdoors for 48 hours before you carry it anywhere remote. Most failures show up in the first two days.',
-        minutes: 5,
+        detail: 'Seat the TPU gasket in the lid groove, close the shell hard enough to compress it, then leave the node outdoors for 48 hours before you carry it anywhere remote. Most failures show up in the first two days.',
+        minutes: 7,
     },
     {
         title: 'Mount and confirm',

@@ -44,7 +44,7 @@ type HomeSectionCopy = {
 
 export type HomeContent = {
     readonly hero: HomeHero
-    readonly network: HomeSectionCopy & { readonly mapCta: string; readonly hardwareCost: string }
+    readonly network: HomeSectionCopy & { readonly mapCta: string }
     readonly baseline: {
         readonly eyebrow: string
         readonly title: string
@@ -169,6 +169,22 @@ export type BuildContent = PageHeading & {
         readonly lede: string
         readonly substitutionTitle: string
         readonly substitutionBody: string
+        /** ISO date the prices in the table were last checked against the stores. */
+        readonly pricesCheckedOn: string
+        readonly orders: {
+            readonly label: string
+            readonly title: string
+            readonly lede: string
+            /** Shipping policy captions. `{amount}` is filled from the store catalogue. */
+            readonly freeOver: string
+            readonly freeOverMet: string
+            readonly flat: string
+            readonly from: string
+            readonly checkout: string
+            readonly none: string
+        }
+        readonly shippingTitle: string
+        readonly shippingBody: string
     }
     readonly enclosures: {
         readonly eyebrow: string

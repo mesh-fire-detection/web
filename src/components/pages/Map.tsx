@@ -13,9 +13,11 @@ import { Text } from '@components/shared/typography/Text'
 import { Metric } from '@components/shared/widgets/Badge'
 import { Callout } from '@components/shared/widgets/Callout'
 import { SampleDataBanner } from '@components/shared/widgets/SampleDataBanner'
+import { nodeCost } from '@core/content/build/bom'
 import { mapContent } from '@core/content/network/log'
 import type { MeshNode } from '@core/content/network/network'
 import { countByStatus, LINKS, linkQuality, NODES } from '@core/content/network/network'
+import { money } from '@core/format/format'
 import { formatCopy, formatDistance, formatLength } from '@core/format/units'
 import { HAS_BASEMAP } from '@core/map/mapStyle'
 
@@ -57,8 +59,8 @@ export function MapPage() {
                     {HAS_BASEMAP ? null : (
                         <Callout title={mapContent.noBasemap.title} tone='fire' icon='map'>
                             The map renders node geometry on a blank canvas — no tile requests, no
-                            API key, no bill. That is the same instinct that produces a $70 node.
-                            Point{' '}
+                            API key, no bill. That is the same instinct that produces a{' '}
+                            {money(nodeCost('base'))} node. Point{' '}
                             <Text as='span' mono size='inherit' tone='fire'>
                                 {mapContent.noBasemap.env}
                             </Text>{' '}

@@ -64,6 +64,10 @@ export function BuildPage() {
                     />
                     <BomTable />
 
+                    <Callout title={buildContent.bom.shippingTitle} tone='fire'>
+                        {buildContent.bom.shippingBody}
+                    </Callout>
+
                     <Callout title={buildContent.bom.substitutionTitle} tone='warn'>
                         {buildContent.bom.substitutionBody}
                     </Callout>

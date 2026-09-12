@@ -122,7 +122,7 @@ export const PROBLEMS = [
         constraints: [
             'Under $60 per node for the whole sensing head.',
             'Has to survive five years outdoors with no cleaning.',
-            'Average draw has to fit a 5000 mAh cell and one small panel.',
+            'Average draw has to fit a 3450 mAh cell and one small panel.',
             'It only earns its place if it beats the Vision node to the alert.',
         ],
         tried: [

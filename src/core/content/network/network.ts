@@ -264,7 +264,6 @@ export type NodeTypeSpec = {
     name: string
     role: string
     detail: string
-    unitCost: number
     icon: 'radio' | 'cell' | 'sensor' | 'camera'
 }
 
@@ -274,7 +273,6 @@ export const NODE_TYPES = [
         name: 'Base',
         role: 'Carries the mesh',
         detail: 'The core relay. Strongest LoRa signal in the network, mounted as high as the site allows. Every other node type talks through one.',
-        unitCost: 70,
         icon: 'radio',
     },
     {
@@ -282,7 +280,6 @@ export const NODE_TYPES = [
         name: 'Cellular',
         role: 'Reaches the internet',
         detail: 'Sits at the head of a branch and forwards the mesh to the outside world over LTE. One per branch, placed where there is both coverage and access.',
-        unitCost: 118,
         icon: 'cell',
     },
     {
@@ -290,7 +287,6 @@ export const NODE_TYPES = [
         name: 'Sensor',
         role: 'Smells smoke',
         detail: 'Particulate and gas sensing at ground level. Cheap enough to scatter, close enough to the fuel to catch a fire before it has a plume.',
-        unitCost: 94,
         icon: 'sensor',
     },
     {
@@ -298,7 +294,6 @@ export const NODE_TYPES = [
         name: 'Vision',
         role: 'Sees smoke',
         detail: 'A low-rate camera with on-device inference. Ridge-mounted for line of sight across a drainage. The expensive node, so the network uses few.',
-        unitCost: 146,
         icon: 'camera',
     },
 ] as const satisfies readonly NodeTypeSpec[]

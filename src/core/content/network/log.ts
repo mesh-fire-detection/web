@@ -57,7 +57,7 @@ export const mapContent = {
     },
     noBasemap: {
         title: 'No basemap, on purpose',
-        body: 'The map renders node geometry on a blank canvas — no tile requests, no API key, no bill. That is the same instinct that produces a $70 node. Point VITE_BASEMAP_STYLE at a Protomaps or MapTiler style and terrain appears underneath, unchanged otherwise.',
+        body: 'The map renders node geometry on a blank canvas — no tile requests, no API key, no bill. That is the same instinct that produces a {baseCost} node. Point VITE_BASEMAP_STYLE at a Protomaps or MapTiler style and terrain appears underneath, unchanged otherwise.',
         env: 'VITE_BASEMAP_STYLE',
     },
 } as const satisfies MapContent

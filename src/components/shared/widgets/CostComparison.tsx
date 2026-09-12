@@ -4,6 +4,7 @@ import { Heading } from '@components/shared/typography/Heading'
 import { Text, Value } from '@components/shared/typography/Text'
 import { TextLink } from '@components/shared/widgets/Action'
 import { Badge } from '@components/shared/widgets/Badge'
+import { nodeCost } from '@core/content/build/bom'
 import { money } from '@core/format/format'
 
 type Side = {
@@ -37,7 +38,7 @@ const INCUMBENT: Side = {
 const OURS: Side = {
     label: 'Base node, per unit',
     name: 'Mesh Fire Detection',
-    price: 70,
+    price: nodeCost('base'),
     priceNote: 'Five parts, priced below',
     points: [
         'LoRa radio on a printed IP65 shell',

@@ -8,13 +8,15 @@ import { ButtonAnchor, ButtonLink, TextLink } from '@components/shared/widgets/A
 import { Badge, Metric } from '@components/shared/widgets/Badge'
 import { Icon } from '@components/shared/widgets/Icon'
 import { SITE } from '@core/config/site'
+import { nodeCost } from '@core/content/build/bom'
 import { NODE_TYPES } from '@core/content/network/network'
 import { aboutContent } from '@core/content/site/about'
 import { money } from '@core/format/format'
 
 export function AboutPage() {
     const copy = aboutContent
-    const fleetCost = NODE_TYPES.reduce((sum, spec) => sum + spec.unitCost, 0)
+    const baseCost = money(nodeCost('base'))
+    const fleetCost = NODE_TYPES.reduce((sum, spec) => sum + nodeCost(spec.type), 0)
 
     return (
         <Page title={copy.title} eyebrow={copy.eyebrow} lede={copy.lede}>
@@ -48,7 +50,7 @@ export function AboutPage() {
                                             <Badge kind={goal.kind}>{goal.status}</Badge>
                                         </Row>
                                         <Text size='sm' tone='muted' measure={86}>
-                                            {goal.detail}
+                                            {goal.detail.split('{baseCost}').join(baseCost)}
                                         </Text>
                                     </Stack>
                                 </Row>
@@ -83,7 +85,7 @@ export function AboutPage() {
                                     <Metric
                                         key={spec.type}
                                         label={spec.name}
-                                        value={money(spec.unitCost)}
+                                        value={money(nodeCost(spec.type))}
                                         size='md'
                                         hint={spec.role}
                                     />

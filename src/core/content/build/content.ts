@@ -15,16 +15,31 @@ export const buildContent = {
     },
     bom: {
         eyebrow: 'Bill of materials',
-        title: 'Part, supplier, price, running total',
-        lede: 'Prices are what the supplier listed on the date shown, in USD, before shipping and tax. Where a part is not settled, the table says estimated rather than pretending otherwise.',
+        title: 'Part, stores, price, running total',
+        lede: 'The running total uses the first store. A second listing is shown wherever the part is bought, not printed. Prices are in USD, before shipping and tax, on the date shown. Where a part is not settled, the table says estimated rather than pretending otherwise.',
         substitutionTitle: 'One substitution will cost you a node',
         substitutionBody:
             'Print the shell in ASA, not PLA. A PLA enclosure in direct sun softens and warps by its second summer, and every seal on it fails at once. It is the single most common way a build of this kind dies quietly a year after you install it.',
+        pricesCheckedOn: '2026-09-12',
+        orders: {
+            label: 'Orders',
+            title: 'What you actually check out',
+            lede: 'The unit cost above is the cheapest price for each line. Nobody can buy that basket in one go — the parts come from several storefronts, and each one charges postage separately.',
+            freeOver: 'free over {amount}',
+            freeOverMet: 'free — this basket clears {amount}',
+            flat: '{amount} a shipment, any basket size',
+            from: 'from {amount}',
+            checkout: 'quoted at checkout',
+            none: 'printed, not shipped',
+        },
+        shippingTitle: 'The sticker price is not the landed price',
+        shippingBody:
+            'Every figure on this page excludes shipping and sales tax, because both depend on where you are. What we can tell you is the shape of the bill: a Base node is two orders, and ordering from RAK directly adds international freight plus a customs duty they state is yours to pay. That is why a US reseller at a higher sticker price can still be cheaper in the cart — and why buying parts for several nodes at once is the one discount available to everybody.',
     },
     enclosures: {
         eyebrow: 'Enclosures',
         title: 'STLs, hosted here',
-        lede: 'Printed in ASA at 0.2 mm, four walls, 30% infill. No supports on any part. Print times assume a 0.4 mm nozzle.',
+        lede: 'Printed in ASA at 0.2 mm, four walls, 30% infill, with the lid gasket in TPU. No supports on any part. Print times assume a 0.4 mm nozzle.',
         unpublished:
             'The enclosure geometry is not published yet. Rather than serve you a file that is not there, these link to the hardware repository — the print settings below are current, the meshes are not.',
         printTitle: 'Print settings',
@@ -33,7 +48,14 @@ export const buildContent = {
             { term: 'Layer height', value: '0.2 mm' },
             { term: 'Walls', value: '4 perimeters, 30% gyroid infill' },
             { term: 'Supports', value: 'None required in the shipped orientation' },
-            { term: 'Post-processing', value: 'Silicone the cable pass-through; nothing else' },
+            {
+                term: 'Lid gasket',
+                value: 'TPU 95A, printed flat and seated in the lid groove. Sized for about 25% compression, so the lid needs real force to close.',
+            },
+            {
+                term: 'Post-processing',
+                value: 'Silicone the cable pass-through, seat the gasket, and insulate the cell leads. Nothing else.',
+            },
         ],
         ipTitle: 'What IP65 means here',
         ipBody: 'Dust-tight and rated against low-pressure water jets from any direction. It is a design target for these parts, not a certification — nobody has taken one of these shells to a test house.',

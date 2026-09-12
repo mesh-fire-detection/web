@@ -3,6 +3,7 @@ import { Heading } from '@components/shared/typography/Heading'
 import { Text } from '@components/shared/typography/Text'
 import { Badge } from '@components/shared/widgets/Badge'
 import { Icon } from '@components/shared/widgets/Icon'
+import { nodeCost } from '@core/content/build/bom'
 import { NODE_TYPES, nodesByType } from '@core/content/network/network'
 import { money, plural } from '@core/format/format'
 
@@ -25,7 +26,7 @@ export function NodeTypeGrid() {
                                 <Text as='span' tone='fire' className='ntype_icon'>
                                     <Icon name={spec.icon} size={20} />
                                 </Text>
-                                <Badge>{money(spec.unitCost)}</Badge>
+                                <Badge>{money(nodeCost(spec.type))}</Badge>
                             </Row>
 
                             <Stack gap={1}>
