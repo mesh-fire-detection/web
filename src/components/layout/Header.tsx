@@ -44,9 +44,9 @@ export function Header() {
                     </Row>
 
                     <Row gap={2} wrap={false} className='header_actions'>
-                        <Row className='header_units' gap={0} wrap={false}>
-                            <UnitsToggle />
-                        </Row>
+                        {/*<Row className='header_units' gap={0} wrap={false}>*/}
+                        {/*    <UnitsToggle />*/}
+                        {/*</Row>*/}
                         <ButtonLink to='/build' size='sm' className='header_cta'>
                             Build a Node
                         </ButtonLink>
