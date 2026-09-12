@@ -1,3 +1,5 @@
+import type { MeasuredCopy } from '@core/format/units'
+
 export type ProblemStatus = 'open' | 'in-progress' | 'has-candidate'
 
 export type OpenProblem = {
@@ -6,11 +8,11 @@ export type OpenProblem = {
     question: string
     status: ProblemStatus
     /** Hard boundaries any solution has to live inside. */
-    constraints: readonly string[]
+    constraints: readonly MeasuredCopy[]
     tried: readonly { approach: string; outcome: string }[]
     candidate?: { name: string; detail: string; blocker: string }
     /** What would have to be true to call this closed. */
-    closesWhen: string
+    closesWhen: MeasuredCopy
     help: string
 }
 
@@ -54,7 +56,11 @@ export const PROBLEMS = [
         status: 'open',
         constraints: [
             'A node with its mast weighs roughly 2.5 kg.',
-            'Placement accuracy of about 50 m is enough; the mast is what has to be precise.',
+            [
+                'Placement accuracy of about ',
+                { m: 50 },
+                ' is enough; the mast is what has to be precise.',
+            ],
             'Anything airborne has to stay inside Part 107 or it is not a solution for volunteers.',
             'No aircraft over designated wilderness.',
         ],
@@ -70,8 +76,11 @@ export const PROBLEMS = [
                     'Payload is inside the range of a heavy-lift hobby airframe, but the mast is not, and beyond-line-of-sight is the whole point.',
             },
         ],
-        closesWhen:
-            'One node placed more than 5 km from the nearest road by a method any volunteer can repeat in a day.',
+        closesWhen: [
+            'One node placed more than ',
+            { km: 5, places: 0 },
+            ' from the nearest road by a method any volunteer can repeat in a day.',
+        ],
         help: 'Backcountry logistics, packhorse outfitters, and Part 107 operators all have pieces of this.',
     },
     {

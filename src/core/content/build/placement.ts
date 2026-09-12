@@ -3,7 +3,13 @@ import type { TitledDetail } from '@core/content/types'
 export const placement = [
     {
         title: 'Get the antenna high, then get it vertical',
-        detail: 'Height buys more link budget than any component on the bill of materials. A Base node at 8 m outperforms the same node at 2 m by roughly 6 dB of horizon alone, and costs a pipe.',
+        detail: [
+            'Height buys more link budget than any component on the bill of materials. A Base node at ',
+            { m: 8 },
+            ' outperforms the same node at ',
+            { m: 2 },
+            ' by roughly 6 dB of horizon alone, and costs a pipe.',
+        ],
     },
     {
         title: 'Ridge to ridge, not ridge to valley',

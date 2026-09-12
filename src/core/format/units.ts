@@ -1,0 +1,66 @@
+import { decimal } from '@core/format/format'
+
+export type UnitSystem = 'imperial' | 'metric'
+
+export const UNITS_STORAGE_KEY = 'mfd-units'
+export const DEFAULT_UNIT_SYSTEM: UnitSystem = 'imperial'
+
+const KM_PER_MILE = 1.609344
+const M_PER_FOOT = 0.3048
+
+export function parseUnitSystem(value: string | null | undefined): UnitSystem {
+    return value === 'metric' ? 'metric' : DEFAULT_UNIT_SYSTEM
+}
+
+export function toMiles(km: number): number {
+    return km / KM_PER_MILE
+}
+
+export function toKm(miles: number): number {
+    return miles * KM_PER_MILE
+}
+
+export function toFeet(meters: number): number {
+    return meters / M_PER_FOOT
+}
+
+export function toMeters(feet: number): number {
+    return feet * M_PER_FOOT
+}
+
+export function formatDistance(km: number, system: UnitSystem, places = 1): string {
+    if (system === 'imperial') return `${decimal(toMiles(km), places)} mi`
+    return `${decimal(km, places)} km`
+}
+
+export function formatLength(
+    meters: number,
+    system: UnitSystem,
+    options: { readonly places?: number; readonly agl?: boolean } = {}
+): string {
+    const places = options.places ?? 0
+    const body =
+        system === 'imperial'
+            ? `${decimal(toFeet(meters), places)} ft`
+            : `${decimal(meters, places)} m`
+    return options.agl ? `${body} AGL` : body
+}
+
+/** Canonical SI values in copy. Render with `formatCopy`. */
+type CopyMeasure =
+    | { readonly m: number; readonly places?: number }
+    | { readonly km: number; readonly places?: number }
+
+export type MeasuredCopy = string | readonly (string | CopyMeasure)[]
+
+function formatMeasure(part: CopyMeasure, system: UnitSystem): string {
+    if ('km' in part) return formatDistance(part.km, system, part.places ?? 1)
+    return formatLength(part.m, system, { places: part.places ?? 0 })
+}
+
+export function formatCopy(copy: MeasuredCopy, system: UnitSystem): string {
+    if (typeof copy === 'string') return copy
+    return copy
+        .map((part) => (typeof part === 'string' ? part : formatMeasure(part, system)))
+        .join('')
+}

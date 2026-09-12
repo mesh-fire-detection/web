@@ -27,12 +27,20 @@ export const mapContent = {
             },
             {
                 date: '2026-06-14',
-                event: 'Christmas Ridge and Christmas Saddle brought online. The 2.5 km hop from East Peak closed at 4.9 dB SNR.',
+                event: [
+                    'Christmas Ridge and Christmas Saddle brought online. The ',
+                    { km: 2.5 },
+                    ' hop from East Peak closed at 4.9 dB SNR.',
+                ],
                 kind: 'good',
             },
             {
                 date: '2026-05-24',
-                event: 'East Peak Base and its Vision node installed at 943 m. Best link budget in the network.',
+                event: [
+                    'East Peak Base and its Vision node installed at ',
+                    { m: 943 },
+                    '. Best link budget in the network.',
+                ],
                 kind: 'good',
             },
             {

@@ -8,6 +8,8 @@
  * Only the shapes another module names are exported.
  */
 
+import type { MeasuredCopy } from '@core/format/units'
+
 type PageHeading = {
     readonly title: string
     readonly eyebrow?: string
@@ -16,7 +18,7 @@ type PageHeading = {
 
 export type TitledDetail = {
     readonly title: string
-    readonly detail: string
+    readonly detail: MeasuredCopy
 }
 
 type LabeledValue = {
@@ -143,7 +145,7 @@ export type FooterContent = {
 
 type MapLogEntry = {
     readonly date: string
-    readonly event: string
+    readonly event: MeasuredCopy
     readonly kind: 'good' | 'warn' | 'bad'
 }
 
