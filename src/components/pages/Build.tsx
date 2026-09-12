@@ -1,3 +1,4 @@
+import { useUnitSystem } from '@components/app/UnitsProvider'
 import { AssemblySteps } from '@components/build/AssemblySteps'
 import { BomTable } from '@components/build/BomTable'
 import { DownloadList } from '@components/build/DownloadList'
@@ -14,9 +15,11 @@ import { Callout } from '@components/shared/widgets/Callout'
 import { Icon } from '@components/shared/widgets/Icon'
 import { SITE } from '@core/config/site'
 import { buildContent } from '@core/content/build/content'
+import { formatCopy } from '@core/format/units'
 import { PRESETS } from '@core/map/linkBudget'
 
 export function BuildPage() {
+    const { system } = useUnitSystem()
     return (
         <Page
             title={buildContent.title}
@@ -175,7 +178,7 @@ export function BuildPage() {
                                             {item.title}
                                         </Heading>
                                         <Text size='sm' tone='muted'>
-                                            {item.detail}
+                                            {formatCopy(item.detail, system)}
                                         </Text>
                                     </Stack>
                                 </Box>

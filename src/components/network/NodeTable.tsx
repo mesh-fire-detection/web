@@ -1,12 +1,13 @@
+import { useUnitSystem } from '@components/app/UnitsProvider'
 import type { Column } from '@components/shared/page/DataTable'
 import { DataTable } from '@components/shared/page/DataTable'
 import { Row, Stack } from '@components/shared/primitives/Layout'
 import { Text, Value } from '@components/shared/typography/Text'
 import { BareButton } from '@components/shared/widgets/Action'
 import { Badge, StatusDot } from '@components/shared/widgets/Badge'
-import { NODES } from '@core/content/network/network'
-import type { MeshNode } from '@core/content/network/network'
+import { NODES, type MeshNode } from '@core/content/network/network'
 import { coordinate, sinceMinutes } from '@core/format/format'
+import { formatLength } from '@core/format/units'
 
 const STATUS_KIND = { online: 'live', degraded: 'warn', offline: 'dead' } as const
 
@@ -17,6 +18,7 @@ export function NodeTable({
     selectedId: string | null
     onSelect: (node: MeshNode) => void
 }) {
+    const { system } = useUnitSystem()
     const columns: readonly Column<MeshNode>[] = [
         {
             key: 'name',
@@ -96,7 +98,9 @@ export function NodeTable({
             key: 'antenna',
             header: 'Ant. AGL',
             align: 'end',
-            render: (node) => <Value tone='muted'>{node.antennaHeightM} m</Value>,
+            render: (node) => (
+                <Value tone='muted'>{formatLength(node.antennaHeightM, system)}</Value>
+            ),
         },
         {
             key: 'deployed',

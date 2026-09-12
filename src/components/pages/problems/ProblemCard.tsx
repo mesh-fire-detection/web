@@ -1,3 +1,4 @@
+import { useUnitSystem } from '@components/app/UnitsProvider'
 import { List, ListItem } from '@components/shared/page/List'
 import { Box, Divider, Grid, Row, Stack } from '@components/shared/primitives/Layout'
 import { Heading } from '@components/shared/typography/Heading'
@@ -7,6 +8,7 @@ import { Badge } from '@components/shared/widgets/Badge'
 import { Icon } from '@components/shared/widgets/Icon'
 import { SITE } from '@core/config/site'
 import type { OpenProblem, ProblemStatus } from '@core/content/problems/problems'
+import { formatCopy } from '@core/format/units'
 
 const STATUS: Record<ProblemStatus, { label: string; kind: 'dead' | 'warn' | 'live' }> = {
     open: { label: 'Open', kind: 'dead' },
@@ -15,6 +17,7 @@ const STATUS: Record<ProblemStatus, { label: string; kind: 'dead' | 'warn' | 'li
 }
 
 export function ProblemCard({ problem }: { problem: OpenProblem }) {
+    const { system } = useUnitSystem()
     const status = STATUS[problem.status]
 
     return (
@@ -40,11 +43,14 @@ export function ProblemCard({ problem }: { problem: OpenProblem }) {
                             Constraints
                         </Text>
                         <List marker='dash' gap={2}>
-                            {problem.constraints.map((constraint) => (
-                                <ListItem key={constraint} size='sm'>
-                                    {constraint}
-                                </ListItem>
-                            ))}
+                            {problem.constraints.map((constraint) => {
+                                const text = formatCopy(constraint, system)
+                                return (
+                                    <ListItem key={text} size='sm'>
+                                        {text}
+                                    </ListItem>
+                                )
+                            })}
                         </List>
                     </Stack>
 
@@ -94,7 +100,7 @@ export function ProblemCard({ problem }: { problem: OpenProblem }) {
                             Closes when
                         </Text>
                         <Text size='sm' tone='muted' measure={60}>
-                            {problem.closesWhen}
+                            {formatCopy(problem.closesWhen, system)}
                         </Text>
                     </Stack>
                     <Stack gap={3} align='start'>

@@ -1,16 +1,18 @@
+import { useUnitSystem } from '@components/app/UnitsProvider'
 import { Box, Divider, Grid, Row, Stack } from '@components/shared/primitives/Layout'
 import { Heading } from '@components/shared/typography/Heading'
 import { Text } from '@components/shared/typography/Text'
 import { Button } from '@components/shared/widgets/Action'
 import { Badge, Metric, StatusLabel } from '@components/shared/widgets/Badge'
 import { Icon } from '@components/shared/widgets/Icon'
-import { LINKS, findNode, linkQuality } from '@core/content/network/network'
-import type { MeshNode } from '@core/content/network/network'
+import { findNode, LINKS, linkQuality, type MeshNode } from '@core/content/network/network'
 import { coordinate, sinceMinutes } from '@core/format/format'
+import { formatDistance, formatLength } from '@core/format/units'
 
 const STATUS_KIND = { online: 'live', degraded: 'warn', offline: 'dead' } as const
 
 export function NodePanel({ node, onClose }: { node: MeshNode; onClose: () => void }) {
+    const { system } = useUnitSystem()
     const neighbours = LINKS.filter((link) => link.from === node.id || link.to === node.id)
 
     return (
@@ -57,8 +59,16 @@ export function NodePanel({ node, onClose }: { node: MeshNode; onClose: () => vo
                         value={sinceMinutes(node.lastHeartbeatMin)}
                         size='sm'
                     />
-                    <Metric label='Antenna' value={`${node.antennaHeightM} m AGL`} size='sm' />
-                    <Metric label='Elevation' value={`${node.elevationM} m`} size='sm' />
+                    <Metric
+                        label='Antenna'
+                        size='sm'
+                        value={formatLength(node.antennaHeightM, system, { agl: true })}
+                    />
+                    <Metric
+                        label='Elevation'
+                        size='sm'
+                        value={formatLength(node.elevationM, system)}
+                    />
                     <Metric label='Firmware' value={node.firmware} size='sm' />
                 </Grid>
 
@@ -83,7 +93,7 @@ export function NodePanel({ node, onClose }: { node: MeshNode; onClose: () => vo
                                     </Text>
                                     <Row gap={2} wrap={false}>
                                         <Text as='span' size='2xs' mono tone='faint'>
-                                            {link.distanceKm} km
+                                            {formatDistance(link.distanceKm, system)}
                                         </Text>
                                         <Badge
                                             kind={

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 
+import { useUnitSystem } from '@components/app/UnitsProvider'
 import { Page } from '@components/layout/Page'
 import { LazyNetworkMap } from '@components/network/LazyNetworkMap'
 import { MapLegend } from '@components/network/MapLegend'
@@ -14,11 +15,12 @@ import { Callout } from '@components/shared/widgets/Callout'
 import { SampleDataBanner } from '@components/shared/widgets/SampleDataBanner'
 import { mapContent } from '@core/content/network/log'
 import type { MeshNode } from '@core/content/network/network'
-import { LINKS, NODES, countByStatus, linkQuality } from '@core/content/network/network'
-import { decimal } from '@core/format/format'
+import { countByStatus, LINKS, linkQuality, NODES } from '@core/content/network/network'
+import { formatCopy, formatDistance, formatLength } from '@core/format/units'
 import { HAS_BASEMAP } from '@core/map/mapStyle'
 
 export function MapPage() {
+    const { system } = useUnitSystem()
     const [selected, setSelected] = useState<MeshNode | null>(null)
     const counts = countByStatus()
 
@@ -77,10 +79,10 @@ export function MapPage() {
                             hint={`of ${LINKS.length} total`}
                         />
                         <Metric
+                            hint={`${formatLength(totalHeight, system)} of mast total`}
                             label='Longest hop'
-                            value={`${decimal(longestHop)} km`}
                             size='lg'
-                            hint={`${totalHeight} m of mast total`}
+                            value={formatDistance(longestHop, system)}
                         />
                     </Grid>
                 </Stack>
@@ -127,7 +129,7 @@ export function MapPage() {
                                     }
                                     measure={90}
                                 >
-                                    {entry.event}
+                                    {formatCopy(entry.event, system)}
                                 </Text>
                             </Row>
                         ))}

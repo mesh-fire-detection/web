@@ -9,6 +9,7 @@ import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { useEffect, useRef, useState } from 'react'
 
+import { useUnitSystem } from '@components/app/UnitsProvider'
 import { Canvas } from '@components/shared/primitives/Layout'
 import { findNode, type MeshNode } from '@core/content/network/network'
 import { linksToGeoJson, networkBounds, nodesToGeoJson } from '@core/map/mapGeo'
@@ -26,9 +27,12 @@ export function NetworkMap({
     onSelect: (node: MeshNode | null) => void
     height?: number | undefined
 }) {
+    const { system } = useUnitSystem()
     const containerRef = useRef<HTMLDivElement>(null)
     const mapRef = useRef<MapLibreMap | null>(null)
     const onSelectRef = useRef(onSelect)
+    const scaleControlRef = useRef<ScaleControl | null>(null)
+    const initialUnitRef = useRef(system)
     const [failed, setFailed] = useState(false)
 
     // Keep the latest callback without re-creating the map.
@@ -67,7 +71,9 @@ export function NetworkMap({
         mapRef.current = map
 
         map.addControl(new NavigationControl({ showCompass: false }), 'top-right')
-        map.addControl(new ScaleControl({ unit: 'metric' }), 'bottom-left')
+        const scale = new ScaleControl({ unit: initialUnitRef.current })
+        scaleControlRef.current = scale
+        map.addControl(scale, 'bottom-left')
         map.addControl(
             new AttributionControl({
                 compact: true,
@@ -211,8 +217,13 @@ export function NetworkMap({
         return () => {
             map.remove()
             mapRef.current = null
+            scaleControlRef.current = null
         }
     }, [])
+
+    useEffect(() => {
+        scaleControlRef.current?.setUnit(system)
+    }, [system])
 
     // Highlight ring and camera follow the selection made anywhere on the page.
     useEffect(() => {
