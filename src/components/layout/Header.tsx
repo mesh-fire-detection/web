@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 
 import { useNavMenu, OVERLAY_NAV_ID, OVERLAY_TOGGLE_ID } from '@components/app/NavMenuProvider'
+import { UnitsToggle } from '@components/layout/UnitsToggle'
 import { Wordmark } from '@components/layout/Wordmark'
 import { Container, Row, Stack } from '@components/shared/primitives/Layout'
 import { Text } from '@components/shared/typography/Text'
@@ -43,6 +44,9 @@ export function Header() {
                     </Row>
 
                     <Row gap={2} wrap={false} className='header_actions'>
+                        <Row className='header_units' gap={0} wrap={false}>
+                            <UnitsToggle />
+                        </Row>
                         <ButtonLink to='/build' size='sm' className='header_cta'>
                             Build a Node
                         </ButtonLink>
@@ -88,6 +92,17 @@ export function Header() {
                                 <Icon name='arrow-right' size={14} />
                             </Row>
                         ))}
+                        <Row
+                            className='header_drawer_row'
+                            justify='between'
+                            wrap={false}
+                            align='center'
+                        >
+                            <Text as='span' size='xs' tone='faint' mono uppercase>
+                                Units
+                            </Text>
+                            <UnitsToggle />
+                        </Row>
                         <Row className='header_drawer_row' wrap={false}>
                             <ButtonLink to='/build' size='md' full>
                                 Build a Node

@@ -10,6 +10,7 @@ import {
     OVERLAY_TOGGLE_ID,
     useNavMenu,
 } from '@components/app/NavMenuProvider'
+import { UnitsProvider } from '@components/app/UnitsProvider'
 import { Header } from '@components/layout/Header'
 
 const OpenDrawer = () => {
@@ -27,11 +28,13 @@ describe('Header drawer', () => {
 
         render(
             <MemoryRouter>
-                <NavMenuProvider>
-                    <OpenDrawer />
-                    <Header />
-                    <a href='/outside'>Outside</a>
-                </NavMenuProvider>
+                <UnitsProvider>
+                    <NavMenuProvider>
+                        <OpenDrawer />
+                        <Header />
+                        <a href='/outside'>Outside</a>
+                    </NavMenuProvider>
+                </UnitsProvider>
             </MemoryRouter>
         )
 
