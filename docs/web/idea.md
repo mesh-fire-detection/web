@@ -12,13 +12,13 @@ Sensor: has sensors for detecting smoke.
 Vision: detects smoke from images.
 
 Base parts
-RAKwireless WisBlock Mini Meshtastic Starter Kit US915 (Mini Starter Kit with RAK19003 Base) - $32
-RAKwireless Solar Panel with JST 1.5 connector (Large 5.5 × 3.5 inch), SKU 920433 - $14
-915 MHz Whip Antenna for LoRa and Meshtastic - $10
-Samsung 50E 21700 5000mAh Battery - Protected Button Top - $12
-3D printed IP65 enclosure - $2
+WisBlock Meshtastic Starter Kit (RAK10722) - $30
+Solar Panel (80 × 45 mm, SKU 920399) - $4
+915Mhz Whip Antenna for LoRa (RAK Flexible Whip 20 cm) - $8
+21700 Protected Button Top 3450mAh Battery (Panasonic NCR18650GA) - $11
+IP65 enclosure (Printed ASA) - $2
 
-Total: ~$70 per Base node.
+Total: ~$55 per Base node.
 
 Deployment
 How to deliver all nodes to the required locations with minimal difficulty, especially in remote areas without road access.

@@ -2,7 +2,7 @@ The site's job is to convert skeptics into builders. That means the number and t
 
 ## Lead with the cost delta
 
-An ALERTWildfire camera install runs $10–20k. Your Base node is $70. That ratio is the entire pitch and it should be the first thing on screen — a two-column comparison, not a paragraph. Everything below it exists to make that number believable.
+An ALERTWildfire camera install runs $10–20k. Your Base node is $55. That ratio is the entire pitch and it should be the first thing on screen — a two-column comparison, not a paragraph. Everything below it exists to make that number believable.
 
 ## Live node map
 
