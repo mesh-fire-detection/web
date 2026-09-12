@@ -129,10 +129,6 @@
     display: table-row-group;
 }
 
-.table_foot {
-    display: table-footer-group;
-}
-
 .table_row {
     display: table-row;
 }
@@ -155,8 +151,9 @@
     padding: var(--s_2) var(--s_3);
 }
 
-.table_foot .table_cell {
-    border-bottom: none;
+/* Outside the table, so it spans the full width instead of one column. */
+.table_footnote {
+    padding: var(--s_3) var(--s_4);
     background: var(--surface_2);
 }
 
