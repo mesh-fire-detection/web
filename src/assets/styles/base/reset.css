@@ -56,6 +56,17 @@ button {
     cursor: pointer;
 }
 
+/* Most clickables here are divs carrying a role, not native controls, so the
+   `button` rule above never reaches them. Key off the role instead. */
+[role='button'],
+[role='link'] {
+    cursor: pointer;
+}
+
+[aria-disabled='true'] {
+    cursor: not-allowed;
+}
+
 input,
 select,
 textarea {
