@@ -1,0 +1,23 @@
+name: Site bug
+description: Something on the website is broken or looks wrong.
+labels: [bug]
+body:
+    - type: input
+      id: page
+      attributes:
+          label: Page
+          description: URL of the page where it happens.
+      validations:
+          required: true
+    - type: textarea
+      id: what
+      attributes:
+          label: What happened
+          description: What you expected, what you saw, steps to reproduce.
+      validations:
+          required: true
+    - type: input
+      id: browser
+      attributes:
+          label: Browser and device
+          placeholder: Firefox 140, macOS / Chrome, Android

@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+    - name: Questions and ideas
+      url: https://github.com/orgs/mesh-fire-detection/discussions/
+      about: Ask in GitHub Discussions.
+    - name: Security issue
+      url: https://github.com/mesh-fire-detection/web/security/policy
+      about: Report vulnerabilities privately, not in issues.

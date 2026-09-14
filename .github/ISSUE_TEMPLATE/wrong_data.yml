@@ -1,0 +1,30 @@
+name: Wrong data
+description: A price, spec, figure, or claim on the site is incorrect.
+labels: [data]
+body:
+    - type: input
+      id: page
+      attributes:
+          label: Page
+          description: URL of the page with the wrong data.
+      validations:
+          required: true
+    - type: textarea
+      id: current
+      attributes:
+          label: What the site says
+      validations:
+          required: true
+    - type: textarea
+      id: correct
+      attributes:
+          label: What is correct
+      validations:
+          required: true
+    - type: input
+      id: source
+      attributes:
+          label: Source
+          description: Link to a datasheet, store listing, or measurement.
+      validations:
+          required: true
