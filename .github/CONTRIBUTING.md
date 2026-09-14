@@ -14,11 +14,11 @@ npm run dev
 ## Before opening a PR
 
 - Run `npm run check` (types, lint, tests, build). It must pass.
-- Follow the code rules in [AGENTS.md](AGENTS.md).
+- Follow the code rules in [AGENTS.md](../AGENTS.md).
 - Keep PRs small and focused.
 - Do not add claims the project cannot back up (detection times, false-positive
   rates, ranges). See "Things the site deliberately does not claim" in the
-  [README](README.md).
+  [README](../README.md).
 
 ## Questions
 
