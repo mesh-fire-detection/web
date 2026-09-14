@@ -7,7 +7,7 @@ Code layout and contribution rules live in [`AGENTS.md`](AGENTS.md).
 
 ## Requirements
 
-- Node.js 22+ (see `.nvmrc` and `package.json` `engines`)
+- Node.js 24+ (see `.nvmrc` and `package.json` `engines`)
 
 ## Setup
 
