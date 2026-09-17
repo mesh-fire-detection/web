@@ -5,6 +5,7 @@ import {
     formatCopy,
     formatDistance,
     formatLength,
+    formatWeight,
     parseUnitSystem,
     toFeet,
     toKm,
@@ -64,8 +65,8 @@ describe('length conversion', () => {
 
 describe('formatCopy', () => {
     it('passes plain strings through', () => {
-        expect(formatCopy('A node with its mast weighs roughly 2.5 kg.', 'imperial')).toBe(
-            'A node with its mast weighs roughly 2.5 kg.'
+        expect(formatCopy('A node with its mast weighs under 500 g.', 'imperial')).toBe(
+            'A node with its mast weighs under 500 g.'
         )
     })
 
@@ -81,5 +82,12 @@ describe('formatCopy', () => {
         expect(formatCopy(['The ', { km: 2.5 }, ' hop'], 'metric')).toBe('The 2.5 km hop')
         expect(formatCopy(['more than ', { km: 5, places: 0 }], 'imperial')).toBe('more than 3 mi')
         expect(formatCopy(['more than ', { km: 5, places: 0 }], 'metric')).toBe('more than 5 km')
+    })
+
+    it('formats mass for each unit system', () => {
+        expect(formatWeight(0.5, 'metric')).toBe('500 g')
+        expect(formatWeight(0.5, 'imperial')).toBe('1.1 lb')
+        expect(formatCopy(['under ', { kg: 0.5 }, '.'], 'metric')).toBe('under 500 g.')
+        expect(formatCopy(['under ', { kg: 0.5 }, '.'], 'imperial')).toBe('under 1.1 lb.')
     })
 })

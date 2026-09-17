@@ -94,8 +94,8 @@ describe('order plan', () => {
         expect(orderCount(bom)).toBe(2)
     })
 
-    it('needs more orders for every node type that adds parts to Base', () => {
-        expect(orderCount(bomFor('cellular'))).toBe(3)
+    it('counts the stores each node type actually adds to Base', () => {
+        expect(orderCount(bomFor('cellular'))).toBe(2)
         expect(orderCount(bomFor('sensor'))).toBe(4)
         expect(orderCount(bomFor('vision'))).toBe(3)
     })

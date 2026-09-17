@@ -163,6 +163,33 @@ describe('live catalog parts', () => {
         },
         REQUEST_MS
     )
+
+    it(
+        'finds the RAK13102 NoteCard variant and matches the rounded price',
+        async () => {
+            const vendor = primaryVendor(PARTS.lteModule)
+            const product = await fetchShopifyProduct(vendor.url)
+            expect(product.title).toContain('RAK13102')
+            const variant = product.variants.find((item) => item.sku === '110135')
+            expect(variant, 'RAK13102 NoteCard SKU 110135 missing').toBeDefined()
+            if (!variant) return
+            expect(roundedPrice(variant)).toBe(vendor.unitPrice)
+        },
+        REQUEST_MS
+    )
+
+    it(
+        'finds the LTE antenna SKU 920031 and matches the rounded price',
+        async () => {
+            const vendor = primaryVendor(PARTS.lteAntenna)
+            const product = await fetchShopifyProduct(vendor.url)
+            const variant = product.variants.find((item) => item.sku === '920031')
+            expect(variant, 'LTE antenna SKU 920031 missing').toBeDefined()
+            if (!variant) return
+            expect(roundedPrice(variant)).toBe(vendor.unitPrice)
+        },
+        REQUEST_MS
+    )
 })
 
 /**
