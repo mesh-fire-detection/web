@@ -1,7 +1,7 @@
 import type { FeatureCollection, LineString, Point } from 'geojson'
 
 import { findNode, linkQuality, LINKS, NODES } from '@core/content/network/network'
-import type { MeshNode } from '@core/content/network/network'
+import type { MeshLink, MeshNode } from '@core/content/network/network'
 
 export type NodeFeatureProps = {
     id: string
@@ -38,7 +38,7 @@ export function nodesToGeoJson(): FeatureCollection<Point, NodeFeatureProps> {
 export type LinkFeatureProps = {
     quality: 'good' | 'marginal' | 'bad'
     snr: number
-    rssi: number
+    rssi: MeshLink['rssi']
     dashed: boolean
 }
 

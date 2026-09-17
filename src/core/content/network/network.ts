@@ -27,14 +27,14 @@ export type MeshNode = {
     lastHeartbeatMin: number | null
     firmware: string
     deployedOn: string
-    note?: string
+    note?: string | undefined
 }
 
 export type MeshLink = {
     from: string
     to: string
-    /** dBm at the receiving end. */
-    rssi: number
+    /** dBm at the receiving end; null when only SNR is known. */
+    rssi: number | null
     /** dB. Below about -10 the link is unusable on LoRa. */
     snr: number
     distanceKm: number
