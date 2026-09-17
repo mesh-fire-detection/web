@@ -6,11 +6,17 @@ import { SITE } from '../../src/core/config/site.ts'
 
 const siteRoot = (): string => SITE.url.replace(/\/+$/, '')
 
+/**
+ * A parameterised route (`/blog/:slug`) has no single URL to pre-render or to
+ * list. The 404 shell serves those, and the router takes over from there.
+ */
+export const STATIC_ROUTES = APP_ROUTES.filter((route) => !route.path.includes(':'))
+
 /** Loc + lastmod entries derived from APP_ROUTES so the sitemap cannot drift. */
 const sitemapXml = (): string => {
     const root = siteRoot()
     const today = new Date().toISOString().slice(0, 10)
-    const urls = APP_ROUTES.map((route) => {
+    const urls = STATIC_ROUTES.map((route) => {
         const loc = route.path === '/' ? `${root}/` : `${root}${route.path}`
         return `  <url>\n    <loc>${loc}</loc>\n    <lastmod>${today}</lastmod>\n  </url>`
     }).join('\n')
@@ -28,7 +34,7 @@ export const writeGithubPagesSpaFiles = (dist: string): void => {
     const index = path.join(dist, 'index.html')
     copyFileSync(index, path.join(dist, '404.html'))
 
-    for (const route of APP_ROUTES) {
+    for (const route of STATIC_ROUTES) {
         if (route.path === '/') continue
         const directory = path.join(dist, route.path.slice(1))
         mkdirSync(directory, { recursive: true })

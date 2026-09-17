@@ -22,6 +22,14 @@ jobs:
             - name: Checkout
               uses: actions/checkout@v7
 
+            # Blog posts live in their own repository; BLOG_DIR points the
+            # build at this checkout. See config/build/vite.config.ts.
+            - name: Checkout posts
+              uses: actions/checkout@v7
+              with:
+                  repository: mesh-fire-detection/blog
+                  path: blog
+
             - name: Setup Node
               uses: actions/setup-node@v7
               with:
@@ -33,6 +41,8 @@ jobs:
 
             - name: Check
               run: npm run check
+              env:
+                  BLOG_DIR: blog
 
     build:
         if: github.event_name != 'pull_request'
@@ -44,6 +54,12 @@ jobs:
         steps:
             - name: Checkout
               uses: actions/checkout@v7
+
+            - name: Checkout posts
+              uses: actions/checkout@v7
+              with:
+                  repository: mesh-fire-detection/blog
+                  path: blog
 
             - name: Setup Node
               uses: actions/setup-node@v7
@@ -62,6 +78,7 @@ jobs:
               run: npm run check
               env:
                   BASE_PATH: ${{ steps.pages.outputs.base_path }}
+                  BLOG_DIR: blog
 
             - name: Upload artifact
               uses: actions/upload-pages-artifact@v5

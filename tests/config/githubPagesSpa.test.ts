@@ -4,12 +4,12 @@ import path from 'node:path'
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
-import { writeGithubPagesSpaFiles } from '@config/build/githubPagesSpa'
+import { STATIC_ROUTES, writeGithubPagesSpaFiles } from '@config/build/githubPagesSpa'
 import { APP_ROUTES } from '@core/config/routes'
 
 const SHELL = '<!doctype html><title>shell</title>\n'
 
-const nestedRoutePaths = APP_ROUTES.map((route) => route.path).filter(
+const nestedRoutePaths = STATIC_ROUTES.map((route) => route.path).filter(
     (routePath) => routePath !== '/'
 )
 
@@ -34,6 +34,18 @@ describe('writeGithubPagesSpaFiles', () => {
         for (const routePath of nestedRoutePaths) {
             const nested = path.join(dist, routePath.slice(1), 'index.html')
             expect(fs.readFileSync(nested, 'utf8')).toBe(SHELL)
+        }
+    })
+
+    it('leaves parameterised routes to the 404 shell', () => {
+        writeGithubPagesSpaFiles(dist)
+
+        const parameterised = APP_ROUTES.filter((route) => route.path.includes(':'))
+        expect(parameterised.length).toBeGreaterThan(0)
+
+        for (const route of parameterised) {
+            const segments = route.path.slice(1).split('/')
+            expect(fs.existsSync(path.join(dist, ...segments))).toBe(false)
         }
     })
 

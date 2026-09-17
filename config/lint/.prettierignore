@@ -12,3 +12,5 @@ data/
 package-lock.json
 docs/
 init.plan.md
+# The posts repository, checked out here by CI: it has its own conventions.
+blog/

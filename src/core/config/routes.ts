@@ -20,6 +20,8 @@ export const APP_ROUTES = [
     { id: 'coverage', path: '/coverage', label: 'Coverage', nav: true },
     { id: 'open_problems', path: '/open-problems', label: 'Open Problems', nav: true },
     { id: 'about', path: '/about', label: 'About', nav: true },
+    { id: 'blog', path: '/blog', label: 'Blog', nav: false },
+    { id: 'blog_post', path: '/blog/:slug', label: 'Blog post', nav: false },
     { id: 'privacy', path: '/privacy', label: 'Privacy', nav: false },
     { id: 'terms', path: '/terms', label: 'Terms', nav: false },
 ] as const satisfies readonly RouteShape[]

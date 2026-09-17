@@ -5,6 +5,8 @@ import { ErrorBoundary } from '@components/app/ErrorBoundary'
 import { useNavMenu } from '@components/app/NavMenuProvider'
 import { Footer } from '@components/layout/Footer'
 import { Header } from '@components/layout/Header'
+import { BlogPage } from '@components/pages/blog/Blog'
+import { BlogPostPage } from '@components/pages/blog/BlogPost'
 import { BuildPage } from '@components/pages/Build'
 import { CoveragePage } from '@components/pages/coverage/Coverage'
 import { HomePage } from '@components/pages/Home'
@@ -27,6 +29,8 @@ const PAGES: Record<RouteId, ComponentType> = {
     coverage: CoveragePage,
     open_problems: OpenProblemsPage,
     about: AboutPage,
+    blog: BlogPage,
+    blog_post: BlogPostPage,
     privacy: PrivacyPage,
     terms: TermsPage,
 }

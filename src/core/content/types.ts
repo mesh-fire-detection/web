@@ -8,6 +8,7 @@
  * Only the shapes another module names are exported.
  */
 
+import type { MarkdownBlock } from '@core/format/markdown'
 import type { MeasuredCopy } from '@core/format/units'
 
 type PageHeading = {
@@ -135,6 +136,28 @@ export type LegalContent = PageHeading & {
     readonly updatedOn: string
     readonly summary: { readonly title: string; readonly body: string }
     readonly sections: readonly LegalSection[]
+}
+
+/**
+ * A post parsed out of the sibling `blog` repository. Only `blocks` is read
+ * from the document body; everything else comes from its front matter.
+ */
+export type BlogPost = {
+    readonly slug: string
+    readonly title: string
+    /** ISO date from the front matter, shown as written. */
+    readonly date: string
+    readonly excerpt: string
+    readonly tags: readonly string[]
+    readonly draft: boolean
+    readonly blocks: readonly MarkdownBlock[]
+}
+
+export type BlogContent = PageHeading & {
+    readonly draftLabel: string
+    readonly emptyTitle: string
+    readonly emptyBody: string
+    readonly backCta: string
 }
 
 export type NotFoundContent = {

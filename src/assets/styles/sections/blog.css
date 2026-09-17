@@ -1,0 +1,8 @@
+/* Rendered Markdown: the two looks the shared components do not already have. */
+.md_code {
+    white-space: pre;
+}
+
+.md_em {
+    font-style: italic;
+}

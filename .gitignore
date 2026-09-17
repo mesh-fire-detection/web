@@ -1,5 +1,7 @@
 node_modules
 dist
+# CI checks the posts repository out here; locally they sit in ../blog.
+/blog/
 .DS_Store
 *.local
 .env
