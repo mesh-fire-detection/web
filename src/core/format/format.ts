@@ -28,8 +28,7 @@ export function sinceMinutes(minutes: number | null): string {
     if (minutes < 1) return 'just now'
     if (minutes < 60) return `${Math.round(minutes)} min ago`
     const hours = minutes / 60
-    if (hours < 48) return `${Math.round(hours)} h ago`
-    return `${Math.round(hours / 24)} d ago`
+    return hours < 48 ? `${Math.round(hours)} h ago` : `${Math.round(hours / 24)} d ago`
 }
 
 export function coordinate([longitude, latitude]: [number, number]): string {

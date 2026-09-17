@@ -162,8 +162,7 @@ function terrainSpec(id: Terrain): TerrainSpec {
 
 /** Free-space path loss in dB. Distance in km, frequency in MHz. */
 function fspl(distanceKm: number, frequencyMhz: number): number {
-    if (distanceKm <= 0) return 0
-    return 20 * Math.log10(distanceKm) + 20 * Math.log10(frequencyMhz) + 32.44
+    return distanceKm <= 0 ? 0 : 20 * Math.log10(distanceKm) + 20 * Math.log10(frequencyMhz) + 32.44
 }
 
 /** 4/3-earth radio horizon between two antenna heights, km. */
@@ -241,6 +240,5 @@ export function computeLink(input: LinkInput): LinkResult {
 
 /** Nodes needed to span a corridor, given the achievable hop length. */
 export function nodesForCorridor(corridorKm: number, hopKm: number): number {
-    if (hopKm <= 0) return 0
-    return Math.max(1, Math.ceil(corridorKm / hopKm) + 1)
+    return hopKm <= 0 ? 0 : Math.max(1, Math.ceil(corridorKm / hopKm) + 1)
 }

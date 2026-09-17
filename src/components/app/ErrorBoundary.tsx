@@ -41,15 +41,13 @@ export class ErrorBoundary extends Component<ErrorBoundaryProperties, ErrorBound
                 </>
             )
 
-            if (this.props.mode === 'landmark') {
-                return (
-                    <main className='page' id='main' tabIndex={-1}>
-                        {fallback}
-                    </main>
-                )
-            }
-
-            return <div className='page'>{fallback}</div>
+            return this.props.mode === 'landmark' ? (
+                <main className='page' id='main' tabIndex={-1}>
+                    {fallback}
+                </main>
+            ) : (
+                <div className='page'>{fallback}</div>
+            )
         }
         return this.props.children
     }

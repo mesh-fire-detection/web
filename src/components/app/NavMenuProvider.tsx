@@ -109,10 +109,12 @@ export const NavMenuProvider = ({ children }: NavMenuProviderProperties) => {
                 return
             }
 
-            if (active === last || !inTrap) {
-                event.preventDefault()
-                first.focus()
+            if (active !== last && inTrap) {
+                return
             }
+
+            event.preventDefault()
+            first.focus()
         }
 
         window.addEventListener('keydown', onKeyDown)

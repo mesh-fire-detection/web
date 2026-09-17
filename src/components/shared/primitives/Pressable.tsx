@@ -49,29 +49,25 @@ export const Pressable = ({
         onActivate()
     }
 
-    if (role === 'link') {
-        return (
-            <div
-                ref={ref}
-                aria-controls={ariaControls}
-                aria-current={ariaCurrent}
-                aria-disabled={disabled || undefined}
-                aria-expanded={ariaExpanded}
-                aria-haspopup={ariaHasPopup}
-                aria-label={accessibleLabel}
-                className={className}
-                id={id}
-                onClick={activate}
-                onKeyDown={onKeyDown}
-                role='link'
-                tabIndex={disabled ? -1 : 0}
-            >
-                {children}
-            </div>
-        )
-    }
-
-    return (
+    return role === 'link' ? (
+        <div
+            ref={ref}
+            aria-controls={ariaControls}
+            aria-current={ariaCurrent}
+            aria-disabled={disabled || undefined}
+            aria-expanded={ariaExpanded}
+            aria-haspopup={ariaHasPopup}
+            aria-label={accessibleLabel}
+            className={className}
+            id={id}
+            onClick={activate}
+            onKeyDown={onKeyDown}
+            role='link'
+            tabIndex={disabled ? -1 : 0}
+        >
+            {children}
+        </div>
+    ) : (
         <div
             ref={ref}
             aria-controls={ariaControls}

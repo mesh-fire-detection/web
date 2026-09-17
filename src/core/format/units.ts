@@ -30,8 +30,9 @@ export function toMeters(feet: number): number {
 }
 
 export function formatDistance(km: number, system: UnitSystem, places = 1): string {
-    if (system === 'imperial') return `${decimal(toMiles(km), places)} mi`
-    return `${decimal(km, places)} km`
+    return system === 'imperial'
+        ? `${decimal(toMiles(km), places)} mi`
+        : `${decimal(km, places)} km`
 }
 
 export function formatLength(
@@ -49,8 +50,7 @@ export function formatLength(
 
 export function formatWeight(kg: number, system: UnitSystem, places = 1): string {
     if (system === 'imperial') return `${decimal(kg * LB_PER_KG, places)} lb`
-    if (kg < 1) return `${decimal(kg * 1000, 0)} g`
-    return `${decimal(kg, places)} kg`
+    return kg < 1 ? `${decimal(kg * 1000, 0)} g` : `${decimal(kg, places)} kg`
 }
 
 /** Canonical SI values in copy. Render with `formatCopy`. */
@@ -63,13 +63,15 @@ export type MeasuredCopy = string | readonly (string | CopyMeasure)[]
 
 function formatMeasure(part: CopyMeasure, system: UnitSystem): string {
     if ('km' in part) return formatDistance(part.km, system, part.places ?? 1)
-    if ('kg' in part) return formatWeight(part.kg, system, part.places ?? 1)
-    return formatLength(part.m, system, { places: part.places ?? 0 })
+    return 'kg' in part
+        ? formatWeight(part.kg, system, part.places ?? 1)
+        : formatLength(part.m, system, { places: part.places ?? 0 })
 }
 
 export function formatCopy(copy: MeasuredCopy, system: UnitSystem): string {
-    if (typeof copy === 'string') return copy
-    return copy
-        .map((part) => (typeof part === 'string' ? part : formatMeasure(part, system)))
-        .join('')
+    return typeof copy === 'string'
+        ? copy
+        : copy
+              .map((part) => (typeof part === 'string' ? part : formatMeasure(part, system)))
+              .join('')
 }

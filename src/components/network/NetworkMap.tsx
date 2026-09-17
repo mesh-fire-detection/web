@@ -242,18 +242,14 @@ export function NetworkMap({
         else void map.once('load', apply)
     }, [selectedId])
 
-    if (failed) {
-        return (
-            <Canvas
-                className='map map_failed'
-                style={{ height }}
-                role='img'
-                ariaLabel='Network map unavailable'
-            />
-        )
-    }
-
-    return (
+    return failed ? (
+        <Canvas
+            className='map map_failed'
+            style={{ height }}
+            role='img'
+            ariaLabel='Network map unavailable'
+        />
+    ) : (
         <Canvas
             ref={containerRef}
             className='map'

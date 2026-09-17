@@ -127,14 +127,11 @@ export function TextLink({
     mono?: boolean | undefined
 }) {
     const className = cx('tlink', `tlink_${tone}`, size && `txt_${size}`, mono && 'txt_mono')
-    if (to.startsWith('https://') || to.startsWith('mailto:')) {
-        return (
-            <ExternalLink className={className} href={to as ExternalHref}>
-                {children}
-            </ExternalLink>
-        )
-    }
-    return (
+    return to.startsWith('https://') || to.startsWith('mailto:') ? (
+        <ExternalLink className={className} href={to as ExternalHref}>
+            {children}
+        </ExternalLink>
+    ) : (
         <NavHit className={className} to={to}>
             {children}
         </NavHit>

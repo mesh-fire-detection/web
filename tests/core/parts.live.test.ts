@@ -23,12 +23,11 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
     typeof value === 'object' && value !== null
 
 const isVariant = (value: unknown): value is ShopifyVariant => {
-    if (!isRecord(value)) return false
-    return (
-        typeof value['title'] === 'string' &&
-        typeof value['sku'] === 'string' &&
-        typeof value['price'] === 'string'
-    )
+    return isRecord(value)
+        ? typeof value['title'] === 'string' &&
+              typeof value['sku'] === 'string' &&
+              typeof value['price'] === 'string'
+        : false
 }
 
 const isProduct = (value: unknown): value is ShopifyProduct => {

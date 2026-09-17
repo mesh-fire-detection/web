@@ -318,6 +318,5 @@ export function findNode(id: string): MeshNode | undefined {
 /** Link quality bands, from the Meshtastic SNR floor for the long-fast preset. */
 export function linkQuality(snr: number): 'good' | 'marginal' | 'bad' {
     if (snr >= 4) return 'good'
-    if (snr >= -7) return 'marginal'
-    return 'bad'
+    return snr >= -7 ? 'marginal' : 'bad'
 }

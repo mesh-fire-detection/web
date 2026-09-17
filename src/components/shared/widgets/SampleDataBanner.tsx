@@ -8,9 +8,7 @@ import { isSampleNetwork, SOURCE } from '@core/content/network/network'
  * When SOURCE.kind flips to 'live' this disappears everywhere at once.
  */
 export function SampleDataBanner() {
-    if (!isSampleNetwork(SOURCE)) return null
-
-    return (
+    return isSampleNetwork(SOURCE) ? (
         <Box tone='warn' accent='warn' border={false} padding={4} radius='sm'>
             <Row gap={4} align='start' wrap>
                 <Badge kind='warn'>Sample data</Badge>
@@ -24,5 +22,5 @@ export function SampleDataBanner() {
                 </Stack>
             </Row>
         </Box>
-    )
+    ) : null
 }
