@@ -36,28 +36,36 @@ const fallbackSlug = (file: string): string =>
         .replace(/\.md$/, '')
         .replace(/^\d+[-_]/, '')
 
-const toPost = ([file, source]: readonly [string, string]): BlogPost => {
+type SourcedPost = readonly [file: string, post: BlogPost]
+
+const toPost = ([file, source]: readonly [string, string]): SourcedPost => {
     const { data, body } = splitFrontMatter(source)
     const blocks = parseMarkdown(body)
     const [first, ...rest] = blocks
     const lead = blocks.find((block) => block.kind === 'paragraph')
     const heading = first?.kind === 'heading' && first.level === 1 ? first : undefined
 
-    return {
-        slug: text(data, 'slug') ?? fallbackSlug(file),
-        title: text(data, 'title') ?? (heading ? inlineText(heading.content) : fallbackSlug(file)),
-        date: text(data, 'date') ?? '',
-        excerpt: text(data, 'excerpt') ?? (lead ? inlineText(lead.content) : ''),
-        tags: list(data, 'tags'),
-        draft: text(data, 'status') === 'draft',
-        // The page header already carries the title; repeating the H1 stutters.
-        blocks: heading ? rest : blocks,
-    }
+    return [
+        file,
+        {
+            slug: text(data, 'slug') ?? fallbackSlug(file),
+            title: text(data, 'title') ?? (heading ? inlineText(heading.content) : fallbackSlug(file)),
+            date: text(data, 'date') ?? '',
+            excerpt: text(data, 'excerpt') ?? (lead ? inlineText(lead.content) : ''),
+            tags: list(data, 'tags'),
+            draft: text(data, 'status') === 'draft',
+            // The page header already carries the title; repeating the H1 stutters.
+            blocks: heading ? rest : blocks,
+        },
+    ]
 }
 
-const byNewestFirst = (left: BlogPost, right: BlogPost): number =>
-    right.date.localeCompare(left.date) || left.slug.localeCompare(right.slug)
+const byNewestFirst = ([leftFile, left]: SourcedPost, [rightFile, right]: SourcedPost): number =>
+    right.date.localeCompare(left.date) ||
+    fileName(rightFile).localeCompare(fileName(leftFile), undefined, { numeric: true }) ||
+    left.slug.localeCompare(right.slug)
 
 export const blogPosts = Object.entries(sources)
     .map((entry) => toPost(entry))
-    .toSorted(byNewestFirst) satisfies readonly BlogPost[]
+    .toSorted(byNewestFirst)
+    .map(([, post]) => post) satisfies readonly BlogPost[]
