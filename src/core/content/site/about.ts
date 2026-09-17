@@ -90,11 +90,12 @@ export const aboutContent = {
         eyebrow: 'Privacy',
         title: 'What this site collects',
         items: [
-            'No analytics, no cookies, no third-party scripts. The map draws node geometry on a blank canvas and makes no tile requests.',
+            'No analytics, no cookies, no third-party scripts. By default the map draws node geometry on a blank canvas and makes no tile requests.',
             'Node positions are published deliberately. They are on public land or on land whose owner agreed in writing to the position being public.',
             'Vision nodes point at terrain, not at roads, homes or trailheads. Frames that trigger an alert are kept; the rest are discarded on the node.',
             'Alert subscriptions are opt-in by area, and the list is never shared with an agency that has not been asked for in writing by the subscriber.',
         ],
+        policyCta: 'Full privacy policy',
     },
     licensing: {
         eyebrow: 'Licensing',

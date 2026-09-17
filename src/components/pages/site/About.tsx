@@ -171,6 +171,9 @@ export function AboutPage() {
                                 <ListItem key={item}>{item}</ListItem>
                             ))}
                         </List>
+                        <TextLink to='/privacy' tone='fire' size='sm'>
+                            {copy.privacy.policyCta}
+                        </TextLink>
                     </Stack>
 
                     <Stack gap={4}>

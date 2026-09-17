@@ -11,6 +11,7 @@ import { HomePage } from '@components/pages/Home'
 import { MapPage } from '@components/pages/Map'
 import { OpenProblemsPage } from '@components/pages/problems/OpenProblems'
 import { AboutPage } from '@components/pages/site/About'
+import { PrivacyPage, TermsPage } from '@components/pages/site/Legal'
 import { NotFoundPage } from '@components/pages/site/NotFound'
 import { SkipLink } from '@components/shared/widgets/Action'
 import { APP_ROUTES, type RouteId } from '@core/config/routes'
@@ -26,6 +27,8 @@ const PAGES: Record<RouteId, ComponentType> = {
     coverage: CoveragePage,
     open_problems: OpenProblemsPage,
     about: AboutPage,
+    privacy: PrivacyPage,
+    terms: TermsPage,
 }
 
 const AppEntry = () => {

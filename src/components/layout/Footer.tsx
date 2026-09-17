@@ -59,8 +59,11 @@ export function Footer() {
                                     {SITE.licenses.firmware.name}
                                 </TextLink>
                             </Text>
-                            <TextLink to='/about#privacy' tone='quiet' size='xs'>
+                            <TextLink to='/privacy' tone='quiet' size='xs'>
                                 Privacy
+                            </TextLink>
+                            <TextLink to='/terms' tone='quiet' size='xs'>
+                                Terms
                             </TextLink>
                         </Row>
                         <Text as='span' size='xs' tone='faint'>

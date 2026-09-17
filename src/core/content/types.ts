@@ -103,6 +103,7 @@ export type AboutContent = PageHeading & {
         readonly eyebrow: string
         readonly title: string
         readonly items: readonly string[]
+        readonly policyCta: string
     }
     readonly licensing: {
         readonly eyebrow: string
@@ -119,6 +120,21 @@ export type AboutContent = PageHeading & {
         readonly primaryCta: string
         readonly secondaryCta: string
     }
+}
+
+type LegalSection = {
+    /** Anchor id, so a clause can be linked directly. */
+    readonly id: string
+    readonly title: string
+    readonly paragraphs?: readonly string[]
+    readonly items?: readonly string[]
+}
+
+export type LegalContent = PageHeading & {
+    /** ISO date of the latest revision. */
+    readonly updatedOn: string
+    readonly summary: { readonly title: string; readonly body: string }
+    readonly sections: readonly LegalSection[]
 }
 
 export type NotFoundContent = {
