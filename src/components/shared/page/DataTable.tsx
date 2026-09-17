@@ -18,6 +18,7 @@ export function DataTable<Row>({
     caption,
     footer,
     dense = false,
+    className,
 }: {
     columns: readonly Column<Row>[]
     rows: readonly Row[]
@@ -29,13 +30,14 @@ export function DataTable<Row>({
      */
     footer?: ReactNode | undefined
     dense?: boolean | undefined
+    className?: string | undefined
 }) {
     return (
         <Stack gap={0}>
             <ScrollArea label={caption}>
                 <div
                     aria-label={caption}
-                    className={cx('table', dense && 'table_dense')}
+                    className={cx('table', dense && 'table_dense', className)}
                     role='table'
                 >
                     {caption ? (

@@ -111,18 +111,6 @@ export const STORES = {
         origin: 'domestic',
         shipping: { kind: 'checkout' },
     },
-    hologram: {
-        name: 'Hologram',
-        url: 'https://www.hologram.io',
-        origin: 'domestic',
-        shipping: { kind: 'checkout' },
-    },
-    soracom: {
-        name: 'Soracom',
-        url: 'https://www.soracom.io',
-        origin: 'domestic',
-        shipping: { kind: 'checkout' },
-    },
     kiloElectronics: {
         name: 'Kilo Electronics',
         url: 'https://kiloelectronics.com',

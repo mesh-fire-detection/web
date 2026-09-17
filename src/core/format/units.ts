@@ -7,6 +7,7 @@ export const DEFAULT_UNIT_SYSTEM: UnitSystem = 'imperial'
 
 const KM_PER_MILE = 1.609344
 const M_PER_FOOT = 0.3048
+const LB_PER_KG = 2.2046226218
 
 export function parseUnitSystem(value: string | null | undefined): UnitSystem {
     return value === 'metric' ? 'metric' : DEFAULT_UNIT_SYSTEM
@@ -46,15 +47,23 @@ export function formatLength(
     return options.agl ? `${body} AGL` : body
 }
 
+export function formatWeight(kg: number, system: UnitSystem, places = 1): string {
+    if (system === 'imperial') return `${decimal(kg * LB_PER_KG, places)} lb`
+    if (kg < 1) return `${decimal(kg * 1000, 0)} g`
+    return `${decimal(kg, places)} kg`
+}
+
 /** Canonical SI values in copy. Render with `formatCopy`. */
 type CopyMeasure =
     | { readonly m: number; readonly places?: number }
     | { readonly km: number; readonly places?: number }
+    | { readonly kg: number; readonly places?: number }
 
 export type MeasuredCopy = string | readonly (string | CopyMeasure)[]
 
 function formatMeasure(part: CopyMeasure, system: UnitSystem): string {
     if ('km' in part) return formatDistance(part.km, system, part.places ?? 1)
+    if ('kg' in part) return formatWeight(part.kg, system, part.places ?? 1)
     return formatLength(part.m, system, { places: part.places ?? 0 })
 }
 

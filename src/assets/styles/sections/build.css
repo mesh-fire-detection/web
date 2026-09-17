@@ -1,3 +1,21 @@
+/* Bill of materials ========================================================= */
+.bom_table .table_cell:first-child {
+    width: min(var(--bom_part_viewport_width), var(--bom_part_width));
+}
+
+.bom_metrics > .metric {
+    align-items: flex-end;
+    text-align: right;
+}
+
+.bom_metrics > .metric:nth-child(3) {
+    min-width: var(--bom_build_time_width);
+}
+
+.bom_metrics > .metric:last-child {
+    min-width: var(--bom_cost_width);
+}
+
 /* Node type cards =========================================================== */
 .ntype {
     transition:

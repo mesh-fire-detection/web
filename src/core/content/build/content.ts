@@ -5,7 +5,7 @@ import { placement } from './placement'
 export const buildContent = {
     title: 'Build a node',
     eyebrow: 'Bill of materials · STLs · firmware',
-    lede: 'Every part, every price, every file. Nothing behind a form, nothing that needs an email. If you have to ask us a question to finish a node, this page has a bug in it.',
+    lede: 'Every part, every price, every file. Nothing behind a form, nothing that needs an email. Prototype sections state their unanswered engineering questions instead of hiding them.',
     jumpCta: 'Jump to the parts list',
     sourceCta: 'Source',
     nodeTypes: {
@@ -20,7 +20,7 @@ export const buildContent = {
         substitutionTitle: 'One substitution will cost you a node',
         substitutionBody:
             'Print the shell in ASA, not PLA. A PLA enclosure in direct sun softens and warps by its second summer, and every seal on it fails at once. It is the single most common way a build of this kind dies quietly a year after you install it.',
-        pricesCheckedOn: '2026-09-12',
+        pricesCheckedOn: '2026-09-16',
         orders: {
             label: 'Orders',
             title: 'What you actually check out',
@@ -69,9 +69,75 @@ export const buildContent = {
         presetsNote:
             'The network runs Long / Fast. Slower presets buy range and spend airtime — and airtime is the thing that caps how many nodes a branch can carry.',
     },
+    sps30: {
+        eyebrow: 'SPS30 particulate head',
+        title: 'A prototype sensor subsystem, not a plug-in module',
+        lede: 'The SPS30 measures PM1.0, PM2.5, PM4 and PM10 by laser scattering. It is this project’s particulate-sensing candidate, not proof that a ground-level node detects a wildfire early enough.',
+        requirementsTitle: 'What the Sensor node still needs',
+        requirements: [
+            {
+                title: '5 V power interface',
+                detail: 'SPS30 requires 4.5–5.5 V. RAK19007 sensor power is 3.3 V, so the final build needs a regulated 5 V supply that has not yet been selected or priced.',
+            },
+            {
+                title: 'Vented sensor head',
+                detail: 'The sensor belongs in a separate, water-shedding intake head. It must sample outside air without letting rain, ash or insects reach the optical path.',
+            },
+            {
+                title: 'Weather-rated interconnect',
+                detail: 'Power and data need a cable, strain relief and a sealed pass-through between the node enclosure and the sensor head.',
+            },
+        ],
+        wiringTitle: 'Planned I²C connection',
+        wiring: [
+            { title: 'SPS30 VDD', detail: 'Regulated 5 V supply' },
+            { title: 'SPS30 GND', detail: 'Common ground with RAK19007 and the 5 V supply' },
+            {
+                title: 'SPS30 SDA',
+                detail: 'RAK19007 I²C SDA, after logic-level compatibility is verified',
+            },
+            {
+                title: 'SPS30 SCL',
+                detail: 'RAK19007 I²C SCL, after logic-level compatibility is verified',
+            },
+        ],
+        powerTitle: 'Power budget is an open engineering question',
+        powerBody:
+            'SPS30 averages about 55 mA while measuring and can reach 80 mA when its fan starts. It cannot be assumed to run continuously from the current one-cell node. The measurement interval, warm-up time and winter solar budget need a hardware test.',
+        firmwareTitle: 'The downloadable preset does not make SPS30 work',
+        firmwareBody:
+            'Meshtastic provides the radio and BME688 telemetry path, but this build has no SPS30 driver or PM telemetry yet. A project firmware extension must read the sensor, recover from I²C faults, manage sleep and wake, and publish PM1.0, PM2.5, PM4 and PM10.',
+        questionsTitle: 'Questions the first prototype must answer',
+        questions: [
+            'Which interval — 1, 5, 15 or 60 minutes — gives a useful signal without exhausting the energy budget?',
+            'How long must SPS30 warm up in cold, humid air before a reading is valid?',
+            'Can the chosen 5 V supply share I²C safely with the 3.3 V RAK19007, or is a level shifter required?',
+            'Does the intake remain dry and unobstructed through rain, dust, ash and insects?',
+            'Does ground-level particulate matter distinguish wildfire smoke from fog, road dust and a nearby burn pile early enough to help?',
+        ],
+        readyTitle: 'What makes SPS30 a supported component',
+        ready: [
+            'A cold boot and deep-sleep cycle repeatedly find the sensor and publish all four PM values.',
+            'A 72-hour power test records current, solar input and battery state at the chosen interval without I²C or radio failures.',
+            'The sensor-head design survives a wet outdoor test and its files, wiring diagram and firmware source are published.',
+            'A controlled-burn or equivalent field test publishes raw PM, weather and power data alongside the result.',
+        ],
+    },
+    bme688: {
+        title: 'BME688: compatible now, with one cable',
+        lede: 'The Adafruit BME688 breakout is compatible with the RAK19007 + RAK4631 I²C bus and Meshtastic’s BME680/BME688 telemetry path. Use a STEMMA QT/Qwiic JST-SH to female-header cable; the cable is sold separately.',
+        wiring: [
+            { title: 'BME688 VIN', detail: 'RAK19007 J12 VDD, 3.3 V' },
+            { title: 'BME688 GND', detail: 'RAK19007 J12 GND' },
+            { title: 'BME688 SCL', detail: 'RAK19007 J12 I²C SCL' },
+            { title: 'BME688 SDA', detail: 'RAK19007 J12 I²C SDA' },
+            { title: 'I²C address', detail: '0x77 by default; bridge SDO to GND for 0x76' },
+        ],
+        note: 'Verify the address in an I²C scan and confirm temperature, humidity, pressure and gas-resistance telemetry before sealing the enclosure. BME688 reports a general VOC trend; it does not identify smoke or a specific gas.',
+    },
     assembly: {
         eyebrow: 'Assembly',
-        title: 'Six steps, about an hour',
+        title: 'Base build: six steps, about an hour',
     },
     placement: {
         eyebrow: 'Placement',

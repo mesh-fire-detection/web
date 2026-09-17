@@ -55,7 +55,7 @@ export const PROBLEMS = [
         question: 'How do you get a node to a ridge with no road and no trail?',
         status: 'open',
         constraints: [
-            'A node with its mast weighs roughly 2.5 kg.',
+            ['A node with its mast weighs under ', { kg: 0.5 }, '.'],
             [
                 'Placement accuracy of about ',
                 { m: 50 },
@@ -134,7 +134,7 @@ export const PROBLEMS = [
             {
                 approach: 'Particulate sensing with the SPS30',
                 outcome:
-                    'Power and price work. Whether ground-level PM rises early enough, and far enough from the fire, is untested.',
+                    'The sensor needs a 5 V supply and custom firmware. Whether ground-level PM rises early enough, and far enough from the fire, is untested.',
             },
         ],
         closesWhen:

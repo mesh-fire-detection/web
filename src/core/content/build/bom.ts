@@ -16,7 +16,7 @@ export type Bom = {
     parts: readonly BomLine[]
     /** Anything not on the list: postage, printing time, hardware store bits. */
     incidentals: number
-    buildMinutes: number
+    buildMinutes: number | null
     confidence: 'priced' | 'estimated'
 }
 
@@ -51,7 +51,6 @@ export const BOMS = [
             ...inherited,
             { part: 'lteModule', quantity: 1 },
             { part: 'lteAntenna', quantity: 1 },
-            { part: 'iotSim', quantity: 1 },
         ],
         incidentals: 0,
         buildMinutes: 45,
@@ -61,7 +60,7 @@ export const BOMS = [
         type: 'sensor',
         title: 'Sensor node',
         summary:
-            'Particulate plus gas. The sensor selection here is not settled — this is the current best candidate, not a recommendation.',
+            'Particulate plus gas. The parts subtotal excludes the still-unselected 5 V SPS30 interface; custom firmware is also required before this is a repeatable field build.',
         parts: [
             ...inherited,
             { part: 'sps30', quantity: 1 },
@@ -69,7 +68,7 @@ export const BOMS = [
             { part: 'sensorHead', quantity: 1 },
         ],
         incidentals: 0,
-        buildMinutes: 60,
+        buildMinutes: null,
         confidence: 'estimated',
     },
     {
@@ -208,7 +207,7 @@ export const DOWNLOADS = [
     },
     {
         name: 'meshtastic-sensor-us915.json',
-        detail: 'Base preset plus telemetry intervals and sensor module config.',
+        detail: 'Base radio preset. It does not add an SPS30 driver or PM telemetry.',
         href: `${import.meta.env.BASE_URL}files/meshtastic-sensor-us915.json`,
         kind: 'json',
         size: '4 KB',

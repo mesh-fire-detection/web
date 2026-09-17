@@ -6,4 +6,8 @@
     --icon_hit: 34px;
     --dot_size: 7px;
     --slider_thumb_offset: -5.5px;
+    --bom_build_time_width: 5rem;
+    --bom_cost_width: 7rem;
+    --bom_part_width: 40rem;
+    --bom_part_viewport_width: 50vw;
 }

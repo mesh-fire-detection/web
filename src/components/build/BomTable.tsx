@@ -151,20 +151,19 @@ export function BomTable() {
                     options={OPTIONS}
                     onChange={setType}
                 />
-                <Row gap={5} wrap>
+                <Row gap={5} align='start' justify='end' className='bom_metrics'>
                     <Metric label='Parts' value={bom.parts.length} size='sm' />
                     <Metric label={ordersCopy.label} value={orderCount(bom)} size='sm' />
-                    <Metric label='Build time' value={`${bom.buildMinutes} min`} size='sm' />
                     <Metric
-                        label='Unit cost'
+                        label='Build time'
+                        value={bom.buildMinutes === null ? 'prototype' : `${bom.buildMinutes} min`}
+                        size='sm'
+                    />
+                    <Metric
+                        label={bom.type === 'sensor' ? 'Parts subtotal' : 'Unit cost'}
                         value={money(total)}
                         tone='fire'
                         size='lg'
-                        hint={
-                            bom.confidence === 'priced'
-                                ? 'Every part quoted'
-                                : 'Some parts estimated'
-                        }
                     />
                 </Row>
             </Row>
@@ -176,13 +175,14 @@ export function BomTable() {
                             <Heading level={3} size='md'>
                                 {bom.title}
                             </Heading>
-                            <Text size='sm' tone='muted' measure={84}>
+                            <Text size='sm' tone='muted'>
                                 {bom.summary}
                             </Text>
                         </Stack>
                     </Box>
 
                     <DataTable
+                        className='bom_table'
                         columns={columns}
                         rows={rows}
                         getRowKey={({ line, index }) => `${line.part}-${String(index)}`}

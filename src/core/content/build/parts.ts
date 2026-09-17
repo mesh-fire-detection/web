@@ -115,14 +115,14 @@ export const PARTS = {
         ],
     },
     lteModule: {
-        component: 'RAK13102 WisBlock LTE-M / NB-IoT module',
-        detail: 'Cat-M1 modem on the WisBlock stack. No carrier lock-in.',
+        component: 'RAK13102 Blues NoteCarrier + NoteCard',
+        detail: 'LTE-M / NB-IoT backhaul with 10 years and 500 MB of included cellular data.',
         vendors: [
             {
-                product: 'RAK13102',
+                product: 'RAK13102 with NoteCard V1 NBGL-500, SKU 110135',
                 store: 'rakwireless',
                 url: 'https://store.rakwireless.com/products/wisblock-blues-notecarrier-rak13102',
-                unitPrice: 36,
+                unitPrice: 77,
             },
             {
                 product: 'RAK13102 with NoteCard',
@@ -133,38 +133,20 @@ export const PARTS = {
         ],
     },
     lteAntenna: {
-        component: 'LTE stub antenna + pigtail',
-        detail: 'External mount through the enclosure wall.',
+        component: 'LTE antenna',
+        detail: '215 mm outdoor antenna with N-Type male connector. The enclosure cable and adapter remain to be selected.',
         vendors: [
             {
-                product: 'u.FL to SMA',
+                product: 'RAK LTE Antenna, SKU 920031',
                 store: 'rakwireless',
                 url: 'https://store.rakwireless.com/products/lte-antenna',
-                unitPrice: 9,
+                unitPrice: 15,
             },
             {
                 product: 'RAK 3 dBi N-Type',
                 store: 'connectedThings',
                 url: 'https://eu.connectedthings.store/en/lorawan-gateways/gateway-accessories/rak-3dbi-4glte-cellular-antenna-n-type.html',
                 unitPrice: 24,
-            },
-        ],
-    },
-    iotSim: {
-        component: 'IoT data SIM, 12 months',
-        detail: 'Low-rate M2M plan. Roughly 30 MB per month at the current packet rate.',
-        vendors: [
-            {
-                product: 'Hologram',
-                store: 'hologram',
-                url: 'https://www.hologram.io/pricing/',
-                unitPrice: 3,
-            },
-            {
-                product: 'Soracom',
-                store: 'soracom',
-                url: 'https://www.soracom.io/pricing/',
-                unitPrice: 3,
             },
         ],
     },
@@ -175,8 +157,8 @@ export const PARTS = {
             {
                 product: 'SPS30',
                 store: 'mouser',
-                url: 'https://www.mouser.com/ProductDetail/Sensirion/SPS30',
-                unitPrice: 42,
+                url: 'https://www.mouser.com/en/ProductDetail/Sensirion/SPS30?qs=lc2O%252BfHJPVbEPY0RBeZmPA%3D%3D',
+                unitPrice: 35,
             },
             {
                 product: 'SPS30',
@@ -188,13 +170,13 @@ export const PARTS = {
     },
     bme688: {
         component: 'Bosch BME688 gas + environment sensor',
-        detail: 'VOC and temperature/humidity, for discriminating smoke from fog.',
+        detail: 'VOC trend plus temperature, humidity and pressure. It cannot identify smoke or a specific gas on its own.',
         vendors: [
             {
                 product: 'BME688',
                 store: 'adafruit',
                 url: 'https://www.adafruit.com/product/5046',
-                unitPrice: 19,
+                unitPrice: 20,
             },
             {
                 product: 'BME688 Qwiic',

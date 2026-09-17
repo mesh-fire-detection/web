@@ -25,8 +25,8 @@ A branch starts at a **Cellular** node (LTE backhaul) and runs as a chain of **B
 | Type | Role | Cost | On top of Base |
 | --- | --- | ---: | --- |
 | **Base** | Carries the mesh; strongest LoRa signal | ~$55 | WisBlock Meshtastic Starter Kit, panel, 915 MHz whip, 21700, printed IP65 enclosure |
-| **Cellular** | One per branch; reaches the internet | ~$103 | LTE-M / NB-IoT module, LTE antenna, IoT SIM |
-| **Sensor** | Smells smoke at ground level | ~$119 | PM sensor (current candidate: Sensirion SPS30) + gas/climate (BME688) |
+| **Cellular** | One per branch; reaches the internet | ~$147 | RAK13102 NoteCarrier + NoteCard, LTE antenna |
+| **Sensor** | Samples particulate matter at ground level | ~$113 + power interface | SPS30 (current candidate), BME688 and a 5 V sensor interface |
 | **Vision** | Sees smoke | ~$99 | ESP32-S3 with camera, on-device classifier ~1 frame/min, second cell and panel |
 
 A Base node is five parts, no soldering, about 25 minutes. Every other type is a Base plus add-ons. Smoke-sensor selection is not closed: SPS30 is the current best candidate, not a recommendation.
@@ -71,9 +71,9 @@ The map draws node geometry on a blank dark canvas — no tiles, no API key. A b
 Five of them. Hiding unknowns gets spectators. Publishing them gets collaborators.
 
 1. **No detection-time baseline.** Need a median of ignition → first dispatched unit for one named Washington district over five years, with the raw records alongside. A public-records request is drafted, not filed.
-2. **Roadless delivery.** A node with its mast weighs ~2.5 kg. Carrying it in on foot works, and does not scale past a day hike from a trailhead. Drone drop stalls on the mast and on beyond-line-of-sight flight.
+2. **Roadless delivery.** A node with its mast weighs under 500 g / 1.1 lb. Carrying it in on foot works, and does not scale past a day hike from a trailhead. Drone drop stalls on the mast and on beyond-line-of-sight flight.
 3. **No node should be critical.** The chain already shows the failure on the map (Mailbox Spur took Mailbox Bowl with it). Ladder topology is a candidate, not a result.
-4. **Cheap smoke sensing.** Sensing head under $60, five years outdoors with no cleaning, powered by one 21700 and one small panel. MQ-series heaters blow the power budget. SPS30 clears price and current; whether ground-level PM rises early enough on a real fire is untested.
+4. **Cheap smoke sensing.** Sensing head under $60, five years outdoors with no cleaning, powered by one 21700 and one small panel. MQ-series heaters blow the power budget. SPS30 needs a 5 V interface and custom firmware; whether ground-level PM rises early enough on a real fire is untested.
 5. **False positives.** Fog, dust, morning mist, a neighbour’s burn pile. No measured FP/FN rate. Plan: ninety days of continuous capture from two Vision nodes through fog season, hand-labelled, confusion matrix and raw frames published.
 
 A problem closes only against the criterion on its card, not against a feeling.
