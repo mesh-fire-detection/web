@@ -21,7 +21,7 @@ export default defineConfig({
     test: {
         environment: 'node',
         setupFiles: [path.join(rootDir, 'tests/setup.ts')],
-        include: live ? ['tests/**/*.live.test.ts'] : ['tests/**/*.test.{ts,tsx}'],
+        include: [live ? 'tests/**/*.live.test.ts' : 'tests/**/*.test.{ts,tsx}'],
         exclude: live ? ['node_modules/**', 'dist/**'] : ['tests/**/*.live.test.ts'],
         globals: false,
         restoreMocks: true,

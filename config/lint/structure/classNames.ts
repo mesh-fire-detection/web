@@ -47,12 +47,12 @@ const isDynamic = (className: string): boolean =>
     DYNAMIC_CLASS_STEMS.some((stem) => className.startsWith(stem))
 
 const readFilesDeep = (dir: string, extensions: ReadonlySet<string>): readonly string[] => {
-    if (!fs.existsSync(dir)) return []
-
-    return fs
-        .readdirSync(dir, { withFileTypes: true, recursive: true })
-        .filter((entry) => entry.isFile() && extensions.has(path.extname(entry.name)))
-        .map((entry) => path.join(entry.parentPath, entry.name))
+    return fs.existsSync(dir)
+        ? fs
+              .readdirSync(dir, { withFileTypes: true, recursive: true })
+              .filter((entry) => entry.isFile() && extensions.has(path.extname(entry.name)))
+              .map((entry) => path.join(entry.parentPath, entry.name))
+        : []
 }
 
 const CLASS_SELECTOR = /\.(-?[_a-z][\w-]*)/gi
@@ -142,8 +142,7 @@ const extractBalanced = (
         index += 1
     }
 
-    if (depth !== 0) return null
-    return source.slice(openIndex + 1, index - 1)
+    return depth === 0 ? source.slice(openIndex + 1, index - 1) : null
 }
 
 const isComparisonOperand = (body: string, literalIndex: number): boolean => {

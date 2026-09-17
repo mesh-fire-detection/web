@@ -17,8 +17,9 @@ const pagesBase = (): string => {
     const fromEnv = process.env['BASE_PATH']
     if (!fromEnv) return '/'
     const trimmed = fromEnv.replace(/\/+$/, '')
-    if (!trimmed || trimmed === '/') return '/'
-    return `${trimmed.startsWith('/') ? trimmed : `/${trimmed}`}/`
+    return !trimmed || trimmed === '/'
+        ? '/'
+        : `${trimmed.startsWith('/') ? trimmed : `/${trimmed}`}/`
 }
 
 /** SPA shells for known routes plus 404/robots/sitemap. */

@@ -109,11 +109,11 @@ export const parseArgs = (argv: readonly string[]): CliOptions => {
             continue
         }
 
-        if (argument?.startsWith('--exclude=') === true) {
-            const value = argument.slice('--exclude='.length)
-            if (value.length > 0) {
-                excludes.add(value)
-            }
+        if (argument?.startsWith('--exclude=') !== true) continue
+
+        const value = argument.slice('--exclude='.length)
+        if (value.length > 0) {
+            excludes.add(value)
         }
     }
 
@@ -127,8 +127,7 @@ export const getLevel = (
     errorThreshold: number
 ): Severity | null => {
     if (value > errorThreshold) return 'error'
-    if (value > warnThreshold) return 'warn'
-    return null
+    return value > warnThreshold ? 'warn' : null
 }
 
 const walkDirectories = function* (
