@@ -50,26 +50,24 @@ export function Footer() {
                     </Text>
 
                     <Row justify='between' gap={4} className='footer_bottom'>
-                        <Row gap={4} wrap>
-                            <Text as='span' size='xs' tone='faint'>
-                                Hardware{' '}
-                                <TextLink to={SITE.licenses.hardware.href} tone='quiet' size='xs'>
-                                    {SITE.licenses.hardware.name}
-                                </TextLink>
-                            </Text>
-                            <Text as='span' size='xs' tone='faint'>
-                                Firmware{' '}
-                                <TextLink to={SITE.licenses.firmware.href} tone='quiet' size='xs'>
-                                    {SITE.licenses.firmware.name}
-                                </TextLink>
-                            </Text>
+                        <Text as='span' size='xs' tone='faint'>
+                            Hardware{' '}
+                            <TextLink to={SITE.licenses.hardware.href} tone='quiet' size='xs'>
+                                {SITE.licenses.hardware.name}
+                            </TextLink>
+                            {' · '}Firmware{' '}
+                            <TextLink to={SITE.licenses.firmware.href} tone='quiet' size='xs'>
+                                {SITE.licenses.firmware.name}
+                            </TextLink>
+                            {' · '}
                             <TextLink to='/privacy' tone='quiet' size='xs'>
                                 Privacy
                             </TextLink>
+                            {' · '}
                             <TextLink to='/terms' tone='quiet' size='xs'>
                                 Terms
                             </TextLink>
-                        </Row>
+                        </Text>
                         <Text as='span' size='xs' tone='faint'>
                             © {year} {SITE.name}
                         </Text>
