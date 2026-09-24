@@ -45,6 +45,10 @@ export function Footer() {
                         <NodeCounter />
                     </Row>
 
+                    <Text size='xs' tone='faint' measure={100}>
+                        {footerContent.projectNote}
+                    </Text>
+
                     <Row justify='between' gap={4} className='footer_bottom'>
                         <Row gap={4} wrap>
                             <Text as='span' size='xs' tone='faint'>

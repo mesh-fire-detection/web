@@ -2,10 +2,11 @@ import type { HomeContent } from '@core/content/types'
 
 export const homeContent = {
     hero: {
-        eyebrow: 'Open hardware · LoRa mesh · US915',
-        titleBefore: 'A camera site costs $15,000.',
-        titleAfter: 'Our node costs {baseCost}.',
-        lede: 'Wildfire detection fails because coverage is expensive. Make each unit cheap enough to lose and you can cover the ground that matters. Here is the bill of materials, the network, and everything we have not solved.',
+        eyebrow: 'Open-source, non-commercial research network',
+        networkLine: 'Open hardware · LoRa mesh · US915',
+        titleBefore: 'Estimated parts cost:',
+        titleAfter: '~{baseCost} per node',
+        lede: 'A camera-based wildfire monitoring site can cost thousands of dollars. Our goal is to explore whether inexpensive, disposable sensor nodes can make dense ground coverage practical. Here are the hardware design, bill of materials, network architecture, and the problems we have not solved yet.',
         primaryCta: 'Build a Node',
         secondaryCta: 'See the network',
     },

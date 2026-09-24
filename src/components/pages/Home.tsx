@@ -33,6 +33,9 @@ export function HomePage() {
                 <Stack gap={8}>
                     <Stack gap={5} align='center'>
                         <Eyebrow>{copy.hero.eyebrow}</Eyebrow>
+                        <Text size='sm' tone='faint' align='center'>
+                            {copy.hero.networkLine}
+                        </Text>
                         <Heading level={1} size='5xl' align='center' measure={20}>
                             {copy.hero.titleBefore}
                             <Break />

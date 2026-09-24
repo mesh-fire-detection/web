@@ -2,6 +2,8 @@ import { SITE } from '@core/config/site'
 import type { FooterContent } from '@core/content/types'
 
 export const footerContent = {
+    projectNote:
+        'Mesh Fire Detection is a non-commercial experimental research project. No products or services are currently offered for sale.',
     columns: [
         {
             title: 'Project',

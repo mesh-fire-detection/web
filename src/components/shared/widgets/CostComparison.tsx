@@ -36,10 +36,10 @@ const INCUMBENT: Side = {
 }
 
 const OURS: Side = {
-    label: 'Base node, per unit',
+    label: 'Estimated parts cost per Base node',
     name: 'Mesh Fire Detection',
     price: nodeCost('base'),
-    priceNote: 'Five parts, priced below',
+    priceNote: 'Five-part BOM, before shipping and tax',
     points: [
         'LoRa radio on a printed IP65 shell',
         'Solar and a single 21700 cell — no utility power',
@@ -110,7 +110,7 @@ export function CostComparison() {
 
             <Row gap={3} justify='center' className='cost_ratio'>
                 <Text as='div' size='sm' tone='muted' align='center' measure={90}>
-                    One camera site buys{' '}
+                    At current component prices, one camera installation costs about as much as{' '}
                     <Value tone='fire' size='sm'>
                         {RATIO}
                     </Value>{' '}

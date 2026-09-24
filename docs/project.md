@@ -1,6 +1,8 @@
 # Mesh Fire Detection
 
-An open-hardware network for early wildfire detection. The idea is simple: if a node costs about $55, you can put it where a $10–20k camera will never go, and you can lose nodes without the coverage collapsing.
+An open-source, non-commercial experimental research network for early wildfire detection. A Base node's estimated parts cost is about $55 before shipping and tax, which lets us explore ground coverage in places a $10–20k camera installation cannot reach.
+
+No products or services are currently offered for sale.
 
 This is not an emergency service. The network does not call 911 and does not replace a dispatch desk. A person looks at the frame or the sensor trace and decides whether to call it in.
 
@@ -11,7 +13,7 @@ Wildfire detection fails on the cost of coverage, not on the algorithm. A typica
 Three goals, scored honestly:
 
 1. **Reduce detection time.** The headline goal, and the one we cannot yet defend. There is no measured baseline of “ignition to first dispatched unit” for a named district. Without that number the goal is unfalsifiable.
-2. **Radically reduce the cost of detection.** Met at the unit level: ~$55 for a Base node against ~$15,000 for a camera site. Unproven is whether $55 nodes detect anything useful.
+2. **Radically reduce the cost of detection.** Met at the unit level: an estimated parts cost of ~$55 for a Base node against ~$15,000 for a camera installation. Unproven is whether nodes at this parts cost detect anything useful.
 3. **Maximise the area covered.** Cheap units only matter if they actually reach roadless ridges. The constraint today is delivery, not money.
 
 The site and this document are written for people who would build and deploy a node themselves. Agencies and land trusts are the second audience: they need a false-positive rate, an alerting model, and a clear disclaimer.
@@ -22,7 +24,7 @@ Radio is LoRa 915 MHz (US915) on Meshtastic. Nodes are RAKwireless WisBlock, pow
 
 A branch starts at a **Cellular** node (LTE backhaul) and runs as a chain of **Base** nodes. **Sensor** and **Vision** nodes attach where they are useful for detection, not where the topology needs them.
 
-| Type | Role | Cost | On top of Base |
+| Type | Role | Estimated parts cost | On top of Base |
 | --- | --- | ---: | --- |
 | **Base** | Carries the mesh; strongest LoRa signal | ~$55 | WisBlock Meshtastic Starter Kit, panel, 915 MHz whip, 21700, printed IP65 enclosure |
 | **Cellular** | One per branch; reaches the internet | ~$147 | RAK13102 NoteCarrier + NoteCard, LTE antenna |
@@ -96,7 +98,7 @@ Node positions are published deliberately: public land, or land whose owner agre
 
 Hardware, enclosures, and documentation are [CERN-OHL-S v2](https://cern-ohl.web.cern.ch/) (strongly reciprocal: improve a shell and the improvement comes back). Firmware and this site are [MIT](https://opensource.org/license/mit).
 
-The next useful thing is not a donation or a mailing list. It is a node that makes it to March. Build from `/build`: priced parts list, firmware presets, enclosure. If you have to ask a question to finish a node, that is a bug in the site.
+The next useful thing is not a donation or a mailing list. It is a node that makes it to March. Build from `/build`: supplier-linked parts list, firmware presets, enclosure. If you have to ask a question to finish a node, that is a bug in the site.
 
 - Repository: https://github.com/mesh-fire-detection
 - Discussions: https://github.com/orgs/mesh-fire-detection/discussions/

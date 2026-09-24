@@ -30,6 +30,7 @@ type LabeledValue = {
 
 type HomeHero = {
     readonly eyebrow: string
+    readonly networkLine: string
     readonly titleBefore: string
     readonly titleAfter: string
     readonly lede: string
@@ -180,6 +181,7 @@ type FooterColumn = {
 
 export type FooterContent = {
     readonly columns: readonly FooterColumn[]
+    readonly projectNote: string
 }
 
 type MapLogEntry = {
