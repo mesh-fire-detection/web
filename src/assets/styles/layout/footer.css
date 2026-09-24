@@ -8,3 +8,7 @@
 .footer_bottom {
     padding-bottom: var(--s_2);
 }
+
+.footer_legal_links .tlink[href^='https://'] {
+    display: inline;
+}

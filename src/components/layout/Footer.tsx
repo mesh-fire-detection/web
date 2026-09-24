@@ -50,7 +50,7 @@ export function Footer() {
                     </Text>
 
                     <Row justify='between' gap={4} className='footer_bottom'>
-                        <Text as='span' size='xs' tone='faint'>
+                        <Text as='span' className='footer_legal_links' size='xs' tone='faint'>
                             Hardware{' '}
                             <TextLink to={SITE.licenses.hardware.href} tone='quiet' size='xs'>
                                 {SITE.licenses.hardware.name}
