@@ -95,6 +95,14 @@
         border-color 120ms var(--ease);
 }
 
+.tlink[href^='https://'] {
+    display: inline-block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 .tlink:hover {
     border-bottom-color: var(--link_hover);
     color: var(--link_hover);
