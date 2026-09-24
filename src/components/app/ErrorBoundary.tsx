@@ -1,5 +1,6 @@
 import { Component, type ReactNode } from 'react'
 
+import { Stack } from '@components/shared/primitives/Layout'
 import { Heading } from '@components/shared/typography/Heading'
 import { Text } from '@components/shared/typography/Text'
 import { Button } from '@components/shared/widgets/Action'
@@ -32,13 +33,21 @@ export class ErrorBoundary extends Component<ErrorBoundaryProperties, ErrorBound
     override render(): ReactNode {
         if (this.state.hasError) {
             const fallback = (
-                <>
-                    <Heading level={1} size='2xl'>
+                <Stack
+                    align='center'
+                    className='container container_narrow'
+                    gap={5}
+                    grow
+                    justify='center'
+                >
+                    <Heading level={1} size='2xl' align='center' measure={26}>
                         {errorTitle}
                     </Heading>
-                    <Text tone='muted'>{errorBody}</Text>
+                    <Text align='center' tone='muted' measure={60}>
+                        {errorBody}
+                    </Text>
                     <Button onClick={this.reload}>{reloadLabel}</Button>
-                </>
+                </Stack>
             )
 
             return this.props.mode === 'landmark' ? (
