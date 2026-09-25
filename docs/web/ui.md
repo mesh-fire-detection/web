@@ -25,7 +25,7 @@ Bill of Materials · Node Types · Enclosures (STL) · Firmware & Config · Asse
 Live Map · Coverage Calculator · Node Status · Deployment Log · False Positives
 
 **Contribute**
-GitHub · Discord · Report a Node · Contact
+GitHub · Report a Node · Contact
 
 Bottom bar: License (pick and name it — CERN-OHL-S for hardware, MIT for firmware) · Privacy · © Mesh Fire Detection.
 

@@ -33,7 +33,7 @@ npm run preview        # serve the production build
 Copy [`config/.env.example`](config/.env.example). Do not commit secrets.
 
 Before publishing, confirm community URLs in [`src/core/config/site.ts`](src/core/config/site.ts)
-(`SITE.github`, `SITE.discord`, `SITE.contact`). `SITE.url` is the public site root used
+(`SITE.github`, `SITE.discussions`, `SITE.contact`). `SITE.url` is the public site root used
 for absolute `sitemap.xml` / `robots.txt` URLs — set it to the custom domain or to
 `https://org.github.io/repo`, and do not fold `BASE_PATH` into those URLs.
 

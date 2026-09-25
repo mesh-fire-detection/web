@@ -28,7 +28,7 @@ Every cheap fire detection project dies on false positives. Dust, fog, morning m
 
 ## What to skip
 
-No forum — link Discord and GitHub Discussions. No donate button until a node has survived a winter outdoors. No manifesto above the fold. And no detection-time claims you haven't measured; a specific unbacked number is the fastest way to lose the agency people you need.
+No forum — use GitHub Discussions, where the people who would answer already are. No donate button until a node has survived a winter outdoors. No manifesto above the fold. And no detection-time claims you haven't measured; a specific unbacked number is the fastest way to lose the agency people you need.
 
 ## One gap in the plan itself
 

@@ -11,7 +11,6 @@ export const SITE = {
     url: 'https://meshfiredetection.org',
     github: 'https://github.com/mesh-fire-detection',
     discussions: 'https://github.com/orgs/mesh-fire-detection/discussions/',
-    discord: 'https://discord.gg/mesh-fire-detection',
     contact: 'mailto:contact@meshfiredetection.org',
     licenses: {
         hardware: { name: 'CERN-OHL-S v2', href: 'https://cern-ohl.web.cern.ch/' },

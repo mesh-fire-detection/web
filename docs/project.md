@@ -102,7 +102,6 @@ The next useful thing is not a donation or a mailing list. It is a node that mak
 
 - Repository: https://github.com/mesh-fire-detection
 - Discussions: https://github.com/orgs/mesh-fire-detection/discussions/
-- Discord: https://discord.gg/mesh-fire-detection
 - Contact: contact@meshfiredetection.org
 
-The GitHub, Discord, and email URLs in `src/data/site.ts` are placeholders and should be replaced before launch.
+The community URLs in `src/core/config/site.ts` should be confirmed before launch.

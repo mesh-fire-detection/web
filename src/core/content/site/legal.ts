@@ -30,7 +30,7 @@ export const privacyContent = {
             items: [
                 'Your choice of metric or imperial units is kept in your browser’s local storage so it survives a reload. It never leaves your device, and clearing site data removes it.',
                 'By default the map draws node geometry on a blank canvas and requests no map tiles. If a basemap is ever enabled, the tile provider will see your IP address, and this policy will name that provider first.',
-                'Links to GitHub, Discord and email take you to those services, which have their own policies.',
+                'Links to GitHub and email take you to those services, which have their own policies.',
             ],
         },
         {
@@ -173,7 +173,7 @@ export const termsContent = {
             id: 'external',
             title: 'Other services',
             paragraphs: [
-                'Links to GitHub, Discord, parts stores and other sites lead to services we do not control. Their terms apply there.',
+                'Links to GitHub, parts stores and other sites lead to services we do not control. Their terms apply there.',
             ],
         },
         {

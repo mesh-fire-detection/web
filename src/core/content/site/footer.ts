@@ -38,7 +38,6 @@ export const footerContent = {
             title: 'Contribute',
             links: [
                 { label: 'GitHub', to: SITE.github },
-                { label: 'Discord', to: SITE.discord },
                 { label: 'Report a Node', to: `${SITE.github}/issues/new` },
                 { label: 'Contact', to: SITE.contact },
             ],
