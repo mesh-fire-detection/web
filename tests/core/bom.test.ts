@@ -14,6 +14,7 @@ import { STORES, isShipped, storeFor } from '@core/content/build/stores'
 import { NODES, type NodeType } from '@core/content/network/network'
 
 const PRINTED = new Set<PartId>(['enclosure', 'sensorHead', 'cameraHood'])
+const SINGLE_SOURCE = new Set<PartId>(['antenna', 'rak12039'])
 
 describe('parts catalog', () => {
     it('stores every catalog price as a whole dollar', () => {
@@ -26,12 +27,12 @@ describe('parts catalog', () => {
         }
     })
 
-    it('lists two priced stores for every bought part', () => {
+    it('lists available priced stores for every bought part', () => {
         for (const [id, part] of Object.entries(PARTS) as readonly (readonly [
             PartId,
             (typeof PARTS)[PartId],
         ])[]) {
-            expect(part.vendors).toHaveLength(PRINTED.has(id) ? 1 : 2)
+            expect(part.vendors).toHaveLength(PRINTED.has(id) || SINGLE_SOURCE.has(id) ? 1 : 2)
         }
     })
 
@@ -48,7 +49,7 @@ describe('parts catalog', () => {
                 primaryVendor(PARTS.battery).unitPrice +
                 primaryVendor(PARTS.enclosure).unitPrice
         )
-        expect(nodeCost('base')).toBe(55)
+        expect(nodeCost('base')).toBe(66)
     })
 
     it('derives branch hardware cost from node types', () => {
@@ -96,7 +97,7 @@ describe('order plan', () => {
 
     it('counts the stores each node type actually adds to Base', () => {
         expect(orderCount(bomFor('cellular'))).toBe(2)
-        expect(orderCount(bomFor('sensor'))).toBe(4)
+        expect(orderCount(bomFor('sensor'))).toBe(2)
         expect(orderCount(bomFor('vision'))).toBe(3)
     })
 })

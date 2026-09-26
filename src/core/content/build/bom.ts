@@ -60,11 +60,10 @@ export const BOMS = [
         type: 'sensor',
         title: 'Sensor node',
         summary:
-            'Particulate plus gas. The parts subtotal excludes the still-unselected 5 V SPS30 interface; custom firmware is also required before this is a repeatable field build.',
+            'RAK12039 particulate sensing. Firmware telemetry and the outdoor sensor head still need validation.',
         parts: [
             ...inherited,
-            { part: 'sps30', quantity: 1 },
-            { part: 'bme688', quantity: 1 },
+            { part: 'rak12039', quantity: 1 },
             { part: 'sensorHead', quantity: 1 },
         ],
         incidentals: 0,
@@ -175,7 +174,7 @@ export const DOWNLOADS = [
     },
     {
         name: 'sensor-head-v2.stl',
-        detail: 'Vented intake head for the SPS30. Prints in the same orientation as the shell.',
+        detail: 'Vented intake head for the particulate sensor. Prints in the same orientation as the shell.',
         href: 'https://github.com/mesh-fire-detection/hardware',
         kind: 'stl',
         size: '780 KB',
@@ -207,7 +206,7 @@ export const DOWNLOADS = [
     },
     {
         name: 'meshtastic-sensor-us915.json',
-        detail: 'Base radio preset. It does not add an SPS30 driver or PM telemetry.',
+        detail: 'Base radio preset. It does not add a RAK12039 driver or PM telemetry.',
         href: `${import.meta.env.BASE_URL}files/meshtastic-sensor-us915.json`,
         kind: 'json',
         size: '4 KB',

@@ -157,43 +157,37 @@ export function BuildPage() {
                 </Stack>
             </Section>
 
-            <Section space='md' bordered id='sps30'>
+            <Section space='md' bordered id='particulate-sensor'>
                 <Stack gap={6}>
                     <SectionHead
-                        eyebrow={buildContent.sps30.eyebrow}
-                        title={buildContent.sps30.title}
-                        lede={buildContent.sps30.lede}
+                        eyebrow={buildContent.rak12039.eyebrow}
+                        title={buildContent.rak12039.title}
+                        lede={buildContent.rak12039.lede}
                     />
-
-                    <Box tone='surface' padding={5} radius='md'>
-                        <Stack gap={4}>
-                            <Heading level={3} size='sm'>
-                                {buildContent.bme688.title}
-                            </Heading>
-                            <Text size='sm' tone='muted'>
-                                {buildContent.bme688.lede}
-                            </Text>
-                            <DescriptionList columns={2}>
-                                {buildContent.bme688.wiring.map((item) => (
-                                    <DescriptionItem key={item.title} term={item.title}>
-                                        {formatCopy(item.detail, system)}
-                                    </DescriptionItem>
-                                ))}
-                            </DescriptionList>
-                            <Text size='sm' tone='warn'>
-                                {buildContent.bme688.note}
-                            </Text>
-                        </Stack>
-                    </Box>
 
                     <Grid columns={2} minColumnWidth={300} gap={6}>
                         <Box tone='surface' padding={5} radius='md'>
                             <Stack gap={4}>
                                 <Heading level={3} size='sm'>
-                                    {buildContent.sps30.requirementsTitle}
+                                    {buildContent.rak12039.measurementsTitle}
+                                </Heading>
+                                <DescriptionList columns={1}>
+                                    {buildContent.rak12039.measurements.map((item) => (
+                                        <DescriptionItem key={item.title} term={item.title}>
+                                            {formatCopy(item.detail, system)}
+                                        </DescriptionItem>
+                                    ))}
+                                </DescriptionList>
+                            </Stack>
+                        </Box>
+
+                        <Box tone='surface' padding={5} radius='md'>
+                            <Stack gap={4}>
+                                <Heading level={3} size='sm'>
+                                    {buildContent.rak12039.requirementsTitle}
                                 </Heading>
                                 <Stack gap={3}>
-                                    {buildContent.sps30.requirements.map((item) => (
+                                    {buildContent.rak12039.requirements.map((item) => (
                                         <Stack key={item.title} gap={1}>
                                             <Text size='sm' weight={600}>
                                                 {item.title}
@@ -206,38 +200,20 @@ export function BuildPage() {
                                 </Stack>
                             </Stack>
                         </Box>
-
-                        <Box tone='surface' padding={5} radius='md'>
-                            <Stack gap={4}>
-                                <Heading level={3} size='sm'>
-                                    {buildContent.sps30.wiringTitle}
-                                </Heading>
-                                <DescriptionList columns={1}>
-                                    {buildContent.sps30.wiring.map((item) => (
-                                        <DescriptionItem key={item.title} term={item.title}>
-                                            {formatCopy(item.detail, system)}
-                                        </DescriptionItem>
-                                    ))}
-                                </DescriptionList>
-                            </Stack>
-                        </Box>
                     </Grid>
 
-                    <Callout title={buildContent.sps30.powerTitle} tone='warn'>
-                        {buildContent.sps30.powerBody}
-                    </Callout>
-                    <Callout title={buildContent.sps30.firmwareTitle} tone='warn'>
-                        {buildContent.sps30.firmwareBody}
+                    <Callout title={buildContent.rak12039.firmwareTitle} tone='warn'>
+                        {buildContent.rak12039.firmwareBody}
                     </Callout>
 
                     <Grid columns={2} minColumnWidth={300} gap={6}>
                         <Box tone='surface' padding={5} radius='md'>
                             <Stack gap={4}>
                                 <Heading level={3} size='sm'>
-                                    {buildContent.sps30.questionsTitle}
+                                    {buildContent.rak12039.questionsTitle}
                                 </Heading>
                                 <List marker='dot' gap={3}>
-                                    {buildContent.sps30.questions.map((question) => (
+                                    {buildContent.rak12039.questions.map((question) => (
                                         <ListItem key={question} size='sm'>
                                             {question}
                                         </ListItem>
@@ -249,10 +225,10 @@ export function BuildPage() {
                         <Box tone='surface' padding={5} radius='md'>
                             <Stack gap={4}>
                                 <Heading level={3} size='sm'>
-                                    {buildContent.sps30.readyTitle}
+                                    {buildContent.rak12039.readyTitle}
                                 </Heading>
                                 <List marker='dot' gap={3}>
-                                    {buildContent.sps30.ready.map((item) => (
+                                    {buildContent.rak12039.ready.map((item) => (
                                         <ListItem key={item} size='sm'>
                                             {item}
                                         </ListItem>

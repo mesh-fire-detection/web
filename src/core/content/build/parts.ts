@@ -19,8 +19,8 @@ export type CatalogPart = {
     component: string
     detail: string
     /**
-     * Bought parts list two storefronts. Printed parts list the filament
-     * cost once. Running totals always use the first vendor.
+     * Bought parts list available storefronts. Printed parts list the
+     * filament cost once. Running totals always use the first vendor.
      */
     vendors: readonly [CatalogVendor, CatalogVendor] | readonly [CatalogVendor]
 }
@@ -67,38 +67,32 @@ export const PARTS = {
         ],
     },
     antenna: {
-        component: '915Mhz Whip Antenna for LoRa',
-        detail: 'SMA male, 20 cm flexible whip. The single cheapest dB you can buy in this build.',
+        component: 'RAK 916 MHz LoRa antenna (US915)',
+        detail: 'Half-wave dipole, 142 mm, 1.2 dBi, RP-SMA. Choose the 900–930 MHz variant for US915.',
         vendors: [
             {
-                product: 'Flexible Whip 20 cm',
+                product: 'Original Helium Hotspot Antenna, 900–930 MHz variant',
                 store: 'rakwireless',
-                url: 'https://store.rakwireless.com/products/sma-male-915mhz-868mhz-whip-antenna-20cm',
-                unitPrice: 8,
-            },
-            {
-                product: 'Atlavox SMA whip',
-                store: 'atlavox',
-                url: 'https://atlavox.com/products/antenna-for-meshtastic-915mhz-sma-whip',
-                unitPrice: 13,
+                url: 'https://store.rakwireless.com/products/868mhz-antenna',
+                unitPrice: 10,
             },
         ],
     },
     battery: {
-        component: '21700 Protected Button Top 3450mAh Battery',
-        detail: 'Protected button top. Protection matters — see the offline node on the map.',
+        component: '3.7V 4400mAh 1S2P Protected Li-ion Battery Pack',
+        detail: 'Two 18650 cells in parallel, protection circuit, and a 2-pin JST cable. Verify polarity and fit before connecting.',
         vendors: [
             {
-                product: 'Panasonic NCR18650GA',
-                store: 'batteryStore18650',
-                url: 'https://www.18650batterystore.com/products/panasonic-ncr18650ga-3450mah-battery-protected-button-top',
-                unitPrice: 11,
+                product: 'Adafruit #354, 3.7V 4400mAh',
+                store: 'adafruit',
+                url: 'https://www.adafruit.com/product/354',
+                unitPrice: 20,
             },
             {
-                product: 'KeepPower P1835J',
-                store: 'illumn',
-                url: 'https://illumn.com/18650-keeppower-3500mah-sanyo-ncr18650ga-protected-button-top.html',
-                unitPrice: 10,
+                product: 'Adafruit #354, SKU 1528-1834-ND',
+                store: 'digikey',
+                url: 'https://www.digikey.com/en/products/detail/adafruit-industries-llc/354/5054541',
+                unitPrice: 20,
             },
         ],
     },
@@ -150,45 +144,21 @@ export const PARTS = {
             },
         ],
     },
-    sps30: {
-        component: 'Sensirion SPS30 particulate sensor',
-        detail: 'PM1.0 / PM2.5 / PM10, laser scattering. Five-year rated life.',
+    rak12039: {
+        component: 'RAK12039 particulate matter sensor',
+        detail: 'Plantower PMSA003I module for WisBlock. PM1.0, PM2.5, PM10 and particle counts.',
         vendors: [
             {
-                product: 'SPS30',
-                store: 'mouser',
-                url: 'https://www.mouser.com/en/ProductDetail/Sensirion/SPS30?qs=lc2O%252BfHJPVbEPY0RBeZmPA%3D%3D',
-                unitPrice: 35,
-            },
-            {
-                product: 'SPS30',
-                store: 'digikey',
-                url: 'https://www.digikey.com/en/products/detail/sensirion-ag/SPS30/7674523',
-                unitPrice: 36,
-            },
-        ],
-    },
-    bme688: {
-        component: 'Bosch BME688 gas + environment sensor',
-        detail: 'VOC trend plus temperature, humidity and pressure. It cannot identify smoke or a specific gas on its own.',
-        vendors: [
-            {
-                product: 'BME688',
-                store: 'adafruit',
-                url: 'https://www.adafruit.com/product/5046',
-                unitPrice: 20,
-            },
-            {
-                product: 'BME688 Qwiic',
-                store: 'sparkfun',
-                url: 'https://www.sparkfun.com/sparkfun-environmental-sensor-bme688-qwiic.html',
-                unitPrice: 35,
+                product: 'RAK12039, SKU 110098',
+                store: 'rakwireless',
+                url: 'https://store.rakwireless.com/products/particle-matter-sensor-plantower-pmsa003i-rak12039',
+                unitPrice: 32,
             },
         ],
     },
     sensorHead: {
         component: 'Sensor-head housing + gore vent',
-        detail: 'Printed head with a vented, water-shedding intake.',
+        detail: 'Printed particle-sensor head with a vented, water-shedding intake.',
         vendors: [
             {
                 product: 'Printed ASA',

@@ -245,28 +245,20 @@ export type BuildContent = PageHeading & {
         readonly presetsTitle: string
         readonly presetsNote: string
     }
-    readonly sps30: {
+    readonly rak12039: {
         readonly eyebrow: string
         readonly title: string
         readonly lede: string
         readonly requirementsTitle: string
         readonly requirements: readonly TitledDetail[]
-        readonly wiringTitle: string
-        readonly wiring: readonly TitledDetail[]
-        readonly powerTitle: string
-        readonly powerBody: string
+        readonly measurementsTitle: string
+        readonly measurements: readonly TitledDetail[]
         readonly firmwareTitle: string
         readonly firmwareBody: string
         readonly questionsTitle: string
         readonly questions: readonly string[]
         readonly readyTitle: string
         readonly ready: readonly string[]
-    }
-    readonly bme688: {
-        readonly title: string
-        readonly lede: string
-        readonly wiring: readonly TitledDetail[]
-        readonly note: string
     }
     readonly assembly: { readonly eyebrow: string; readonly title: string }
     readonly placement: {

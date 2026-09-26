@@ -122,7 +122,7 @@ export const PROBLEMS = [
         constraints: [
             'Under $60 per node for the whole sensing head.',
             'Has to survive five years outdoors with no cleaning.',
-            'Average draw has to fit a 3450 mAh cell and one small panel.',
+            'Average draw has to fit a 4400 mAh battery pack and one small panel.',
             'It only earns its place if it beats the Vision node to the alert.',
         ],
         tried: [
@@ -132,9 +132,9 @@ export const PROBLEMS = [
                     'Heater current alone blows the power budget, and they drift badly outdoors.',
             },
             {
-                approach: 'Particulate sensing with the SPS30',
+                approach: 'Particulate sensing with the RAK12039',
                 outcome:
-                    'The sensor needs a 5 V supply and custom firmware. Whether ground-level PM rises early enough, and far enough from the fire, is untested.',
+                    'The RAK12039 module includes its own power conversion, but particulate telemetry still needs firmware work. Whether ground-level PM rises early enough, and far enough from the fire, is untested.',
             },
         ],
         closesWhen:

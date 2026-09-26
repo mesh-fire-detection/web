@@ -1,6 +1,6 @@
 # Mesh Fire Detection
 
-An open-source, non-commercial experimental research network for early wildfire detection. A Base node's estimated parts cost is about $55 before shipping and tax, which lets us explore ground coverage in places a $10–20k camera installation cannot reach.
+An open-source, non-commercial experimental research network for early wildfire detection. A Base node's estimated parts cost is about $66 before shipping and tax, which lets us explore ground coverage in places a $10–20k camera installation cannot reach.
 
 No products or services are currently offered for sale.
 
@@ -13,25 +13,25 @@ Wildfire detection fails on the cost of coverage, not on the algorithm. A typica
 Three goals, scored honestly:
 
 1. **Reduce detection time.** The headline goal, and the one we cannot yet defend. There is no measured baseline of “ignition to first dispatched unit” for a named district. Without that number the goal is unfalsifiable.
-2. **Radically reduce the cost of detection.** Met at the unit level: an estimated parts cost of ~$55 for a Base node against ~$15,000 for a camera installation. Unproven is whether nodes at this parts cost detect anything useful.
+2. **Radically reduce the cost of detection.** Met at the unit level: an estimated parts cost of ~$66 for a Base node against ~$15,000 for a camera installation. Unproven is whether nodes at this parts cost detect anything useful.
 3. **Maximise the area covered.** Cheap units only matter if they actually reach roadless ridges. The constraint today is delivery, not money.
 
 The site and this document are written for people who would build and deploy a node themselves. Agencies and land trusts are the second audience: they need a false-positive rate, an alerting model, and a clear disclaimer.
 
 ## How the network is built
 
-Radio is LoRa 915 MHz (US915) on Meshtastic. Nodes are RAKwireless WisBlock, powered by a small solar panel and a protected 21700 cell (3450 mAh).
+Radio is LoRa 915 MHz (US915) on Meshtastic. Nodes are RAKwireless WisBlock, powered by a small solar panel and a protected 1S2P 18650 pack (4400 mAh).
 
 A branch starts at a **Cellular** node (LTE backhaul) and runs as a chain of **Base** nodes. **Sensor** and **Vision** nodes attach where they are useful for detection, not where the topology needs them.
 
 | Type | Role | Estimated parts cost | On top of Base |
 | --- | --- | ---: | --- |
-| **Base** | Carries the mesh; strongest LoRa signal | ~$55 | WisBlock Meshtastic Starter Kit, panel, 915 MHz whip, 21700, printed IP65 enclosure |
-| **Cellular** | One per branch; reaches the internet | ~$147 | RAK13102 NoteCarrier + NoteCard, LTE antenna |
-| **Sensor** | Samples particulate matter at ground level | ~$113 + power interface | SPS30 (current candidate), BME688 and a 5 V sensor interface |
-| **Vision** | Sees smoke | ~$99 | ESP32-S3 with camera, on-device classifier ~1 frame/min, second cell and panel |
+| **Base** | Carries the mesh; strongest LoRa signal | ~$66 | WisBlock Meshtastic Starter Kit, panel, RAK 916 MHz antenna, protected battery pack, printed IP65 enclosure |
+| **Cellular** | One per branch; reaches the internet | ~$158 | RAK13102 NoteCarrier + NoteCard, LTE antenna |
+| **Sensor** | Samples particulate matter at ground level | ~$101 estimated | RAK12039 and a vented sensor head |
+| **Vision** | Sees smoke | ~$119 | ESP32-S3 with camera, on-device classifier ~1 frame/min, second cell and panel |
 
-A Base node is five parts, no soldering, about 25 minutes. Every other type is a Base plus add-ons. Smoke-sensor selection is not closed: SPS30 is the current best candidate, not a recommendation.
+A Base node is five parts, no soldering, about 25 minutes. Every other type is a Base plus add-ons. RAK12039 is the current particulate-sensor choice; its firmware support, power budget and field performance remain unverified.
 
 Today’s topology is a simple chain. That is deliberately fragile: if an intermediate Base dies, everything behind it is orphaned. The candidate replacement is a ladder — paired Base nodes on facing ridges with cross-links. Roughly +40% Base nodes, no extra Cellular. Unsimulated against real terrain.
 
@@ -46,7 +46,7 @@ Placement rules:
 
 Two independent channels, both cheap, both unproven:
 
-- **Sensor.** Particulate (PM2.5) plus gas/humidity to tell smoke from fog. It only earns its place if it alerts before a camera would on the same fire.
+- **Sensor.** Particulate matter (PM1.0, PM2.5 and PM10). It only earns its place if it alerts before a camera would on the same fire.
 - **Vision.** A ridge-mounted camera with on-device inference. The alert carries the frame, not a label. Other frames are discarded on the node. Cameras point at terrain, not at homes, roads, or trailheads.
 
 Alerts are opt-in by area: push and email, both carrying the frame or sensor trace. The subscriber list is never shared with an agency the subscriber has not asked for in writing. The network never contacts emergency services itself.
@@ -75,7 +75,7 @@ Five of them. Hiding unknowns gets spectators. Publishing them gets collaborator
 1. **No detection-time baseline.** Need a median of ignition → first dispatched unit for one named Washington district over five years, with the raw records alongside. A public-records request is drafted, not filed.
 2. **Roadless delivery.** A node with its mast weighs under 500 g / 1.1 lb. Carrying it in on foot works, and does not scale past a day hike from a trailhead. Drone drop stalls on the mast and on beyond-line-of-sight flight.
 3. **No node should be critical.** The chain already shows the failure on the map (Mailbox Spur took Mailbox Bowl with it). Ladder topology is a candidate, not a result.
-4. **Cheap smoke sensing.** Sensing head under $60, five years outdoors with no cleaning, powered by one 21700 and one small panel. MQ-series heaters blow the power budget. SPS30 needs a 5 V interface and custom firmware; whether ground-level PM rises early enough on a real fire is untested.
+4. **Cheap smoke sensing.** Sensing head under $60, five years outdoors with no cleaning, powered by a protected 4400 mAh 1S2P 18650 pack and one small panel. MQ-series heaters blow the power budget. RAK12039 plugs into the WisBlock IO slot with its power conversion onboard, but particulate telemetry, lifetime and whether ground-level PM rises early enough on a real fire are untested.
 5. **False positives.** Fog, dust, morning mist, a neighbour’s burn pile. No measured FP/FN rate. Plan: ninety days of continuous capture from two Vision nodes through fog season, hand-labelled, confusion matrix and raw frames published.
 
 A problem closes only against the criterion on its card, not against a feeling.

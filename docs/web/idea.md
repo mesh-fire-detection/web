@@ -1,6 +1,7 @@
 Mesh Fire Detection
 
 Goals
+
 1. Reduce wildfire detection time.
 2. Radically reduce the cost of wildfire detection.
 3. Maximize the area covered by the detection network.
@@ -14,11 +15,11 @@ Vision: detects smoke from images.
 Base parts
 WisBlock Meshtastic Starter Kit (RAK10722) - $30
 Solar Panel (80 × 45 mm, SKU 920399) - $4
-915Mhz Whip Antenna for LoRa (RAK Flexible Whip 20 cm) - $8
-21700 Protected Button Top 3450mAh Battery (Panasonic NCR18650GA) - $11
+916 MHz LoRa Antenna (RAK HWR Series, US915 variant) - $10
+3.7V 4400mAh 1S2P Protected Li-ion Battery Pack (2 × 18650, JST-PH cable) - $20
 IP65 enclosure (Printed ASA) - $2
 
-Total: ~$55 per Base node.
+Total: ~$66 per Base node.
 
 Deployment
 How to deliver all nodes to the required locations with minimal difficulty, especially in remote areas without road access.
@@ -34,5 +35,6 @@ One Cellular node is placed at the beginning of the branch. Base nodes then form
 No node should be critical.
 
 Research
+
 1. Cheap fire/smoke sensor
 2. Cheap vision-based fire detection system

@@ -50,6 +50,20 @@ async function fetchShopifyProduct(url: string): Promise<ShopifyProduct> {
     return body['product']
 }
 
+async function fetchAdafruitProductPrice(url: string): Promise<number> {
+    const response = await fetch(url, {
+        headers: { 'User-Agent': USER_AGENT },
+        signal: AbortSignal.timeout(REQUEST_MS),
+    })
+    expect(response.status, `${url} returned ${String(response.status)}`).toBe(200)
+    const html = await response.text()
+    const meta = /<meta\s+[^>]*property=["']product:price:amount["'][^>]*>/i.exec(html)?.[0]
+    const amount = /\bcontent=["']([\d.]+)["']/i.exec(meta ?? '')?.[1]
+    expect(amount, `${url} has no product price metadata`).toBeDefined()
+    if (!amount) throw new Error(`No product price metadata for ${url}`)
+    return Math.round(Number(amount))
+}
+
 function roundedPrice(variant: ShopifyVariant): number {
     return Math.round(Number(variant.price))
 }
@@ -123,42 +137,25 @@ describe('live catalog parts', () => {
     )
 
     it(
-        'finds the RAK whip antenna US915 variant and matches the rounded price',
+        'finds the RAK 900–930MHz antenna variant and matches the rounded price',
         async () => {
             const vendor = primaryVendor(PARTS.antenna)
             const product = await fetchShopifyProduct(vendor.url)
-            const variant = product.variants.find((item) => item.sku === '926275')
-            expect(variant, 'SKU 926275 missing').toBeDefined()
+            expect(product.title).toContain('Original Helium Hotspot Antenna')
+            const variant = product.variants.find((item) => item.sku === '926000')
+            expect(variant, '916MHz SKU 926000 missing').toBeDefined()
             if (!variant) return
+            expect(variant.title).toBe('900–930MHz')
             expect(roundedPrice(variant)).toBe(vendor.unitPrice)
         },
         REQUEST_MS
     )
 
     it(
-        'finds the Atlavox whip antenna listing and matches the rounded price',
-        async () => {
-            const vendor = secondVendor(PARTS.antenna.vendors)
-            const product = await fetchShopifyProduct(vendor.url)
-            const [variant] = product.variants
-            expect(variant).toBeDefined()
-            if (!variant) return
-            expect(roundedPrice(variant)).toBe(vendor.unitPrice)
-        },
-        REQUEST_MS
-    )
-
-    it(
-        'finds the Panasonic NCR18650GA cell and matches the rounded price',
+        'finds the Adafruit 4400mAh battery pack and matches the rounded price',
         async () => {
             const vendor = primaryVendor(PARTS.battery)
-            const product = await fetchShopifyProduct(vendor.url)
-            expect(product.title).toContain('NCR18650GA')
-            expect(product.variants.length).toBeGreaterThan(0)
-            const [variant] = product.variants
-            expect(variant).toBeDefined()
-            if (!variant) return
-            expect(roundedPrice(variant)).toBe(vendor.unitPrice)
+            expect(await fetchAdafruitProductPrice(vendor.url)).toBe(vendor.unitPrice)
         },
         REQUEST_MS
     )
