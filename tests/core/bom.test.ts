@@ -9,12 +9,9 @@ import {
     orderCount,
     supplierBaskets,
 } from '@core/content/build/bom'
-import { PARTS, primaryVendor, type PartId } from '@core/content/build/parts'
+import { PARTS, primaryVendor } from '@core/content/build/parts'
 import { STORES, isShipped, storeFor } from '@core/content/build/stores'
 import { NODES, type NodeType } from '@core/content/network/network'
-
-const PRINTED = new Set<PartId>(['enclosure', 'sensorHead', 'cameraHood'])
-const SINGLE_SOURCE = new Set<PartId>(['antenna', 'rak12039'])
 
 describe('parts catalog', () => {
     it('stores every catalog price as a whole dollar', () => {
@@ -27,12 +24,9 @@ describe('parts catalog', () => {
         }
     })
 
-    it('lists available priced stores for every bought part', () => {
-        for (const [id, part] of Object.entries(PARTS) as readonly (readonly [
-            PartId,
-            (typeof PARTS)[PartId],
-        ])[]) {
-            expect(part.vendors).toHaveLength(PRINTED.has(id) || SINGLE_SOURCE.has(id) ? 1 : 2)
+    it('lists at least one priced store for each part', () => {
+        for (const part of Object.values(PARTS)) {
+            expect(part.vendors.length).toBeGreaterThanOrEqual(1)
         }
     })
 
@@ -49,7 +43,6 @@ describe('parts catalog', () => {
                 primaryVendor(PARTS.battery).unitPrice +
                 primaryVendor(PARTS.enclosure).unitPrice
         )
-        expect(nodeCost('base')).toBe(66)
     })
 
     it('derives branch hardware cost from node types', () => {
@@ -83,6 +76,9 @@ describe('order plan', () => {
 
             const stores = baskets.map((basket) => basket.store)
             expect(new Set(stores).size).toBe(stores.length)
+
+            const shippedBaskets = baskets.filter((basket) => isShipped(storeFor(basket.store)))
+            expect(orderCount(bom)).toBe(shippedBaskets.length)
         }
     })
 
@@ -92,13 +88,6 @@ describe('order plan', () => {
 
         expect(printed).toHaveLength(1)
         expect(orderCount(bom)).toBe(supplierBaskets(bom).length - 1)
-        expect(orderCount(bom)).toBe(2)
-    })
-
-    it('counts the stores each node type actually adds to Base', () => {
-        expect(orderCount(bomFor('cellular'))).toBe(2)
-        expect(orderCount(bomFor('sensor'))).toBe(2)
-        expect(orderCount(bomFor('vision'))).toBe(3)
     })
 })
 

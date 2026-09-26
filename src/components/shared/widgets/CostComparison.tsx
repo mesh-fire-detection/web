@@ -42,7 +42,7 @@ const OURS: Side = {
     priceNote: 'Five-part BOM, before shipping and tax',
     points: [
         'LoRa radio on a printed IP65 shell',
-        'Solar and two protected 18650 cells in parallel — no utility power',
+        'Solar and a protected battery pack — no utility power',
         'Carried in and mounted by one person in an afternoon',
         'Losing one node is a Saturday, not a budget line',
     ],

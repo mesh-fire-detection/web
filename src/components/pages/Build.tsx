@@ -15,6 +15,7 @@ import { Callout } from '@components/shared/widgets/Callout'
 import { Icon } from '@components/shared/widgets/Icon'
 import { SITE } from '@core/config/site'
 import { buildContent } from '@core/content/build/content'
+import { PARTS } from '@core/content/build/parts'
 import { formatCopy } from '@core/format/units'
 import { PRESETS } from '@core/map/linkBudget'
 
@@ -160,19 +161,19 @@ export function BuildPage() {
             <Section space='md' bordered id='particulate-sensor'>
                 <Stack gap={6}>
                     <SectionHead
-                        eyebrow={buildContent.rak12039.eyebrow}
-                        title={buildContent.rak12039.title}
-                        lede={buildContent.rak12039.lede}
+                        eyebrow={buildContent.smokeSensor.eyebrow}
+                        title={buildContent.smokeSensor.title}
+                        lede={buildContent.smokeSensor.lede}
                     />
 
                     <Grid columns={2} minColumnWidth={300} gap={6}>
                         <Box tone='surface' padding={5} radius='md'>
                             <Stack gap={4}>
                                 <Heading level={3} size='sm'>
-                                    {buildContent.rak12039.measurementsTitle}
+                                    {buildContent.smokeSensor.measurementsTitle}
                                 </Heading>
                                 <DescriptionList columns={1}>
-                                    {buildContent.rak12039.measurements.map((item) => (
+                                    {PARTS.smokeSensor.measurements.map((item) => (
                                         <DescriptionItem key={item.title} term={item.title}>
                                             {formatCopy(item.detail, system)}
                                         </DescriptionItem>
@@ -184,10 +185,10 @@ export function BuildPage() {
                         <Box tone='surface' padding={5} radius='md'>
                             <Stack gap={4}>
                                 <Heading level={3} size='sm'>
-                                    {buildContent.rak12039.requirementsTitle}
+                                    {buildContent.smokeSensor.requirementsTitle}
                                 </Heading>
                                 <Stack gap={3}>
-                                    {buildContent.rak12039.requirements.map((item) => (
+                                    {PARTS.smokeSensor.integration.map((item) => (
                                         <Stack key={item.title} gap={1}>
                                             <Text size='sm' weight={600}>
                                                 {item.title}
@@ -202,18 +203,18 @@ export function BuildPage() {
                         </Box>
                     </Grid>
 
-                    <Callout title={buildContent.rak12039.firmwareTitle} tone='warn'>
-                        {buildContent.rak12039.firmwareBody}
+                    <Callout title={buildContent.smokeSensor.firmwareTitle} tone='warn'>
+                        {buildContent.smokeSensor.firmwareBody}
                     </Callout>
 
                     <Grid columns={2} minColumnWidth={300} gap={6}>
                         <Box tone='surface' padding={5} radius='md'>
                             <Stack gap={4}>
                                 <Heading level={3} size='sm'>
-                                    {buildContent.rak12039.questionsTitle}
+                                    {buildContent.smokeSensor.questionsTitle}
                                 </Heading>
                                 <List marker='dot' gap={3}>
-                                    {buildContent.rak12039.questions.map((question) => (
+                                    {buildContent.smokeSensor.questions.map((question) => (
                                         <ListItem key={question} size='sm'>
                                             {question}
                                         </ListItem>
@@ -225,10 +226,10 @@ export function BuildPage() {
                         <Box tone='surface' padding={5} radius='md'>
                             <Stack gap={4}>
                                 <Heading level={3} size='sm'>
-                                    {buildContent.rak12039.readyTitle}
+                                    {buildContent.smokeSensor.readyTitle}
                                 </Heading>
                                 <List marker='dot' gap={3}>
-                                    {buildContent.rak12039.ready.map((item) => (
+                                    {buildContent.smokeSensor.ready.map((item) => (
                                         <ListItem key={item} size='sm'>
                                             {item}
                                         </ListItem>

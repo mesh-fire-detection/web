@@ -1,9 +1,26 @@
 /**
- * The only place a part’s names, store links, or prices may be written.
+ * The only place a part’s names, technical details, store links, or prices may be written.
  * Node totals and every advertised dollar figure are derived from vendor[0].
  */
 
 import type { StoreId } from '@core/content/build/stores'
+
+type CatalogNote = {
+    readonly title: string
+    readonly detail: string
+}
+
+export type CatalogPriceCheck =
+    | {
+          readonly kind: 'shopify'
+          readonly productTitleIncludes?: string
+          readonly variant:
+              | { readonly sku: string }
+              | { readonly titleIncludes: readonly string[] }
+              | { readonly index: number }
+      }
+    | { readonly kind: 'meta-price' }
+
 export type CatalogVendor = {
     /** Specific item in that store’s cart. */
     product: string
@@ -12,17 +29,25 @@ export type CatalogVendor = {
     url: string
     /** USD, stored already rounded to a whole dollar. */
     unitPrice: number
+    /** Live price selector for catalog entries with an automated source check. */
+    priceCheck?: CatalogPriceCheck
 }
 
 export type CatalogPart = {
     /** Role in the build. */
     component: string
     detail: string
+    /** Selected LoRa antenna gain used for the link-budget defaults. */
+    antennaGainDbi?: number
+    /** Product-specific measurements, kept with the product entry. */
+    measurements?: readonly CatalogNote[]
+    /** Product-specific integration notes, kept with the product entry. */
+    integration?: readonly CatalogNote[]
     /**
      * Bought parts list available storefronts. Printed parts list the
      * filament cost once. Running totals always use the first vendor.
      */
-    vendors: readonly [CatalogVendor, CatalogVendor] | readonly [CatalogVendor]
+    vendors: readonly [CatalogVendor, ...CatalogVendor[]]
 }
 
 export function primaryVendor(part: CatalogPart): CatalogVendor {
@@ -39,12 +64,22 @@ export const PARTS = {
                 store: 'rakwireless',
                 url: 'https://store.rakwireless.com/products/wisblock-meshtastic-starter-kit',
                 unitPrice: 30,
+                priceCheck: {
+                    kind: 'shopify',
+                    productTitleIncludes: 'RAK10722',
+                    variant: { titleIncludes: ['RAK19007', 'no additional modules', 'US915'] },
+                },
             },
             {
                 product: 'US915 SKU 116016',
                 store: 'rokland',
                 url: 'https://store.rokland.com/products/rak-wireless-wisblock-meshtastic-starter-kit',
                 unitPrice: 35,
+                priceCheck: {
+                    kind: 'shopify',
+                    productTitleIncludes: 'Starter Kit',
+                    variant: { index: 0 },
+                },
             },
         ],
     },
@@ -57,24 +92,32 @@ export const PARTS = {
                 store: 'rakwireless',
                 url: 'https://store.rakwireless.com/products/solar-panel',
                 unitPrice: 4,
+                priceCheck: { kind: 'shopify', variant: { sku: '920399' } },
             },
             {
                 product: 'SKU 920399',
                 store: 'rokland',
                 url: 'https://store.rokland.com/products/rak-solar-panels-920399',
                 unitPrice: 12,
+                priceCheck: { kind: 'shopify', variant: { index: 0 } },
             },
         ],
     },
     antenna: {
         component: 'RAK 916 MHz LoRa antenna (US915)',
         detail: 'Half-wave dipole, 142 mm, 1.2 dBi, RP-SMA. Choose the 900–930 MHz variant for US915.',
+        antennaGainDbi: 1.2,
         vendors: [
             {
                 product: 'Original Helium Hotspot Antenna, 900–930 MHz variant',
                 store: 'rakwireless',
                 url: 'https://store.rakwireless.com/products/868mhz-antenna',
                 unitPrice: 10,
+                priceCheck: {
+                    kind: 'shopify',
+                    productTitleIncludes: 'Original Helium Hotspot Antenna',
+                    variant: { sku: '926000' },
+                },
             },
         ],
     },
@@ -87,6 +130,7 @@ export const PARTS = {
                 store: 'adafruit',
                 url: 'https://www.adafruit.com/product/354',
                 unitPrice: 20,
+                priceCheck: { kind: 'meta-price' },
             },
             {
                 product: 'Adafruit #354, SKU 1528-1834-ND',
@@ -117,6 +161,11 @@ export const PARTS = {
                 store: 'rakwireless',
                 url: 'https://store.rakwireless.com/products/wisblock-blues-notecarrier-rak13102',
                 unitPrice: 77,
+                priceCheck: {
+                    kind: 'shopify',
+                    productTitleIncludes: 'RAK13102',
+                    variant: { sku: '110135' },
+                },
             },
             {
                 product: 'RAK13102 with NoteCard',
@@ -135,6 +184,7 @@ export const PARTS = {
                 store: 'rakwireless',
                 url: 'https://store.rakwireless.com/products/lte-antenna',
                 unitPrice: 15,
+                priceCheck: { kind: 'shopify', variant: { sku: '920031' } },
             },
             {
                 product: 'RAK 3 dBi N-Type',
@@ -144,15 +194,34 @@ export const PARTS = {
             },
         ],
     },
-    rak12039: {
+    smokeSensor: {
         component: 'RAK12039 particulate matter sensor',
         detail: 'Plantower PMSA003I module for WisBlock. PM1.0, PM2.5, PM10 and particle counts.',
+        measurements: [
+            { title: 'Mass concentration', detail: 'PM1.0, PM2.5 and PM10.' },
+            { title: 'Particle size bins', detail: '0.3–1.0, 1.0–2.5 and 2.5–10 μm.' },
+        ],
+        integration: [
+            {
+                title: 'Plug-in IO module',
+                detail: 'The RAK12039 mounts in the WisBlock IO slot. Its included flex cable connects the sensor to its module board.',
+            },
+            {
+                title: 'No external boost board',
+                detail: 'The module includes a 5 V boost converter for the PMSA003I, so the sensor does not need a separately wired 5 V supply.',
+            },
+            {
+                title: 'Vented sensor head',
+                detail: 'The sensor needs a weather-shedding intake that admits outside air while keeping rain, ash and insects away from its optical path.',
+            },
+        ],
         vendors: [
             {
                 product: 'RAK12039, SKU 110098',
                 store: 'rakwireless',
                 url: 'https://store.rakwireless.com/products/particle-matter-sensor-plantower-pmsa003i-rak12039',
                 unitPrice: 32,
+                priceCheck: { kind: 'shopify', variant: { sku: '110098' } },
             },
         ],
     },

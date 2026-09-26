@@ -245,14 +245,12 @@ export type BuildContent = PageHeading & {
         readonly presetsTitle: string
         readonly presetsNote: string
     }
-    readonly rak12039: {
+    readonly smokeSensor: {
         readonly eyebrow: string
         readonly title: string
         readonly lede: string
         readonly requirementsTitle: string
-        readonly requirements: readonly TitledDetail[]
         readonly measurementsTitle: string
-        readonly measurements: readonly TitledDetail[]
         readonly firmwareTitle: string
         readonly firmwareBody: string
         readonly questionsTitle: string

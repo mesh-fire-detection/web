@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest'
 
-import { PARTS, primaryVendor, type CatalogVendor } from '@core/content/build/parts'
+import {
+    PARTS,
+    type CatalogPart,
+    type CatalogPriceCheck,
+    type CatalogVendor,
+    type PartId,
+} from '@core/content/build/parts'
 import { STORES, storeFor, type StoreId } from '@core/content/build/stores'
 
 const REQUEST_MS = 20_000
@@ -50,7 +56,7 @@ async function fetchShopifyProduct(url: string): Promise<ShopifyProduct> {
     return body['product']
 }
 
-async function fetchAdafruitProductPrice(url: string): Promise<number> {
+async function fetchMetaProductPrice(url: string): Promise<number> {
     const response = await fetch(url, {
         headers: { 'User-Agent': USER_AGENT },
         signal: AbortSignal.timeout(REQUEST_MS),
@@ -68,119 +74,51 @@ function roundedPrice(variant: ShopifyVariant): number {
     return Math.round(Number(variant.price))
 }
 
-function secondVendor(vendors: readonly CatalogVendor[]): CatalogVendor {
-    const vendor = vendors[1]
-    expect(vendor, 'second store missing').toBeDefined()
-    if (!vendor) throw new Error('second store missing')
-    return vendor
+function selectedShopifyVariant(
+    product: ShopifyProduct,
+    priceCheck: Extract<CatalogPriceCheck, { readonly kind: 'shopify' }>
+): ShopifyVariant | undefined {
+    const { variant } = priceCheck
+    return 'sku' in variant
+        ? product.variants.find((item) => item.sku === variant.sku)
+        : 'titleIncludes' in variant
+          ? product.variants.find((item) =>
+                variant.titleIncludes.every((part) => item.title.includes(part))
+            )
+          : product.variants[variant.index]
 }
 
+type LiveCatalogSource = {
+    readonly name: string
+    readonly vendor: CatalogVendor
+    readonly priceCheck: CatalogPriceCheck
+}
+
+const liveCatalogSources: readonly LiveCatalogSource[] = (
+    Object.entries(PARTS) as [PartId, CatalogPart][]
+).flatMap(([partId, part]) =>
+    part.vendors.flatMap((vendor) =>
+        vendor.priceCheck === undefined
+            ? []
+            : [{ name: partId + ': ' + vendor.product, vendor, priceCheck: vendor.priceCheck }]
+    )
+)
+
 describe('live catalog parts', () => {
-    it(
-        'finds the WisBlock starter kit and matches the rounded US915 price',
-        async () => {
-            const vendor = primaryVendor(PARTS.starterKit)
+    it.each(liveCatalogSources)(
+        '$name matches the listed price',
+        async ({ vendor, priceCheck }) => {
+            if (priceCheck.kind === 'meta-price') {
+                expect(await fetchMetaProductPrice(vendor.url)).toBe(vendor.unitPrice)
+                return
+            }
+
             const product = await fetchShopifyProduct(vendor.url)
-            expect(product.title).toContain('RAK10722')
-
-            const variant = product.variants.find(
-                (item) =>
-                    item.title.includes('RAK19007') &&
-                    item.title.includes('no additional modules') &&
-                    item.title.includes('US915')
-            )
-            expect(variant, 'US915 RAK19007 kit variant missing').toBeDefined()
-            if (!variant) return
-            expect(roundedPrice(variant)).toBe(vendor.unitPrice)
-        },
-        REQUEST_MS
-    )
-
-    it(
-        'finds the Rokland starter kit listing and matches the rounded price',
-        async () => {
-            const vendor = secondVendor(PARTS.starterKit.vendors)
-            const product = await fetchShopifyProduct(vendor.url)
-            expect(product.title).toContain('Starter Kit')
-            const [variant] = product.variants
-            expect(variant).toBeDefined()
-            if (!variant) return
-            expect(roundedPrice(variant)).toBe(vendor.unitPrice)
-        },
-        REQUEST_MS
-    )
-
-    it(
-        'finds the solar panel SKU 920399 and matches the rounded price',
-        async () => {
-            const vendor = primaryVendor(PARTS.solarPanel)
-            const product = await fetchShopifyProduct(vendor.url)
-            const variant = product.variants.find((item) => item.sku === '920399')
-            expect(variant, 'SKU 920399 missing').toBeDefined()
-            if (!variant) return
-            expect(roundedPrice(variant)).toBe(vendor.unitPrice)
-        },
-        REQUEST_MS
-    )
-
-    it(
-        'finds the Rokland solar panel listing and matches the rounded price',
-        async () => {
-            const vendor = secondVendor(PARTS.solarPanel.vendors)
-            const product = await fetchShopifyProduct(vendor.url)
-            const [variant] = product.variants
-            expect(variant).toBeDefined()
-            if (!variant) return
-            expect(roundedPrice(variant)).toBe(vendor.unitPrice)
-        },
-        REQUEST_MS
-    )
-
-    it(
-        'finds the RAK 900–930MHz antenna variant and matches the rounded price',
-        async () => {
-            const vendor = primaryVendor(PARTS.antenna)
-            const product = await fetchShopifyProduct(vendor.url)
-            expect(product.title).toContain('Original Helium Hotspot Antenna')
-            const variant = product.variants.find((item) => item.sku === '926000')
-            expect(variant, '916MHz SKU 926000 missing').toBeDefined()
-            if (!variant) return
-            expect(variant.title).toBe('900–930MHz')
-            expect(roundedPrice(variant)).toBe(vendor.unitPrice)
-        },
-        REQUEST_MS
-    )
-
-    it(
-        'finds the Adafruit 4400mAh battery pack and matches the rounded price',
-        async () => {
-            const vendor = primaryVendor(PARTS.battery)
-            expect(await fetchAdafruitProductPrice(vendor.url)).toBe(vendor.unitPrice)
-        },
-        REQUEST_MS
-    )
-
-    it(
-        'finds the RAK13102 NoteCard variant and matches the rounded price',
-        async () => {
-            const vendor = primaryVendor(PARTS.lteModule)
-            const product = await fetchShopifyProduct(vendor.url)
-            expect(product.title).toContain('RAK13102')
-            const variant = product.variants.find((item) => item.sku === '110135')
-            expect(variant, 'RAK13102 NoteCard SKU 110135 missing').toBeDefined()
-            if (!variant) return
-            expect(roundedPrice(variant)).toBe(vendor.unitPrice)
-        },
-        REQUEST_MS
-    )
-
-    it(
-        'finds the LTE antenna SKU 920031 and matches the rounded price',
-        async () => {
-            const vendor = primaryVendor(PARTS.lteAntenna)
-            const product = await fetchShopifyProduct(vendor.url)
-            const variant = product.variants.find((item) => item.sku === '920031')
-            expect(variant, 'LTE antenna SKU 920031 missing').toBeDefined()
+            if (priceCheck.productTitleIncludes !== undefined) {
+                expect(product.title).toContain(priceCheck.productTitleIncludes)
+            }
+            const variant = selectedShopifyVariant(product, priceCheck)
+            expect(variant, 'listed product variant missing for ' + vendor.url).toBeDefined()
             if (!variant) return
             expect(roundedPrice(variant)).toBe(vendor.unitPrice)
         },

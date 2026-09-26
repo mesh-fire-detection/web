@@ -9,6 +9,8 @@
  * Splat!, both linked from the Coverage page.
  */
 
+import { PARTS } from '@core/content/build/parts'
+
 type Preset = 'short-fast' | 'medium-fast' | 'long-fast' | 'long-slow'
 type Terrain = 'open' | 'light-forest' | 'dense-forest' | 'built-up'
 
@@ -132,8 +134,8 @@ export const DEFAULT_LINK: LinkInput = {
     txHeightM: 8,
     rxHeightM: 8,
     txPowerDbm: 22,
-    txGainDbi: 2.15,
-    rxGainDbi: 2.15,
+    txGainDbi: PARTS.antenna.antennaGainDbi,
+    rxGainDbi: PARTS.antenna.antennaGainDbi,
     cableLossDb: 0.5,
     frequencyMhz: 915,
     preset: 'long-fast',

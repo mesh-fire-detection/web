@@ -59,11 +59,10 @@ export const BOMS = [
     {
         type: 'sensor',
         title: 'Sensor node',
-        summary:
-            'RAK12039 particulate sensing. Firmware telemetry and the outdoor sensor head still need validation.',
+        summary: 'Smoke-sensor telemetry and the outdoor sensor head still need validation.',
         parts: [
             ...inherited,
-            { part: 'rak12039', quantity: 1 },
+            { part: 'smokeSensor', quantity: 1 },
             { part: 'sensorHead', quantity: 1 },
         ],
         incidentals: 0,
@@ -174,7 +173,7 @@ export const DOWNLOADS = [
     },
     {
         name: 'sensor-head-v2.stl',
-        detail: 'Vented intake head for the particulate sensor. Prints in the same orientation as the shell.',
+        detail: 'Vented intake head for the smoke sensor. Prints in the same orientation as the shell.',
         href: 'https://github.com/mesh-fire-detection/hardware',
         kind: 'stl',
         size: '780 KB',
@@ -206,7 +205,7 @@ export const DOWNLOADS = [
     },
     {
         name: 'meshtastic-sensor-us915.json',
-        detail: 'Base radio preset. It does not add a RAK12039 driver or PM telemetry.',
+        detail: 'Base radio preset. It does not add a smoke-sensor driver or sensor telemetry.',
         href: `${import.meta.env.BASE_URL}files/meshtastic-sensor-us915.json`,
         kind: 'json',
         size: '4 KB',
@@ -223,7 +222,7 @@ export type AssemblyStep = {
 export const ASSEMBLY = [
     {
         title: 'Flash the firmware',
-        detail: 'Connect the RAK4631 over USB and flash from the Meshtastic web installer in Chrome. No toolchain, no drivers on macOS or Linux.',
+        detail: 'Connect the radio core over USB and flash from the Meshtastic web installer in Chrome. No toolchain, no drivers on macOS or Linux.',
         minutes: 5,
     },
     {

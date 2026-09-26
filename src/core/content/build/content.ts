@@ -69,44 +69,26 @@ export const buildContent = {
         presetsNote:
             'The network runs Long / Fast. Slower presets buy range and spend airtime — and airtime is the thing that caps how many nodes a branch can carry.',
     },
-    rak12039: {
-        eyebrow: 'RAK12039 particulate sensor',
-        title: 'A WisBlock module that fits the Sensor node',
-        lede: 'RAK12039 uses the Plantower PMSA003I to measure PM1.0, PM2.5 and PM10. The module plugs into the RAK19007 IO slot and includes the conversion needed to power the sensor.',
-        requirementsTitle: 'How the particulate sensor fits',
-        requirements: [
-            {
-                title: 'Plug-in IO module',
-                detail: 'The RAK12039 mounts in the WisBlock IO slot. Its included flex cable connects the sensor to its module board.',
-            },
-            {
-                title: 'No external boost board',
-                detail: 'The RAK12039 module includes a 5 V boost converter for the PMSA003I, so the sensor does not need a separately wired 5 V supply.',
-            },
-            {
-                title: 'Vented sensor head',
-                detail: 'The sensor still needs a weather-shedding intake that admits outside air while keeping rain, ash and insects away from its optical path.',
-            },
-        ],
+    smokeSensor: {
+        eyebrow: 'Smoke sensor',
+        title: 'Use sensor readings as a smoke signal',
+        lede: 'A smoke sensor only earns its place if its readings distinguish wildfire smoke from fog, dust and other aerosols early enough to help. The current sensing path has not yet been field tested.',
+        requirementsTitle: 'How the sensor connects',
         measurementsTitle: 'What it measures',
-        measurements: [
-            { title: 'Mass concentration', detail: 'PM1.0, PM2.5 and PM10.' },
-            { title: 'Particle size bins', detail: '0.3–1.0, 1.0–2.5 and 2.5–10 μm.' },
-        ],
-        firmwareTitle: 'The preset does not add particulate telemetry',
+        firmwareTitle: 'The preset does not add sensor telemetry',
         firmwareBody:
-            'The downloadable Meshtastic preset configures the radio; it does not read the RAK12039. Firmware support, power use on the one-cell node and PM telemetry still need a hardware test.',
+            'The downloadable Meshtastic preset configures the radio; it does not read the smoke sensor. Firmware support, power use and sensor telemetry still need a hardware test.',
         questionsTitle: 'Questions the first prototype must answer',
         questions: [
             'Which interval — 1, 5, 15 or 60 minutes — gives a useful signal without exhausting the energy budget?',
-            'How does the RAK12039 behave in cold, humid air and after repeated sleep cycles?',
+            'How does the sensor behave in cold, humid air and after repeated sleep cycles?',
             'Does the intake remain dry and unobstructed through rain, dust, ash and insects?',
-            'Does ground-level particulate matter distinguish wildfire smoke from fog, road dust and a nearby burn pile early enough to help?',
+            'Do the sensor readings distinguish wildfire smoke from background conditions early enough to help?',
         ],
-        readyTitle: 'What makes RAK12039 a supported component',
+        readyTitle: 'What would validate this sensor for smoke detection',
         ready: [
-            'A cold boot and deep-sleep cycle repeatedly find the sensor and publish PM1.0, PM2.5 and PM10.',
-            'A 72-hour power test records current, solar input and battery state at the chosen interval without I²C or radio failures.',
+            'A cold boot and deep-sleep cycle repeatedly find the sensor and publish its measurements.',
+            'A 72-hour power test records current, solar input and battery state at the chosen interval without sensor or radio failures.',
             'The sensor-head design survives a wet outdoor test and its files and firmware source are published.',
             'A controlled-burn or equivalent field test publishes raw PM, weather and power data alongside the result.',
         ],

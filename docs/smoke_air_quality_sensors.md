@@ -1,5 +1,7 @@
 # Smoke and Air-Quality Sensors for a RAKwireless WisBlock Meshtastic Node
 
+> This is a research comparison snapshot. The active smoke-sensor choice, its product details, suppliers, and price live in `src/core/content/build/parts.ts`.
+
 ## Target Hardware
 
 This document compares smoke, particulate-matter, and air-quality sensors suitable for use with:
