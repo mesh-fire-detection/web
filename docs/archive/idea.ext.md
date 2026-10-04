@@ -16,7 +16,7 @@ One table per node type: part, supplier link, current price, running total. A pe
 
 ## Coverage calculator
 
-Input a lat/long and antenna height, get back a link-budget viewshed over real terrain (SRTM + Longley-Rice). This answers the only question a potential deployer actually has: *would this work where I live?* Same math serves Vision node placement — a camera viewshed is a propagation viewshed with different constants. Meshtastic Site Planner and Splat! are prior art you can lean on rather than build from scratch.
+Input a lat/long and antenna height, get back a link-budget viewshed over real terrain (SRTM + Longley-Rice). This answers the only question a potential deployer actually has: _would this work where I live?_ Same math serves Vision node placement — a camera viewshed is a propagation viewshed with different constants. Meshtastic Site Planner and Splat! are prior art you can lean on rather than build from scratch.
 
 ## Publish the open problems
 

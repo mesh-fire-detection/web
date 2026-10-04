@@ -24,12 +24,12 @@ Radio is LoRa 915 MHz (US915) on Meshtastic. Nodes use modular radio boards, a s
 
 A branch starts at a **Cellular** node (LTE backhaul) and runs as a chain of **Base** nodes. **Sensor** and **Vision** nodes attach where they are useful for detection, not where the topology needs them.
 
-| Type | Role | Parts added |
-| --- | --- | --- |
-| **Base** | Carries the mesh; strongest LoRa signal | Radio kit, solar panel, LoRa antenna, protected battery pack, printed IP65 enclosure |
-| **Cellular** | One per branch; reaches the internet | Cellular modem and antenna |
-| **Sensor** | Samples air for a smoke signal | Smoke sensor and vented sensor head |
-| **Vision** | Sees smoke | Camera, compute, second battery and panel |
+| Type         | Role                                    | Parts added                                                                          |
+| ------------ | --------------------------------------- | ------------------------------------------------------------------------------------ |
+| **Base**     | Carries the mesh; strongest LoRa signal | Radio kit, solar panel, LoRa antenna, protected battery pack, printed IP65 enclosure |
+| **Cellular** | One per branch; reaches the internet    | Cellular modem and antenna                                                           |
+| **Sensor**   | Samples air for a smoke signal          | Smoke sensor and vented sensor head                                                  |
+| **Vision**   | Sees smoke                              | Camera, compute, second battery and panel                                            |
 
 A Base node is five parts, no soldering, about 25 minutes. Every other type is a Base plus add-ons. The current smoke-sensing approach, its firmware support, power budget and field performance remain unverified. Exact components and live estimates are in the web build catalog.
 
@@ -64,7 +64,7 @@ Pages:
 - **Open Problems** — what is unsolved, with constraints, what has been tried, and what would close it.
 - **About** — goals, roadmap, licenses, privacy.
 
-Network state lives in `src/data/network.ts` and is currently sample data: the fourteen nodes of the planned Rattlesnake Ridge branch (Cascade foothills, Washington). Nothing here is in the field yet. When a live feed exists, flipping `SOURCE.kind` drops the sample banner from every page at once.
+Network state lives in `src/core/content/network/network.ts` and is currently sample data: the fourteen nodes of the planned Rattlesnake Ridge branch (Cascade foothills, Washington). Nothing here is in the field yet. When a live feed exists, flipping `SOURCE.kind` drops the sample banner from every page at once.
 
 The map draws node geometry on a blank dark canvas — no tiles, no API key. A basemap can be enabled with `VITE_BASEMAP_STYLE`.
 

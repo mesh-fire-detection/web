@@ -22,14 +22,14 @@ For actual **smoke detection**, a particulate-matter sensor is generally more us
 
 The strongest options in this price range are:
 
-| Sensor | Typical Price | Main Measurements | WisBlock Integration | Meshtastic Suitability | Smoke Detection |
-|---|---:|---|---|---|---|
-| **RAK12039 + Plantower PMSA003I** | ~$31.50 | PM1.0, PM2.5, PM10, particle count | Native WisBlock IO module | Very good | **Excellent** |
-| **Sensirion SEN55** | ~$33–37 | PM1, PM2.5, PM4, PM10, VOC, NOx, temperature, humidity | External wiring | Good, but more complex | **Excellent** |
-| **RAK1906 + Bosch BME680** | ~$15.20 | Temperature, humidity, pressure, gas resistance / IAQ | Native WisBlock sensor slot | Very good | Moderate |
-| **RAK12047 + Sensirion SGP40** | ~$10.50 | VOC index | Native WisBlock sensor slot | Possible, depending on firmware support | Low to moderate |
-| **RAK12004 + MQ-2** | ~$13 | Smoke and combustible gases | Native WisBlock IO module | Requires more custom handling | Moderate |
-| **Plantower PMS5003** | ~$20–40 | PM1.0, PM2.5, PM10 | External UART | Possible, more wiring/software work | **Excellent** |
+| Sensor                            | Typical Price | Main Measurements                                      | WisBlock Integration        | Meshtastic Suitability                  | Smoke Detection |
+| --------------------------------- | ------------: | ------------------------------------------------------ | --------------------------- | --------------------------------------- | --------------- |
+| **RAK12039 + Plantower PMSA003I** |       ~$31.50 | PM1.0, PM2.5, PM10, particle count                     | Native WisBlock IO module   | Very good                               | **Excellent**   |
+| **Sensirion SEN55**               |       ~$33–37 | PM1, PM2.5, PM4, PM10, VOC, NOx, temperature, humidity | External wiring             | Good, but more complex                  | **Excellent**   |
+| **RAK1906 + Bosch BME680**        |       ~$15.20 | Temperature, humidity, pressure, gas resistance / IAQ  | Native WisBlock sensor slot | Very good                               | Moderate        |
+| **RAK12047 + Sensirion SGP40**    |       ~$10.50 | VOC index                                              | Native WisBlock sensor slot | Possible, depending on firmware support | Low to moderate |
+| **RAK12004 + MQ-2**               |          ~$13 | Smoke and combustible gases                            | Native WisBlock IO module   | Requires more custom handling           | Moderate        |
+| **Plantower PMS5003**             |       ~$20–40 | PM1.0, PM2.5, PM10                                     | External UART               | Possible, more wiring/software work     | **Excellent**   |
 
 ## Recommended configuration
 

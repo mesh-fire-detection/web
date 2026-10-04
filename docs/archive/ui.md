@@ -9,7 +9,7 @@ Four links, one button. Anything more breaks on a phone.
 - `Build a Node` — primary button, right side
 - GitHub icon, far right
 
-If you want a fifth link, **About** goes between Open Problems and the button. Alternates worth considering: *Network* over Map, *Hardware* over Build, *Unsolved* over Open Problems.
+If you want a fifth link, **About** goes between Open Problems and the button. Alternates worth considering: _Network_ over Map, _Hardware_ over Build, _Unsolved_ over Open Problems.
 
 ## Footer
 
