@@ -16,6 +16,7 @@ export function DataTable<Row>({
     rows,
     getRowKey,
     caption,
+    label = caption,
     footer,
     dense = false,
     className,
@@ -24,6 +25,8 @@ export function DataTable<Row>({
     rows: readonly Row[]
     getRowKey: (row: Row, index: number) => string
     caption?: string | undefined
+    /** Accessible name when a visible heading already titles the table. */
+    label?: string | undefined
     /**
      * Sits below the table rather than inside it. A CSS-table row cannot span
      * columns, so a footer row would be as wide as the first column only.
@@ -34,9 +37,9 @@ export function DataTable<Row>({
 }) {
     return (
         <Stack gap={0}>
-            <ScrollArea label={caption}>
+            <ScrollArea label={label}>
                 <div
-                    aria-label={caption}
+                    aria-label={label}
                     className={cx('table', dense && 'table_dense', className)}
                     role='table'
                 >
