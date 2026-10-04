@@ -2,7 +2,7 @@ import { create, fromBinary, toBinary } from '@bufbuild/protobuf'
 import { Mesh, Portnums, Telemetry } from '@meshtastic/protobufs'
 import { vi } from 'vitest'
 
-import type { RadioConnection } from '@core/nearby/bluetooth'
+import type { RadioConnection } from '@core/nearby/transport/bluetooth'
 
 export function radioMessage(payloadVariant: Mesh.FromRadio['payloadVariant']): Uint8Array {
     return toBinary(Mesh.FromRadioSchema, create(Mesh.FromRadioSchema, { payloadVariant }))
@@ -63,6 +63,7 @@ export function mockRadio(num: number) {
     const connection: RadioConnection = {
         id: `bluetooth-${String(num)}`,
         name: `Meshtastic_${String(num)}`,
+        transport: 'bluetooth',
         connect: vi.fn<RadioConnection['connect']>((request, receive, disconnected) => {
             receivers.push(receive)
             lost = disconnected

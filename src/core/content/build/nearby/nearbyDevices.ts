@@ -1,20 +1,23 @@
 import type { NearbyDevicesContent } from '@core/content/types'
 
 export const nearbyDevicesContent = {
-    title: 'Nearby Devices',
+    title: 'Connect a Node',
     eyebrow: 'Build · Check your nodes',
-    lede: 'Connect your nodes over Bluetooth to check their identity, settings, and sensor readings before deployment.',
-    add: 'Add device',
-    helper: 'Choose each device in your browser’s Bluetooth dialog. Only devices you add appear here.',
-    sessionNote:
-        'One active connection at a time. Recent devices stay visible for 10 minutes after connecting. The latest readings and voltage history are kept in this browser.',
+    lede: 'Connect nodes over Bluetooth or USB to check their identity, settings, and sensor readings before deployment.',
+    add: { bluetooth: 'Add Bluetooth device', usb: 'Add USB device' },
+    transports: { bluetooth: 'Bluetooth', usb: 'USB' },
+    helper: [
+        'Choose each device in your browser’s Bluetooth or USB dialog. One device is connected at a time.',
+        'A USB session turns the node’s Bluetooth advertising off. Disconnect USB first so the node can appear in the browser’s Bluetooth list again.',
+    ],
     recentStatus: 'Recently connected',
     emptyTitle: 'No devices added yet',
-    emptyBody: 'Power on a node and select Add device.',
+    emptyBody: 'Power on a node, or plug it in over USB, and choose Bluetooth or USB above.',
     devicesTitle: 'Your devices',
     unnamed: 'Unnamed device',
     errorTitle: 'Connection failed',
     battery: 'Battery',
+    externalPower: 'external power',
     lastPacket: 'Last packet',
     notReported: 'Not reported',
     previousTitle: 'Previously added',
@@ -26,22 +29,46 @@ export const nearbyDevicesContent = {
             'This browser requires you to select the device again after a reload. Use Reconnect below.',
         failed: 'Could not restore device access. Use Reconnect below to try again.',
     },
-    unsupportedTitle: 'Bluetooth connection unavailable',
+    /** Shown under a disabled connection button. */
     support: {
+        insecure: 'HTTPS only',
+        unsupported: 'Chrome or Edge only',
+    },
+    /** Replaces the per-button reasons when neither connection works in this browser. */
+    noSupport: {
+        title: 'This browser cannot connect to nodes',
         insecure:
-            'Open this page over HTTPS, or localhost during development, to connect to a device.',
+            'Bluetooth and USB connections need a secure (HTTPS) page. Open this site over HTTPS.',
         unsupported:
-            'Web Bluetooth is unavailable in this browser. Open this page in desktop Chrome on a computer with Bluetooth.',
+            'Bluetooth and USB connections need Web Bluetooth or Web Serial. Open this page in desktop Chrome or Edge.',
+        link: 'Browser support',
+        href: 'https://developer.chrome.com/docs/capabilities/bluetooth',
+    },
+    /** Why Reconnect is disabled on a saved card. */
+    unavailable: {
+        bluetooth: 'Bluetooth is not available in this browser.',
+        usb: 'USB is not available in this browser.',
+    },
+    /** Read out by screen readers; `removed` also leads the visible undo line. */
+    announcements: {
+        connecting: 'Connecting',
+        connected: 'Connected',
+        disconnected: 'Disconnected',
+        failed: 'Connection failed',
+        removed: 'Removed',
+        restored: 'Restored',
     },
     errors: {
+        adapter:
+            'Bluetooth is off or unavailable to this browser. Turn Bluetooth on and allow the browser to use it in system settings, or connect over USB.',
         permission:
-            'Browser or system pairing did not complete. Check Bluetooth permissions and try again.',
+            'Browser or system permission was not granted. Check Bluetooth or USB permissions and try again.',
         unsupported:
-            'The Meshtastic Bluetooth service is unavailable. Check the device and its firmware, then try again.',
+            'The device does not offer the Meshtastic connection. Check the device and its firmware, then try again.',
         timeout:
             'The device did not finish connecting within 30 seconds. Check power, distance, and whether another app is connected, then try again.',
         connection:
-            'Could not connect to the device. Check power, distance, and whether another phone or app is connected, then try again.',
+            'Could not connect to the device. Check power, distance or the cable, and whether another phone or app is connected, then try again.',
     },
     hints: {
         connected: 'Receiving live data.',
@@ -61,5 +88,6 @@ export const nearbyDevicesContent = {
         connect: 'Reconnect',
         disconnect: 'Disconnect',
         remove: 'Remove from list',
+        undo: 'Undo',
     },
 } as const satisfies NearbyDevicesContent

@@ -3,10 +3,12 @@ import { useSyncExternalStore } from 'react'
 import { Text } from '@components/shared/typography/Text'
 import { Badge, StatusDot, StatusLabel } from '@components/shared/widgets/Badge'
 import type { StatusKind } from '@components/shared/widgets/Badge'
+import { Icon } from '@components/shared/widgets/Icon'
 import { nearbyDetailsContent } from '@core/content/build/nearby/deviceDetails'
 import { nearbyDevicesContent as copy } from '@core/content/build/nearby/nearbyDevices'
 import { cx } from '@core/format/cx'
 import { parseFirmware } from '@core/nearby/firmware'
+import type { NodeKind } from '@core/nearby/firmware'
 import { age, localTime } from '@core/nearby/metrics'
 import { nodeId } from '@core/nearby/model'
 import type { ConnectionState, Device } from '@core/nearby/model'
@@ -87,6 +89,7 @@ export function NodeTag({
         <span
             className={cx(
                 'nearby_node_tag',
+                'nearby_selectable',
                 size === 'sm' && 'nearby_node_tag_sm',
                 !ours && 'nearby_node_tag_other',
                 num === null && 'nearby_node_tag_empty'
@@ -101,7 +104,7 @@ export function NodeTag({
 export function NodeId({ num }: { readonly num: number }) {
     const id = nodeId(num)
     return (
-        <span className='nearby_node_id'>
+        <span className='nearby_node_id nearby_selectable'>
             <span className='nearby_node_id_prefix'>{id.slice(0, -4)}</span>
             {id.slice(-4)}
         </span>
@@ -182,5 +185,24 @@ export function SensorStatus({
                 {text}
             </Text>
         </div>
+    )
+}
+
+const KIND_ICON = {
+    base: 'radio',
+    cellular: 'cell',
+    sensor: 'sensor',
+    vision: 'camera',
+    test: 'flask',
+} as const
+
+/** The node type read from an MFD name; nothing for other nodes. */
+export function NodeKindIcon({ kind }: { readonly kind: NodeKind | null }) {
+    if (kind === null) return null
+    const label = nearbyDetailsContent.kinds[kind]
+    return (
+        <span className='nearby_kind' title={label}>
+            <Icon name={KIND_ICON[kind]} size={20} label={label} />
+        </span>
     )
 }

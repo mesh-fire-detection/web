@@ -3,6 +3,10 @@ import type { NearbyDetailsContent } from '@core/content/types'
 export const nearbyDetailsContent = {
     battery: 'Battery',
     solar: 'Solar charging',
+    /** On external power the voltage trend tracks the charger, not the panel. */
+    charging: 'Charging',
+    externalPower: 'On external power',
+    byVoltage: 'estimated from voltage',
     signal: 'Signal',
     readings: 'Sensor readings',
     nearest: 'Nearest nodes',
@@ -12,7 +16,7 @@ export const nearbyDetailsContent = {
     lastPacket: 'Last packet',
     notReported: 'Not reported',
     voltageOver: 'over',
-    trendWaiting: 'Trend after the next reading',
+    trendWaiting: 'Trend: next reading',
     voltageSaved: 'readings kept in this browser',
     voltageWaiting: 'Needs a second voltage reading to show a trend.',
     voltageNone: 'No voltage reported yet.',
@@ -25,8 +29,8 @@ export const nearbyDetailsContent = {
     hops: 'hops',
     routeUnknown: 'Route unknown',
     lastHeard: 'Heard',
-    peersNote:
-        'Reported by the connected radio, closest by signal first. Entries may be old and are not available over Bluetooth.',
+    peersNote: 'Strongest signal first. Saved observations may be old.',
+    unnamedNode: 'Unnamed node',
     noPeers: 'No other nodes reported yet.',
     showAll: 'Show all nodes',
     showFewer: 'Show fewer nodes',
@@ -34,6 +38,7 @@ export const nearbyDetailsContent = {
     waiting: 'Connected. Sensor readings appear when the node sends them.',
     sensorsDisabled: 'Connected. Environmental and particle telemetry are disabled on this node.',
     disconnected: 'Disconnected. Showing previously received data.',
+    recent: 'Not connected. Stays at the top for 10 minutes after connecting; reconnect for live data.',
     initializing: 'Device information and readings appear as they arrive.',
     live: 'Readings update as packets arrive.',
     sensors: {
@@ -57,12 +62,38 @@ export const nearbyDetailsContent = {
         upstream: 'Meshtastic',
         oursTitle: 'Mesh Fire Detection firmware build',
     },
+    history: {
+        title: 'History',
+        lowest: 'Lowest',
+        highest: 'Highest',
+        average: 'Average',
+        rise: 'Fastest observed rise',
+        fall: 'Fastest observed fall',
+        span: 'Covers',
+        reading: 'reading',
+        readings: 'readings',
+        empty: 'No history for this reading yet. It builds up while a node is connected.',
+        source: {
+            browser:
+                'Kept in this browser for 100 days: one reading per 5 minutes, recorded while a node is connected.',
+            server: 'From the Mesh Fire Detection server.',
+        },
+    },
+    kinds: {
+        base: 'Base node',
+        cellular: 'Cellular node',
+        sensor: 'Sensor node',
+        vision: 'Vision node',
+        test: 'Test node',
+    },
     labels: {
         nodeId: 'Node ID',
+        connection: 'Connection',
         hardware: 'Hardware',
         firmware: 'Firmware',
         build: 'Build',
         shortName: 'Short name',
         connectedAt: 'Session connected at',
+        lastConnected: 'Last connected',
     },
 } as const satisfies NearbyDetailsContent

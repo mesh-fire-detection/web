@@ -1,6 +1,6 @@
 import { useId, useState } from 'react'
 
-import { Age, DeviceStatus, NodeTag } from '@components/pages/build/nearby/Indicators'
+import { Age, DeviceStatus, NodeKindIcon, NodeTag } from '@components/pages/build/nearby/Indicators'
 import { Box, Row, Stack } from '@components/shared/primitives/Layout'
 import { Pressable } from '@components/shared/primitives/Pressable'
 import { Heading } from '@components/shared/typography/Heading'
@@ -8,20 +8,22 @@ import { Text } from '@components/shared/typography/Text'
 import { Button } from '@components/shared/widgets/Action'
 import { nearbyDevicesContent as copy } from '@core/content/build/nearby/nearbyDevices'
 import { cx } from '@core/format/cx'
-import { isMfdNode } from '@core/nearby/firmware'
-import { readingValue } from '@core/nearby/metrics'
+import { isMfdNode, mfdKind } from '@core/nearby/firmware'
+import { batteryCharge, batteryTone, readingValue } from '@core/nearby/metrics'
 import { deviceName, isRecentDevice } from '@core/nearby/model'
-import type { Device, Snapshot } from '@core/nearby/model'
+import type { Device, Snapshot, Transport } from '@core/nearby/model'
 import type { NearbySession } from '@core/nearby/session'
 
 export function DeviceList({
     snapshot,
     session,
     canConnect,
+    onSelect,
 }: {
     readonly snapshot: Snapshot
     readonly session: NearbySession
-    readonly canConnect: boolean
+    readonly canConnect: Readonly<Record<Transport, boolean>>
+    readonly onSelect: (id: string) => void
 }) {
     const [previousOpen, setPreviousOpen] = useState<boolean | null>(null)
     const previousId = useId()
@@ -56,6 +58,7 @@ export function DeviceList({
                         snapshot={snapshot}
                         session={session}
                         canConnect={canConnect}
+                        onSelect={onSelect}
                     />
                 ))
             )}
@@ -86,6 +89,7 @@ export function DeviceList({
                                         snapshot={snapshot}
                                         session={session}
                                         canConnect={canConnect}
+                                        onSelect={onSelect}
                                     />
                                 ))}
                             </Stack>
@@ -97,23 +101,49 @@ export function DeviceList({
     )
 }
 
+function BatteryPercent({
+    percent,
+    estimated,
+}: {
+    readonly percent: number
+    readonly estimated: boolean
+}) {
+    const tone = batteryTone(percent)
+    const text = `${estimated ? '≈' : ''}${String(percent)} %`
+    return tone === 'default' ? (
+        text
+    ) : (
+        <Text as='span' size='xs' mono tone={tone}>
+            {text}
+        </Text>
+    )
+}
+
 function DeviceEntry({
     device,
     snapshot,
     session,
     canConnect,
+    onSelect,
 }: {
     readonly device: Device
     readonly snapshot: Snapshot
     readonly session: NearbySession
-    readonly canConnect: boolean
+    readonly canConnect: Readonly<Record<Transport, boolean>>
+    readonly onSelect: (id: string) => void
 }) {
     const selected = snapshot.selectedId === device.id
     const name = deviceName(device) || copy.unnamed
     const battery = device.readings['deviceMetrics.batteryLevel']
+    const { powered, percent } = batteryCharge(device)
     const active = device.state !== 'disconnected'
     const recent = isRecentDevice(device)
-    const hint = recent ? copy.hints.recent : copy.hints[device.state]
+    const hint =
+        !active && !canConnect[device.transport]
+            ? copy.unavailable[device.transport]
+            : recent
+              ? copy.hints.recent
+              : copy.hints[device.state]
     return (
         <Box
             tone='surface'
@@ -136,7 +166,7 @@ function DeviceEntry({
                             pressed={selected}
                             accessibleLabel={`${copy.actions.view}: ${name}`}
                             onActivate={() => {
-                                session.select(device.id)
+                                onSelect(device.id)
                             }}
                         >
                             <Heading
@@ -150,10 +180,24 @@ function DeviceEntry({
                         </Pressable>
                         <DeviceStatus state={device.state} recent={recent} />
                     </Stack>
+                    <NodeKindIcon kind={mfdKind(device)} />
                 </Row>
                 <Stack gap={1}>
                     <Text mono size='xs' tone='faint' className='nearby_line'>
-                        {copy.battery} {battery ? readingValue(battery) : '—'} · {copy.lastPacket}{' '}
+                        {copy.transports[device.transport]} · {copy.battery}{' '}
+                        {percent === null ? (
+                            battery ? (
+                                readingValue(battery)
+                            ) : (
+                                '—'
+                            )
+                        ) : (
+                            <BatteryPercent percent={percent} estimated={powered} />
+                        )}
+                        {powered ? ` · ${copy.externalPower}` : null}
+                    </Text>
+                    <Text mono size='xs' tone='faint' className='nearby_line'>
+                        {copy.lastPacket}{' '}
                         {device.lastPacketAt === null ? '—' : <Age time={device.lastPacketAt} />}
                     </Text>
                     <Text size='xs' tone='faint' className='nearby_line'>
@@ -165,10 +209,10 @@ function DeviceEntry({
                         size='sm'
                         variant='secondary'
                         full
-                        disabled={!active && (snapshot.busy || !canConnect)}
+                        disabled={!active && (snapshot.busy || !canConnect[device.transport])}
                         label={`${active ? copy.actions.disconnect : copy.actions.connect}: ${name}`}
                         onClick={() => {
-                            if (active) session.disconnect(device.id)
+                            if (active) void session.disconnect(device.id)
                             else void session.connect(device.id)
                         }}
                     >

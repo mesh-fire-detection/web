@@ -1,4 +1,4 @@
-export type ToneMark = 'good' | 'fair' | 'bad'
+type ToneMark = 'good' | 'fair' | 'bad'
 
 export type ToneSegment = {
     readonly text: string

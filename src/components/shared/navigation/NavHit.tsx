@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { NavLink as RouterNavLink } from 'react-router-dom'
 
+import { opensInNewTab } from '@core/config/routes'
 import { cx } from '@core/format/cx'
 
 type NavHitProperties = {
@@ -24,12 +25,15 @@ export const NavHit = ({
     end = false,
     accessibleLabel,
 }: NavHitProperties) => {
+    const newTab = opensInNewTab(to)
     return (
         <RouterNavLink
             aria-label={accessibleLabel}
             className={({ isActive }) => cx(className, isActive && activeClassName)}
             end={end}
             to={to}
+            target={newTab ? '_blank' : undefined}
+            rel={newTab ? 'noopener' : undefined}
         >
             {children}
         </RouterNavLink>

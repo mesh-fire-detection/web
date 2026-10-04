@@ -1,10 +1,10 @@
 import { describe, expect, it, vi } from 'vitest'
 
 import { emptyDevice } from '@core/nearby/model'
-import { createDeviceMemory } from '@core/nearby/remembered'
+import { createDeviceMemory } from '@core/nearby/storage/devices'
 
 describe('remembered nearby devices', () => {
-    it('persists identity, latest readings and voltage history but not configuration, and avoids repeated writes', () => {
+    it('persists identity and latest readings, but not configuration or history, and avoids repeated writes', () => {
         let serialized = ''
         const storage = {
             getItem: () => serialized,
@@ -17,6 +17,9 @@ describe('remembered nearby devices', () => {
             ...emptyDevice('radio', 'Bluetooth name'),
             name: 'Sensor node',
             nodeNum: 123,
+            shortName: 'SN',
+            hardware: 'RAK4631',
+            firmware: '2.6.11.mfd',
             configuration: { secret: 'private-key' },
             history: { 'deviceMetrics.voltage': [{ value: 3.8, at: 1000 }] },
             readings: {
@@ -41,8 +44,11 @@ describe('remembered nearby devices', () => {
                     bluetoothName: 'Bluetooth name',
                     name: 'Sensor node',
                     nodeNum: 123,
+                    shortName: 'SN',
+                    hardware: 'RAK4631',
+                    firmware: '2.6.11.mfd',
                     connectedAt: null,
-                    history: { 'deviceMetrics.voltage': [{ value: 3.8, at: 1000 }] },
+                    transport: 'bluetooth',
                     readings: [device.readings.temperature],
                 },
             ],
@@ -50,6 +56,21 @@ describe('remembered nearby devices', () => {
         })
         expect(memory.read().activeId).toBe('radio')
         expect(memory.read().devices[0]?.readings).toEqual([device.readings.temperature])
+        expect(memory.read().devices[0]).toMatchObject({
+            shortName: 'SN',
+            hardware: 'RAK4631',
+            firmware: '2.6.11.mfd',
+        })
+    })
+
+    it('ignores identity details of the wrong type', () => {
+        const serialized = JSON.stringify({
+            version: 1,
+            devices: [{ id: 'radio', bluetoothName: '', name: '', nodeNum: null, hardware: 4631 }],
+            activeId: null,
+        })
+        const memory = createDeviceMemory(() => ({ getItem: () => serialized, setItem: vi.fn() }))
+        expect(memory.read().devices).toEqual([])
     })
 
     it.each([
@@ -108,5 +129,24 @@ describe('remembered nearby devices', () => {
         expect(memory.read().devices[0]?.history).toEqual({
             'deviceMetrics.voltage': [{ value: 3.8, at: 1000 }],
         })
+    })
+
+    it('restores legacy sensor history containing zero and negative values', () => {
+        const history = {
+            temperature: [
+                { value: -5, at: 1000 },
+                { value: 0, at: 2000 },
+            ],
+        }
+        const memory = createDeviceMemory(() => ({
+            getItem: () =>
+                JSON.stringify({
+                    version: 1,
+                    devices: [{ id: 'radio', bluetoothName: '', name: '', nodeNum: 123, history }],
+                    activeId: null,
+                }),
+            setItem: vi.fn(),
+        }))
+        expect(memory.read().devices[0]?.history).toEqual(history)
     })
 })

@@ -1,6 +1,8 @@
 import { useId, useState } from 'react'
 
+import { FirmwareUpdate } from '@components/build/FirmwareUpdate'
 import {
+    MetricHistoryStats,
     ReadingList,
     SensorGrid,
     SensorGuide,
@@ -21,11 +23,13 @@ import { Heading } from '@components/shared/typography/Heading'
 import { Text } from '@components/shared/typography/Text'
 import { Button } from '@components/shared/widgets/Action'
 import { Metric } from '@components/shared/widgets/Badge'
+import { Icon } from '@components/shared/widgets/Icon'
 import { nearbyDetailsContent as copy } from '@core/content/build/nearby/deviceDetails'
 import { nearbyDevicesContent } from '@core/content/build/nearby/nearbyDevices'
 import { EXPECTED_SENSOR_METRICS, isSensorMetric, SUMMARY_METRICS } from '@core/nearby/metrics'
 import { isRecentDevice } from '@core/nearby/model'
 import type { Device } from '@core/nearby/model'
+import { browserHistory } from '@core/nearby/storage/devices'
 
 export function DeviceDetails({ device }: { readonly device: Device }) {
     const [moreOpen, setMoreOpen] = useState(false)
@@ -44,7 +48,7 @@ export function DeviceDetails({ device }: { readonly device: Device }) {
     const status =
         device.state === 'disconnected'
             ? recent
-                ? nearbyDevicesContent.hints.recent
+                ? copy.recent
                 : copy.disconnected
             : device.state === 'connected'
               ? sensors.length === 0
@@ -62,6 +66,16 @@ export function DeviceDetails({ device }: { readonly device: Device }) {
                             size='sm'
                             label={copy.labels.nodeId}
                             value={device.nodeNum === null ? '—' : <NodeId num={device.nodeNum} />}
+                        />
+                        <Metric
+                            size='sm'
+                            label={copy.labels.connection}
+                            value={
+                                <span className='nearby_transport'>
+                                    <Icon name={device.transport} />
+                                    {nearbyDevicesContent.transports[device.transport]}
+                                </span>
+                            }
                         />
                         <Metric
                             size='sm'
@@ -118,6 +132,12 @@ export function DeviceDetails({ device }: { readonly device: Device }) {
                 </Stack>
             </Box>
             <Box tone='surface' padding={5} radius='md'>
+                <MetricHistoryStats
+                    metric={activeMetric}
+                    history={browserHistory(device, activeMetric)}
+                />
+            </Box>
+            <Box tone='surface' padding={5} radius='md'>
                 <SensorGuide active={activeMetric} />
             </Box>
             <Box tone='surface' padding={5} radius='md'>
@@ -129,26 +149,37 @@ export function DeviceDetails({ device }: { readonly device: Device }) {
                 </Stack>
             </Box>
             <Box tone='surface' padding={5} radius='md'>
-                <Stack gap={4}>
-                    <Button
-                        variant='ghost'
-                        size='sm'
-                        ariaExpanded={moreOpen}
-                        ariaControls={moreId}
-                        onClick={() => {
-                            setMoreOpen(!moreOpen)
-                        }}
-                    >
-                        {copy.more}
-                    </Button>
-                    {moreOpen ? (
+                <FirmwareUpdate firmware={device.firmware} />
+            </Box>
+            <Stack gap={4}>
+                <Button
+                    variant='ghost'
+                    size='sm'
+                    className='nearby_more'
+                    iconAfter={<Icon name='chevron' />}
+                    ariaExpanded={moreOpen}
+                    ariaControls={moreId}
+                    onClick={() => {
+                        setMoreOpen(!moreOpen)
+                    }}
+                >
+                    {copy.more}
+                </Button>
+                {moreOpen ? (
+                    <Box tone='surface' padding={5} radius='md'>
                         <div id={moreId}>
                             <Stack gap={5}>
                                 <DescriptionList columns={1}>
                                     <DescriptionItem term={copy.labels.shortName}>
                                         {device.shortName || copy.notReported}
                                     </DescriptionItem>
-                                    <DescriptionItem term={copy.labels.connectedAt}>
+                                    <DescriptionItem
+                                        term={
+                                            device.state === 'disconnected'
+                                                ? copy.labels.lastConnected
+                                                : copy.labels.connectedAt
+                                        }
+                                    >
                                         {device.connectedAt === null ? (
                                             copy.notReported
                                         ) : (
@@ -202,9 +233,9 @@ export function DeviceDetails({ device }: { readonly device: Device }) {
                                 </Stack>
                             </Stack>
                         </div>
-                    ) : null}
-                </Stack>
-            </Box>
+                    </Box>
+                ) : null}
+            </Stack>
         </Stack>
     )
 }

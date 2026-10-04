@@ -1,13 +1,15 @@
-import { create, fromBinary } from '@bufbuild/protobuf'
-import { Config, Mesh, Telemetry } from '@meshtastic/protobufs'
+import { create, fromBinary, toBinary } from '@bufbuild/protobuf'
+import { Admin, Config, Mesh, Portnums, Telemetry } from '@meshtastic/protobufs'
 import { describe, expect, it } from 'vitest'
 
-import { isMfdNode } from '@core/nearby/firmware'
+import { isMfdNode, mfdKind } from '@core/nearby/firmware'
 import {
+    batteryFromVoltage,
     bestLink,
     epochTime,
     localTime,
     metricLabel,
+    metricStats,
     nearestPeers,
     readingValue,
     signalQuality,
@@ -16,7 +18,13 @@ import {
     voltageTrend,
 } from '@core/nearby/metrics'
 import { deviceName, emptyDevice } from '@core/nearby/model'
-import { configurationRequest, receiveRadio } from '@core/nearby/protocol'
+import {
+    configurationRequest,
+    disconnectRequest,
+    dfuRequest,
+    localNodeNum,
+    receiveRadio,
+} from '@core/nearby/protocol'
 
 import { linkPacket, radioMessage, telemetryPacket } from '../../support/nearby'
 
@@ -45,6 +53,13 @@ describe('nearby device protocol', () => {
         ['Ridge relay', 'Ridge relay'],
     ])('drops the ID suffix the node tag already shows (%s)', (name, expected) => {
         expect(deviceName({ name, bluetoothName: '', nodeNum: 0xda_5a_8b_79 })).toBe(expected)
+    })
+
+    it('encodes a disconnect so the firmware can resume Bluetooth advertising', () => {
+        expect(fromBinary(Mesh.ToRadioSchema, disconnectRequest()).payloadVariant).toEqual({
+            case: 'disconnect',
+            value: true,
+        })
     })
 
     it.each([
@@ -389,6 +404,62 @@ describe('nearby device protocol', () => {
     })
 })
 
+describe('battery charge from voltage', () => {
+    it.each([
+        [4.25, 100],
+        [4.19, 100],
+        [4.05, 90],
+        [3.8, 60],
+        [3.76, 55],
+        [3.1, 0],
+        [2.9, 0],
+        [2.5, null],
+    ])('%s V → %s %%', (volts, expected) => {
+        expect(batteryFromVoltage(volts)).toBe(expected)
+    })
+})
+
+describe('metric history statistics', () => {
+    const MINUTE = 60_000
+    it('finds extremes, average and the fastest rise and fall per hour', () => {
+        const samples = [
+            { value: 20, at: 0 },
+            { value: 21, at: 30 * MINUTE },
+            { value: 23, at: 60 * MINUTE },
+            { value: 19, at: 90 * MINUTE },
+        ]
+        const stats = metricStats(samples)
+        expect(stats?.lowest).toEqual(samples[3])
+        expect(stats?.highest).toEqual(samples[2])
+        expect(stats?.average).toBe(20.75)
+        expect(stats?.fastestRise).toEqual({ perHour: 4, from: samples[1], to: samples[2] })
+        expect(stats?.fastestFall).toEqual({ perHour: -8, from: samples[2], to: samples[3] })
+        expect(stats?.to).toBe(90 * MINUTE)
+    })
+
+    it('ignores rates between samples too close together to be meaningful', () => {
+        const stats = metricStats([
+            { value: 20, at: 0 },
+            { value: 25, at: MINUTE },
+        ])
+        expect(stats?.fastestRise).toBeNull()
+        expect(metricStats([])).toBeNull()
+    })
+})
+
+describe('node kind from MFD names', () => {
+    it.each([
+        [{ name: 'MFD Sensor 8b79', shortName: 'MFDS' }, 'sensor'],
+        [{ name: 'MFD Node 2e53', shortName: 'MFDN' }, 'base'],
+        [{ name: 'MFD Test', shortName: 'test' }, 'test'],
+        [{ name: 'Ridge relay', shortName: 'MFDC' }, 'cellular'],
+        [{ name: 'Meshtastic 2e53', shortName: '2e53' }, null],
+        [{ name: 'MFD Garage', shortName: 'GRG' }, null],
+    ])('%o → %s', (node, expected) => {
+        expect(mfdKind(node)).toBe(expected)
+    })
+})
+
 describe('our firmware detection', () => {
     it.each([
         [{ name: 'MFD Sensor 8b79', shortName: 'MFDS' }, true],
@@ -398,5 +469,35 @@ describe('our firmware detection', () => {
         [{ name: 'Meshtastic 2e53', shortName: '2e53', firmware: '2.7.26.7d798c3' }, true],
     ])('%o → %s', (node, expected) => {
         expect(isMfdNode(node)).toBe(expected)
+    })
+})
+
+describe('DFU request', () => {
+    it('reads the local node number only from myInfo', () => {
+        const myInfo = toBinary(
+            Mesh.FromRadioSchema,
+            create(Mesh.FromRadioSchema, {
+                payloadVariant: {
+                    case: 'myInfo',
+                    value: create(Mesh.MyNodeInfoSchema, { myNodeNum: LOCAL }),
+                },
+            })
+        )
+        expect(localNodeNum(myInfo)).toBe(LOCAL)
+        expect(localNodeNum(configurationRequest(NONCE))).toBeNull()
+        expect(localNodeNum(new Uint8Array([0xff, 0xff]))).toBeNull()
+    })
+
+    it('addresses an enter-DFU admin message to the local node', () => {
+        const message = fromBinary(Mesh.ToRadioSchema, dfuRequest(LOCAL)).payloadVariant
+        expect(message.case).toBe('packet')
+        if (message.case !== 'packet') return
+        expect(message.value.to).toBe(LOCAL)
+        const data = message.value.payloadVariant
+        expect(data.case).toBe('decoded')
+        if (data.case !== 'decoded') return
+        expect(data.value.portnum).toBe(Portnums.PortNum.ADMIN_APP)
+        const admin = fromBinary(Admin.AdminMessageSchema, data.value.payload).payloadVariant
+        expect(admin).toEqual({ case: 'enterDfuModeRequest', value: true })
     })
 })

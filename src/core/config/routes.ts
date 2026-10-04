@@ -11,13 +11,16 @@ type RouteShape = {
     readonly path: `/${string}`
     readonly label: string
     readonly nav: boolean
+    /** Holds a live device connection, so links open it beside the current page. */
+    readonly newTab?: boolean
 }
 
 export const APP_ROUTES = [
     { id: 'home', path: '/', label: 'Home', nav: false },
     { id: 'map', path: '/map', label: 'Map', nav: true },
     { id: 'build', path: '/build', label: 'Build', nav: true },
-    { id: 'nearby_devices', path: '/devices/nearby', label: 'Nearby Devices', nav: false },
+    { id: 'connect', path: '/connect', label: 'Connect a Node', nav: false, newTab: true },
+    { id: 'firmware', path: '/firmware', label: 'Firmware', nav: false },
     { id: 'coverage', path: '/coverage', label: 'Coverage', nav: true },
     { id: 'open_problems', path: '/open-problems', label: 'Open Problems', nav: true },
     { id: 'about', path: '/about', label: 'About', nav: true },
@@ -31,3 +34,9 @@ type RouteDefinition = (typeof APP_ROUTES)[number]
 export type RouteId = RouteDefinition['id']
 
 export const NAV_ROUTES = APP_ROUTES.filter((route) => route.nav)
+
+/** Whether an in-app link target is a route marked `newTab`; hash and query are ignored. */
+export function opensInNewTab(to: string): boolean {
+    const [path] = to.split(/[?#]/u, 1)
+    return APP_ROUTES.some((route) => 'newTab' in route && route.path === path)
+}

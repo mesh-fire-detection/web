@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 
 import { Age, Timestamp } from '@components/pages/build/nearby/Indicators'
 import { DescriptionItem, DescriptionList } from '@components/shared/page/List'
-import { Box, Grid, Stack } from '@components/shared/primitives/Layout'
+import { Box, Grid, Row, Stack } from '@components/shared/primitives/Layout'
 import { Pressable } from '@components/shared/primitives/Pressable'
 import { Heading } from '@components/shared/typography/Heading'
 import { Text } from '@components/shared/typography/Text'
@@ -10,13 +10,18 @@ import { Metric } from '@components/shared/widgets/Badge'
 import { nearbyDetailsContent as copy } from '@core/content/build/nearby/deviceDetails'
 import { sensorGuideContent as guide } from '@core/content/build/nearby/sensorGuide'
 import { cx } from '@core/format/cx'
+import { plural } from '@core/format/format'
 import { toneSegments } from '@core/format/tones'
 import {
+    batteryCharge,
+    batteryTone,
     bestLink,
     duration,
     EXPECTED_SENSOR_METRICS,
     formatNumber,
     metricLabel,
+    metricStats,
+    metricValue,
     readingValue,
     SIGNAL_TONE,
     signedChange,
@@ -24,6 +29,7 @@ import {
     trend,
     voltageTrend,
 } from '@core/nearby/metrics'
+import type { MetricHistory, Rate } from '@core/nearby/metrics'
 import { nodeId } from '@core/nearby/model'
 import type { Device, History, Reading, Sample } from '@core/nearby/model'
 
@@ -57,18 +63,16 @@ function Tile({
 const TREND_ARROW = { rising: '↑', falling: '↓', steady: '→' } as const
 const TREND_TONE = { rising: 'live', falling: 'warn', steady: 'default' } as const
 
-function batteryTone(reading: Reading): Tone {
-    if (reading.value > 100 || reading.value >= 40) return 'live'
-    return reading.value >= 20 ? 'warn' : 'dead'
-}
-
 /** Battery, solar charging and LoRa signal: the first things checked on a node. */
 export function Vitals({ device }: { readonly device: Device }) {
     const battery = device.readings['deviceMetrics.batteryLevel']
     const voltage = device.readings['deviceMetrics.voltage']
+    const { powered, percent } = batteryCharge(device)
     const voltageChange = voltageTrend(device)
     const voltages = device.history['deviceMetrics.voltage'] ?? []
-    const latestVoltage = voltages.at(-1)
+    // Without stored history (private window, blocked site data) the latest reading still counts.
+    const latestVoltage =
+        voltages.at(-1) ?? (voltage ? { value: voltage.value, at: voltage.receivedAt } : undefined)
     const utilization = device.readings['deviceMetrics.channelUtilization']
     const link = bestLink(device)
     const quality = link?.snr == null ? null : signalQuality(link.snr)
@@ -76,14 +80,26 @@ export function Vitals({ device }: { readonly device: Device }) {
         <Grid minColumnWidth={140} gap={3} className='nearby_vitals'>
             <Tile
                 label={copy.battery}
-                value={battery ? readingValue(battery) : '—'}
-                tone={battery ? batteryTone(battery) : 'muted'}
+                value={
+                    percent === null
+                        ? battery
+                            ? readingValue(battery)
+                            : '—'
+                        : `${powered ? '≈' : ''}${String(percent)} %`
+                }
+                tone={percent === null ? (battery ? 'default' : 'muted') : batteryTone(percent)}
             >
+                {powered ? (
+                    <div className='nearby_power'>
+                        {copy.externalPower}
+                        {percent === null ? null : `, ${copy.byVoltage}`}
+                    </div>
+                ) : null}
                 {voltage ? `${readingValue(voltage)} · ` : null}
                 {battery ? <Age time={battery.receivedAt} /> : copy.notReported}
             </Tile>
             <Tile
-                label={copy.solar}
+                label={powered ? copy.charging : copy.solar}
                 value={
                     voltageChange
                         ? `${TREND_ARROW[voltageChange.direction]} ${signedChange('deviceMetrics.voltage', voltageChange.change)}`
@@ -209,10 +225,10 @@ export function SensorGrid({
                         >
                             {reading ? (
                                 <>
-                                    <TrendLine metric={metric} samples={history[metric]} />
                                     <div>
                                         <ReadingTime reading={reading} />
                                     </div>
+                                    <TrendLine metric={metric} samples={history[metric]} />
                                 </>
                             ) : (
                                 copy.notReported
@@ -225,15 +241,120 @@ export function SensorGrid({
     )
 }
 
+const MARK_CLASS = {
+    good: 'nearby_mark_good',
+    fair: 'nearby_mark_fair',
+    bad: 'nearby_mark_bad',
+} as const
+
 function Toned({ text }: { readonly text: string }) {
     return toneSegments(text).map((segment) =>
         segment.tone === null ? (
             segment.text
         ) : (
-            <span key={segment.start} className={`nearby_mark_${segment.tone}`}>
+            <span key={segment.start} className={MARK_CLASS[segment.tone]}>
                 {segment.text}
             </span>
         )
+    )
+}
+
+function StatCell({
+    label,
+    value,
+    note,
+}: {
+    readonly label: string
+    readonly value: string
+    /** Null while there is no history: the empty block stays one line shorter. */
+    readonly note: ReactNode
+}) {
+    return (
+        <Stack gap={1}>
+            <Metric
+                label={label}
+                value={value}
+                size='sm'
+                tone={value === '—' ? 'muted' : 'default'}
+            />
+            {note === null ? null : (
+                <Text size='2xs' tone='faint' className='nearby_line'>
+                    {note}
+                </Text>
+            )}
+        </Stack>
+    )
+}
+
+/**
+ * Extremes, average and fastest change of the selected metric over its kept
+ * history: low and falling on the left, high and rising on the right.
+ */
+export function MetricHistoryStats({
+    metric,
+    history,
+}: {
+    readonly metric: string
+    readonly history: MetricHistory
+}) {
+    const stats = metricStats(history.samples)
+    const labels = copy.history
+    const rate = (value: Rate | null) =>
+        value === null ? '—' : signedChange(metric, value.to.value - value.from.value)
+    const interval = (value: Rate | null) =>
+        value === null ? null : (
+            <>
+                {copy.voltageOver} {duration(value.to.at - value.from.at)} ·{' '}
+                <Timestamp time={value.to.at} />
+            </>
+        )
+    return (
+        <Stack gap={3}>
+            <Row gap={3} justify='between' wrap={false}>
+                <Heading level={3} size='sm' className='nearby_line'>
+                    {labels.title} · {metricLabel(metric)}
+                </Heading>
+                <Text mono size='xs' tone='faint' className='nearby_count'>
+                    {history.samples.length}{' '}
+                    {plural(history.samples.length, labels.reading, labels.readings)}
+                </Text>
+            </Row>
+            <div className='nearby_stats'>
+                <StatCell
+                    label={labels.lowest}
+                    value={stats ? metricValue(metric, stats.lowest.value) : '—'}
+                    note={stats ? <Timestamp time={stats.lowest.at} /> : null}
+                />
+                <StatCell
+                    label={labels.average}
+                    value={stats ? metricValue(metric, Math.round(stats.average * 100) / 100) : '—'}
+                    note={null}
+                />
+                <StatCell
+                    label={labels.highest}
+                    value={stats ? metricValue(metric, stats.highest.value) : '—'}
+                    note={stats ? <Timestamp time={stats.highest.at} /> : null}
+                />
+                <StatCell
+                    label={labels.fall}
+                    value={rate(stats?.fastestFall ?? null)}
+                    note={interval(stats?.fastestFall ?? null)}
+                />
+                <StatCell
+                    label={labels.span}
+                    value={stats ? duration(stats.to - stats.from) : '—'}
+                    note={stats ? <Timestamp time={stats.from} /> : null}
+                />
+                <StatCell
+                    label={labels.rise}
+                    value={rate(stats?.fastestRise ?? null)}
+                    note={interval(stats?.fastestRise ?? null)}
+                />
+            </div>
+            <Text size='xs' tone='faint'>
+                {stats ? labels.source[history.source] : labels.empty}
+            </Text>
+        </Stack>
     )
 }
 
@@ -243,7 +364,7 @@ export function SensorGuide({ active }: { readonly active: string }) {
     const known = entries.some(([metric]) => metric === active)
     const slots = [...entries, ['', guide.unknown] as const]
     return (
-        <div className='nearby_guide' aria-live='polite'>
+        <div className='nearby_guide'>
             {slots.map(([metric, entry]) => {
                 const shown = metric === (known ? active : '')
                 return (
@@ -295,7 +416,7 @@ export function ReadingList({ readings }: { readonly readings: readonly Reading[
             {readings.map((reading) => (
                 <DescriptionItem key={reading.metric} term={metricLabel(reading.metric)}>
                     {readingValue(reading)}{' '}
-                    <Text size='2xs' tone='faint'>
+                    <Text as='span' size='2xs' tone='faint'>
                         · <ReadingTime reading={reading} />
                     </Text>
                 </DescriptionItem>

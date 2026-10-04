@@ -1,10 +1,14 @@
 import { create, fromBinary } from '@bufbuild/protobuf'
 import { Mesh, Telemetry } from '@meshtastic/protobufs'
+import { IDBFactory } from 'fake-indexeddb'
+// Installs IDBKeyRange and the other IndexedDB globals the store uses.
+import 'fake-indexeddb/auto'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { emptyDevice, isRecentDevice, RECENT_CONNECTION_MS } from '@core/nearby/model'
-import { createDeviceMemory } from '@core/nearby/remembered'
 import { createNearbySession } from '@core/nearby/session'
+import { createDeviceMemory } from '@core/nearby/storage/devices'
+import { createReadingStore } from '@core/nearby/storage/readings'
 
 import { mockRadio, radioMessage, telemetryPacket } from '../../support/nearby'
 
@@ -35,7 +39,7 @@ describe('nearby sessions', () => {
         expect(session.getSnapshot()).toMatchObject({ busy: true })
         expect(session.getSnapshot().devices[0]?.state).toBe('connecting')
         expect(radio.connection.connect).not.toHaveBeenCalled()
-        session.disconnect(radio.connection.id)
+        void session.disconnect(radio.connection.id)
         await adding
         pending.resolve(codec)
         await Promise.resolve()
@@ -103,6 +107,112 @@ describe('nearby sessions', () => {
         expect(unrelated.connection.connect).not.toHaveBeenCalled()
         expect(choose).toHaveBeenCalledOnce()
         restored.dispose()
+    })
+
+    it('restores identity and the last packet time from saved readings', async () => {
+        const memory = deviceMemory()
+        const reading = (metric: string, receivedAt: number) => ({
+            metric,
+            value: 1,
+            sender: 123,
+            receivedAt,
+            measuredAt: null,
+            cached: false,
+        })
+        memory.write(
+            [
+                {
+                    ...emptyDevice('radio', ''),
+                    nodeNum: 123,
+                    hardware: 'RAK4631',
+                    firmware: '2.6.11.mfd',
+                    shortName: 'SN',
+                    readings: {
+                        a: reading('a', 2000),
+                        b: reading('b', 5000),
+                    },
+                },
+                emptyDevice('empty', ''),
+            ],
+            null
+        )
+        const session = createNearbySession(() => Promise.resolve(null), { memory })
+        await session.restore()
+        expect(session.getSnapshot().devices[0]).toMatchObject({
+            lastPacketAt: 5000,
+            hardware: 'RAK4631',
+            firmware: '2.6.11.mfd',
+            shortName: 'SN',
+        })
+        expect(session.getSnapshot().devices[1]?.lastPacketAt).toBeNull()
+        session.dispose()
+    })
+
+    it('stores history in IndexedDB by node and brings it back after a reload', async () => {
+        const factory = new IDBFactory()
+        const radio = mockRadio(123)
+        const memory = deviceMemory()
+        const original = createNearbySession(() => Promise.resolve(radio.connection), {
+            memory,
+            readings: createReadingStore(() => factory),
+        })
+        await original.restore()
+        await original.add()
+        radio.send(
+            telemetryPacket(123, {
+                case: 'environmentMetrics',
+                value: create(Telemetry.EnvironmentMetricsSchema, { temperature: 24 }),
+            })
+        )
+        await vi.waitFor(async () => {
+            const stored = await createReadingStore(() => factory).load(123)
+            expect(stored['environmentMetrics.temperature']).toHaveLength(1)
+        })
+        original.dispose()
+        const restored = createNearbySession(() => Promise.resolve(null), {
+            memory,
+            readings: createReadingStore(() => factory),
+        })
+        await restored.restore()
+        await vi.waitFor(() => {
+            expect(
+                restored.getSnapshot().devices[0]?.history['environmentMetrics.temperature']
+            ).toEqual([expect.objectContaining({ value: 24 })])
+        })
+        restored.dispose()
+    })
+
+    it('moves history saved in localStorage by older versions into IndexedDB', async () => {
+        const factory = new IDBFactory()
+        const memory = createDeviceMemory(() => ({
+            getItem: () =>
+                JSON.stringify({
+                    version: 1,
+                    devices: [
+                        {
+                            id: 'radio',
+                            bluetoothName: '',
+                            name: '',
+                            nodeNum: 123,
+                            voltageHistory: [{ value: 3.8, at: Date.now() }],
+                        },
+                    ],
+                    activeId: null,
+                }),
+            setItem: () => {},
+        }))
+        const session = createNearbySession(() => Promise.resolve(null), {
+            memory,
+            readings: createReadingStore(() => factory),
+        })
+        await session.restore()
+        await vi.waitFor(async () => {
+            const stored = await createReadingStore(() => factory).load(123)
+            expect(stored['deviceMetrics.voltage']).toEqual([
+                expect.objectContaining({ value: 3.8 }),
+            ])
+        })
+        session.dispose()
     })
 
     it('keeps an unavailable node saved after an automatic connection timeout', async () => {
@@ -175,6 +285,26 @@ describe('nearby sessions', () => {
         session.dispose()
     })
 
+    it('puts a removed entry back in place when undone, and forgets it after ten seconds', async () => {
+        vi.useFakeTimers()
+        const memory = deviceMemory()
+        memory.write([emptyDevice('first', 'First'), emptyDevice('second', 'Second')], null)
+        const session = createNearbySession(() => Promise.resolve(null), { memory })
+        await session.restore()
+        session.remove('first')
+        expect(session.getSnapshot().removed?.id).toBe('first')
+        expect(memory.read().devices.map((device) => device.id)).toEqual(['second'])
+        session.undoRemove()
+        expect(session.getSnapshot()).toMatchObject({ removed: null, selectedId: 'first' })
+        expect(memory.read().devices.map((device) => device.id)).toEqual(['first', 'second'])
+        session.remove('second')
+        vi.advanceTimersByTime(10_000)
+        expect(session.getSnapshot().removed).toBeNull()
+        session.undoRemove()
+        expect(session.getSnapshot().devices.map((device) => device.id)).toEqual(['first'])
+        session.dispose()
+    })
+
     it('respects explicit disconnect while remembering unexpected connection loss', async () => {
         const radio = mockRadio(123)
         const memory = deviceMemory()
@@ -185,7 +315,7 @@ describe('nearby sessions', () => {
         expect(memory.read().activeId).toBe(radio.connection.id)
         expect(session.getSnapshot().devices.filter(isRecentDevice)).toHaveLength(1)
         await session.connect(radio.connection.id)
-        session.disconnect(radio.connection.id)
+        await session.disconnect(radio.connection.id)
         expect(memory.read().activeId).toBeNull()
         expect(session.getSnapshot().devices.filter(isRecentDevice)).toHaveLength(0)
         session.dispose()
@@ -280,6 +410,36 @@ describe('nearby sessions', () => {
         await Promise.resolve()
         expect(radio.connection.connect).not.toHaveBeenCalled()
         expect(vi.getTimerCount()).toBe(0)
+    })
+
+    it('ends a USB session before opening the Bluetooth chooser so the node can advertise', async () => {
+        const usbDone = Promise.withResolvers<undefined>()
+        const usb = mockRadio(123)
+        const usbConnection = {
+            ...usb.connection,
+            id: 'usb:1',
+            name: '',
+            transport: 'usb' as const,
+            disconnect: vi.fn(() => usbDone.promise),
+        }
+        const bluetooth = mockRadio(456)
+        const choose = vi.fn((transport: 'bluetooth' | 'usb') =>
+            Promise.resolve(transport === 'usb' ? usbConnection : bluetooth.connection)
+        )
+        const session = createNearbySession(choose)
+        await session.add('usb')
+        expect(session.getSnapshot().devices[0]?.state).toBe('connected')
+        const adding = session.add('bluetooth')
+        await Promise.resolve()
+        expect(choose).toHaveBeenCalledOnce()
+        expect(choose).toHaveBeenCalledWith('usb')
+        expect(usbConnection.disconnect).toHaveBeenCalledOnce()
+        usbDone.resolve(undefined)
+        await adding
+        expect(choose).toHaveBeenCalledTimes(2)
+        expect(choose).toHaveBeenLastCalledWith('bluetooth')
+        expect(session.getSnapshot().devices[0]?.id).toBe(bluetooth.connection.id)
+        session.dispose()
     })
 
     it('leaves the list unchanged when the chooser is canceled', async () => {

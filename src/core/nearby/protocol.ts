@@ -1,5 +1,5 @@
 import { create, fromBinary, toBinary } from '@bufbuild/protobuf'
-import { Config, Mesh, Portnums, Telemetry } from '@meshtastic/protobufs'
+import { Admin, Config, Mesh, Portnums, Telemetry } from '@meshtastic/protobufs'
 
 import { epochTime, isSensorMetric } from '@core/nearby/metrics'
 import { addActivity, addSample, nodeId } from '@core/nearby/model'
@@ -12,6 +12,60 @@ export function configurationRequest(nonce: number): Uint8Array<ArrayBuffer> {
             create(Mesh.ToRadioSchema, { payloadVariant: { case: 'wantConfigId', value: nonce } })
         )
     )
+}
+
+/** A keepalive; with nonce 0 the firmware only answers with its queue status. */
+export function heartbeatRequest(): Uint8Array<ArrayBuffer> {
+    return new Uint8Array(
+        toBinary(
+            Mesh.ToRadioSchema,
+            create(Mesh.ToRadioSchema, { payloadVariant: { case: 'heartbeat', value: {} } })
+        )
+    )
+}
+
+/** Ends the client session; over serial this lets the firmware turn Bluetooth back on. */
+export function disconnectRequest(): Uint8Array<ArrayBuffer> {
+    return new Uint8Array(
+        toBinary(
+            Mesh.ToRadioSchema,
+            create(Mesh.ToRadioSchema, { payloadVariant: { case: 'disconnect', value: true } })
+        )
+    )
+}
+
+/**
+ * Asks the local node to reboot into its UF2 bootloader, as the Meshtastic Web
+ * Flasher does. The firmware implements it on nRF52 only.
+ */
+export function dfuRequest(myNodeNum: number): Uint8Array<ArrayBuffer> {
+    const admin = create(Admin.AdminMessageSchema, {
+        payloadVariant: { case: 'enterDfuModeRequest', value: true },
+    })
+    const data = create(Mesh.DataSchema, {
+        portnum: Portnums.PortNum.ADMIN_APP,
+        payload: toBinary(Admin.AdminMessageSchema, admin),
+    })
+    const packet = create(Mesh.MeshPacketSchema, {
+        to: myNodeNum,
+        payloadVariant: { case: 'decoded', value: data },
+    })
+    const message = create(Mesh.ToRadioSchema, {
+        payloadVariant: { case: 'packet', value: packet },
+    })
+    return new Uint8Array(toBinary(Mesh.ToRadioSchema, message))
+}
+
+/** The local node number from a `myInfo` frame; null for any other frame. */
+export function localNodeNum(bytes: Uint8Array): number | null {
+    try {
+        const payload = fromBinary(Mesh.FromRadioSchema, bytes).payloadVariant
+        return payload.case === 'myInfo' && validNode(payload.value.myNodeNum)
+            ? payload.value.myNodeNum
+            : null
+    } catch {
+        return null
+    }
 }
 
 function validNode(num: number): boolean {
@@ -203,7 +257,9 @@ export function receiveRadio(device: Device, bytes: Uint8Array, at: number, nonc
                         name: peer?.name ?? device.name,
                         shortName: peer?.shortName ?? device.shortName,
                         hardware: peer && peer.hardware !== '' ? peer.hardware : device.hardware,
-                        lastPacketAt: peer?.lastPacketAt ?? null,
+                        lastPacketAt:
+                            peer?.lastPacketAt ??
+                            (device.nodeNum === num ? device.lastPacketAt : null),
                         readings: {
                             ...peer?.readings,
                             ...Object.fromEntries(

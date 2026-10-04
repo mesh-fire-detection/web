@@ -10,6 +10,7 @@
 
 import type { MarkdownBlock } from '@core/format/markdown'
 import type { MeasuredCopy } from '@core/format/units'
+import type { DfuState, FirmwareUpdate } from '@core/nearby/firmware'
 
 type PageHeading = {
     readonly title: string
@@ -276,9 +277,9 @@ export type BuildContent = PageHeading & {
 }
 
 export type NearbyDevicesContent = PageHeading & {
-    readonly add: string
-    readonly helper: string
-    readonly sessionNote: string
+    readonly add: Readonly<Record<'bluetooth' | 'usb', string>>
+    readonly transports: Readonly<Record<'bluetooth' | 'usb', string>>
+    readonly helper: readonly string[]
     readonly recentStatus: string
     readonly emptyTitle: string
     readonly emptyBody: string
@@ -286,13 +287,23 @@ export type NearbyDevicesContent = PageHeading & {
     readonly unnamed: string
     readonly errorTitle: string
     readonly battery: string
+    readonly externalPower: string
     readonly lastPacket: string
     readonly notReported: string
     readonly previousTitle: string
     readonly previousBody: string
     readonly restoration: Readonly<Record<'checking' | 'unsupported' | 'failed', string>>
-    readonly unsupportedTitle: string
     readonly support: Readonly<Record<'insecure' | 'unsupported', string>>
+    readonly noSupport: Readonly<Record<'title' | 'insecure' | 'unsupported' | 'link', string>> & {
+        readonly href: `https://${string}`
+    }
+    readonly unavailable: Readonly<Record<'bluetooth' | 'usb', string>>
+    readonly announcements: Readonly<
+        Record<
+            'connecting' | 'connected' | 'disconnected' | 'failed' | 'removed' | 'restored',
+            string
+        >
+    >
     readonly errors: Readonly<Record<string, string>>
     readonly hints: Readonly<
         Record<'connected' | 'connecting' | 'initializing' | 'recent' | 'disconnected', string>
@@ -305,6 +316,7 @@ export type NearbyDevicesContent = PageHeading & {
         readonly connect: string
         readonly disconnect: string
         readonly remove: string
+        readonly undo: string
     }
 }
 
@@ -322,6 +334,9 @@ export type NearbySensorGuideContent = {
 export type NearbyDetailsContent = {
     readonly battery: string
     readonly solar: string
+    readonly charging: string
+    readonly externalPower: string
+    readonly byVoltage: string
     readonly signal: string
     readonly readings: string
     readonly nearest: string
@@ -345,6 +360,7 @@ export type NearbyDetailsContent = {
     readonly routeUnknown: string
     readonly lastHeard: string
     readonly peersNote: string
+    readonly unnamedNode: string
     readonly noPeers: string
     readonly showAll: string
     readonly showFewer: string
@@ -352,6 +368,7 @@ export type NearbyDetailsContent = {
     readonly waiting: string
     readonly sensorsDisabled: string
     readonly disconnected: string
+    readonly recent: string
     readonly initializing: string
     readonly live: string
     readonly sensors: Readonly<
@@ -377,13 +394,47 @@ export type NearbyDetailsContent = {
         readonly upstream: string
         readonly oursTitle: string
     }
+    readonly history: {
+        readonly title: string
+        readonly lowest: string
+        readonly highest: string
+        readonly average: string
+        readonly rise: string
+        readonly fall: string
+        readonly span: string
+        readonly reading: string
+        readonly readings: string
+        readonly empty: string
+        readonly source: Readonly<Record<'browser' | 'server', string>>
+    }
+    readonly kinds: Readonly<Record<'base' | 'cellular' | 'sensor' | 'vision' | 'test', string>>
     readonly labels: {
         readonly nodeId: string
+        readonly connection: string
         readonly hardware: string
         readonly firmware: string
         readonly build: string
         readonly shortName: string
         readonly connectedAt: string
+        readonly lastConnected: string
+    }
+}
+
+export type FirmwareContent = PageHeading & {
+    readonly connectCta: string
+    readonly meshtastic: { readonly label: string; readonly href: `https://${string}` }
+    readonly firmwareRepo: { readonly label: string; readonly href: `https://${string}` }
+    readonly usb: Readonly<Record<'title' | 'lede' | 'enter' | 'flash' | 'unsupported', string>> & {
+        readonly driveHelp: string
+        readonly uf2Href: string
+        readonly uf2Name: string
+        readonly uf2Sha256: string
+        readonly steps: readonly string[]
+        readonly states: Readonly<Record<DfuState, string>>
+    }
+    readonly update: Readonly<Record<'title' | 'cta' | 'keepNote', string>> & {
+        readonly status: Readonly<Record<FirmwareUpdate, string>>
+        readonly steps: readonly string[]
     }
 }
 

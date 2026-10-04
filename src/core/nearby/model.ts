@@ -1,5 +1,10 @@
+export const TRANSPORTS = ['bluetooth', 'usb'] as const
+export type Transport = (typeof TRANSPORTS)[number]
+
 export type ConnectionState = 'disconnected' | 'connecting' | 'initializing' | 'connected'
-export type ConnectionError = 'permission' | 'unsupported' | 'timeout' | 'connection'
+export type ConnectionError = 'permission' | 'unsupported' | 'timeout' | 'connection' | 'adapter'
+/** A change read out to screen readers; the page words it. */
+type Announcement = 'connecting' | 'connected' | 'disconnected' | 'failed' | 'removed' | 'restored'
 
 export const RECENT_CONNECTION_MS = 10 * 60 * 1000
 
@@ -23,7 +28,9 @@ export type History = Readonly<Record<string, readonly Sample[]>>
 
 /** Samples closer than this replace the newest one instead of growing the history. */
 const SAMPLE_SPACING_MS = 5 * 60 * 1000
-const SAMPLE_RETENTION_MS = 48 * 60 * 60 * 1000
+/** How long history is kept, in memory and in the browser's IndexedDB. */
+const HISTORY_DAYS = 100
+export const HISTORY_RETENTION_MS = HISTORY_DAYS * 24 * 60 * 60 * 1000
 
 /** Keeps the newest sample last and older samples at least five minutes apart. */
 export function addSample(samples: readonly Sample[], sample: Sample): readonly Sample[] {
@@ -32,7 +39,7 @@ export function addSample(samples: readonly Sample[], sample: Sample): readonly 
     const beforeLast = samples.at(-2)
     const kept =
         beforeLast && sample.at - beforeLast.at < SAMPLE_SPACING_MS ? samples.slice(0, -1) : samples
-    return [...kept, sample].filter((entry) => sample.at - entry.at <= SAMPLE_RETENTION_MS)
+    return [...kept, sample].filter((entry) => sample.at - entry.at <= HISTORY_RETENTION_MS)
 }
 
 export type Peer = {
@@ -52,6 +59,7 @@ export type Peer = {
 export type Device = {
     readonly id: string
     readonly bluetoothName: string
+    readonly transport: Transport
     readonly state: ConnectionState
     readonly nodeNum: number | null
     readonly name: string
@@ -73,14 +81,21 @@ export type Snapshot = {
     readonly selectedId: string | null
     readonly busy: boolean
     readonly error: ConnectionError | null
-    readonly announcement: string
+    readonly announcement: Announcement | null
     readonly restoration: 'checking' | 'unsupported' | 'failed' | null
+    /** The device just removed from the list, while its removal can still be undone. */
+    readonly removed: Device | null
 }
 
-export function emptyDevice(id: string, bluetoothName: string): Device {
+export function emptyDevice(
+    id: string,
+    bluetoothName: string,
+    transport: Transport = 'bluetooth'
+): Device {
     return {
         id,
         bluetoothName,
+        transport,
         state: 'disconnected',
         nodeNum: null,
         name: '',

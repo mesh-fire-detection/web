@@ -1,9 +1,10 @@
 import { useState } from 'react'
 
 import { Age, NodeTag } from '@components/pages/build/nearby/Indicators'
-import { Row, Stack } from '@components/shared/primitives/Layout'
+import { Stack } from '@components/shared/primitives/Layout'
 import { Text } from '@components/shared/typography/Text'
 import { Button } from '@components/shared/widgets/Action'
+import { Icon } from '@components/shared/widgets/Icon'
 import { nearbyDetailsContent as copy } from '@core/content/build/nearby/deviceDetails'
 import { isMfdNode } from '@core/nearby/firmware'
 import {
@@ -15,7 +16,7 @@ import {
     SIGNAL_TONE,
     signalQuality,
 } from '@core/nearby/metrics'
-import { deviceName, nodeId } from '@core/nearby/model'
+import { deviceName } from '@core/nearby/model'
 import type { Device, Peer } from '@core/nearby/model'
 
 const VISIBLE = 5
@@ -58,33 +59,30 @@ function PeerRow({ peer }: { readonly peer: Peer }) {
             .map((reading) => `${metricLabel(reading.metric)} ${readingValue(reading)}`),
     ]
     return (
-        <Stack gap={1} className='nearby_peer'>
-            <Row gap={3} justify='between' align='baseline'>
-                <Row gap={2} wrap={false} minWidth0>
-                    <NodeTag num={peer.num} ours={isMfdNode(peer)} size='sm' />
-                    <Text size='sm' weight={600} className='nearby_line'>
-                        {name}
-                    </Text>
-                </Row>
-                <Link peer={peer} />
-            </Row>
-            <Text size='2xs' tone='faint' mono>
-                {[nodeId(peer.num), heard === null ? '' : copy.lastHeard]
-                    .filter(Boolean)
-                    .join(' · ')}
+        <div className='nearby_peer'>
+            <NodeTag num={peer.num} ours={isMfdNode(peer)} size='sm' />
+            <Text size='sm' weight={600} className='nearby_peer_name'>
+                {name || peer.hardware || copy.unnamedNode}
+            </Text>
+            <Text size='2xs' tone='faint' className='nearby_peer_meta'>
+                {name ? peer.hardware : ''}
+                {heard !== null && name && peer.hardware ? ' · ' : null}
                 {heard === null ? null : (
-                    <>
-                        {' '}
-                        <Age time={heard} />
-                    </>
+                    <span>
+                        {copy.lastHeard} <Age time={heard} />
+                    </span>
                 )}
             </Text>
+            <div className='nearby_peer_link'>
+                <Icon name='radio' />
+                <Link peer={peer} />
+            </div>
             {values.length > 0 ? (
-                <Text size='xs' tone='muted'>
+                <Text size='xs' tone='muted' className='nearby_peer_readings'>
                     {values.join(' · ')}
                 </Text>
             ) : null}
-        </Stack>
+        </div>
     )
 }
 
@@ -101,7 +99,7 @@ export function NearbyNodes({ device }: { readonly device: Device }) {
                     {copy.noPeers}
                 </Text>
             ) : (
-                <div>
+                <div className='nearby_peers'>
                     {(expanded ? peers : peers.slice(0, VISIBLE)).map((peer) => (
                         <PeerRow key={peer.num} peer={peer} />
                     ))}

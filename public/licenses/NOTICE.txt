@@ -1,4 +1,12 @@
-Nearby Devices uses the following third-party protocol libraries:
+Firmware bundled for USB updates:
+
+firmware-rak4631-2.7.26.7d798c3.uf2
+Mesh Fire Detection firmware based on Meshtastic, licensed under GNU GPL version 3.
+Source and build instructions: https://github.com/mesh-fire-detection/firmware/tree/mfd-v2.7.26.7d798c3
+Release: https://github.com/mesh-fire-detection/firmware/releases/tag/mfd-v2.7.26.7d798c3
+License text: meshtastic-firmware.txt
+
+Connect a Node uses the following third-party protocol libraries:
 
 @meshtastic/protobufs 2.8.0
 Meshtastic protocol definitions, licensed under GNU GPL version 3.

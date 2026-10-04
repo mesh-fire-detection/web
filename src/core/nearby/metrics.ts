@@ -81,6 +81,74 @@ export function signedChange(metric: string, change: number): string {
     return `${sign}${formatNumber(Math.abs(change), METRICS[metric]?.[1])}`
 }
 
+/** A metric's value with its unit, e.g. `23.8 °C`. */
+export function metricValue(metric: string, value: number): string {
+    return formatNumber(value, METRICS[metric]?.[1])
+}
+
+/** Where a metric's history came from: this browser now, the backend once it stores readings. */
+type HistorySource = 'browser' | 'server'
+
+export type MetricHistory = {
+    readonly source: HistorySource
+    readonly samples: readonly Sample[]
+}
+
+export type Rate = {
+    /** Used only to compare interval speeds; the UI shows the observed difference. */
+    readonly perHour: number
+    readonly from: Sample
+    readonly to: Sample
+}
+
+export type MetricStats = {
+    readonly lowest: Sample
+    readonly highest: Sample
+    readonly average: number
+    readonly fastestRise: Rate | null
+    readonly fastestFall: Rate | null
+    readonly from: number
+    readonly to: number
+}
+
+/**
+ * Neighbouring samples closer than this give noisy rates: the newest sample can
+ * sit seconds after the one before it, and 0.01 of change would read as a spike.
+ */
+const RATE_MIN_GAP_MS = 4 * 60 * 1000
+
+export function metricStats(samples: readonly Sample[]): MetricStats | null {
+    const first = samples[0]
+    const last = samples.at(-1)
+    if (!first || !last) return null
+    let lowest = first
+    let highest = first
+    let total = 0
+    let fastestRise: Rate | null = null
+    let fastestFall: Rate | null = null
+    for (const [index, sample] of samples.entries()) {
+        if (sample.value < lowest.value) lowest = sample
+        if (sample.value > highest.value) highest = sample
+        total += sample.value
+        const previous = samples[index - 1]
+        if (!previous || sample.at - previous.at < RATE_MIN_GAP_MS) continue
+        const perHour = ((sample.value - previous.value) * 3_600_000) / (sample.at - previous.at)
+        if (perHour > 0 && perHour > (fastestRise?.perHour ?? 0))
+            fastestRise = { perHour, from: previous, to: sample }
+        if (perHour < 0 && perHour < (fastestFall?.perHour ?? 0))
+            fastestFall = { perHour, from: previous, to: sample }
+    }
+    return {
+        lowest,
+        highest,
+        average: total / samples.length,
+        fastestRise,
+        fastestFall,
+        from: first.at,
+        to: last.at,
+    }
+}
+
 export function voltageTrend(device: Pick<Device, 'history'>): Trend | null {
     return trend(device.history['deviceMetrics.voltage'])
 }
@@ -102,8 +170,54 @@ export function metricLabel(metric: string): string {
 
 export function readingValue(reading: Reading): string {
     return reading.metric === 'deviceMetrics.batteryLevel' && reading.value > 100
-        ? 'External power'
+        ? 'Powered'
         : formatNumber(reading.value, METRICS[reading.metric]?.[1])
+}
+
+/**
+ * The firmware's default LiPo open-circuit curve (`OCV_ARRAY`), in volts from 100 %
+ * down to 0 % in 10 % steps. Below the last point by 0.5 V there is no battery.
+ */
+const OCV = [4.19, 4.05, 3.99, 3.89, 3.8, 3.72, 3.63, 3.53, 3.42, 3.3, 3.1] as const
+const NO_BATTERY_VOLTS = 2.6
+
+/**
+ * Charge estimated from voltage the way the firmware does it. On external power
+ * the firmware reports 101 instead of a percentage, so this is the only figure;
+ * charging lifts the voltage, so it reads high while plugged in.
+ */
+export function batteryFromVoltage(volts: number): number | null {
+    if (!Number.isFinite(volts) || volts < NO_BATTERY_VOLTS) return null
+    if (volts >= OCV[0]) return 100
+    for (const [index, upper] of OCV.entries()) {
+        const lower = OCV[index + 1]
+        if (lower === undefined) break
+        if (volts >= lower)
+            return Math.round(100 - (index + (upper - volts) / (upper - lower)) * 10)
+    }
+    return 0
+}
+
+/**
+ * The charge to show: the reported percentage, or on external power (reported as
+ * 101) the one estimated from voltage. Null when neither is known.
+ */
+export function batteryCharge(device: Pick<Device, 'readings'>): {
+    readonly powered: boolean
+    readonly percent: number | null
+} {
+    const battery = device.readings['deviceMetrics.batteryLevel']
+    if (battery === undefined) return { powered: false, percent: null }
+    const voltage = device.readings['deviceMetrics.voltage']
+    return battery.value <= 100
+        ? { powered: false, percent: battery.value }
+        : { powered: true, percent: voltage ? batteryFromVoltage(voltage.value) : null }
+}
+
+/** Green above 80 %, red below 20 %. */
+export function batteryTone(percent: number): 'live' | 'dead' | 'default' {
+    if (percent > 80) return 'live'
+    return percent < 20 ? 'dead' : 'default'
 }
 
 const number = new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 })

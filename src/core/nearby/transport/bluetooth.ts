@@ -1,12 +1,15 @@
+import type { Transport } from '@core/nearby/model'
+
 export type RadioConnection = {
     readonly id: string
     readonly name: string
+    readonly transport: Transport
     readonly connect: (
         request: Uint8Array<ArrayBuffer>,
         receive: (bytes: Uint8Array) => void,
         disconnected: () => void
     ) => Promise<void>
-    readonly disconnect: () => void
+    readonly disconnect: () => void | Promise<void>
 }
 
 const SERVICE = '6ba1b218-15a8-461f-9fa8-5dcae273eafd'
@@ -34,6 +37,7 @@ function deviceConnection(device: BluetoothDevice): RadioConnection {
     return {
         id: device.id,
         name: device.name ?? '',
+        transport: 'bluetooth',
         async connect(request, receive, disconnected) {
             release?.()
             const attempt = ++revision
@@ -123,6 +127,13 @@ function deviceConnection(device: BluetoothDevice): RadioConnection {
     }
 }
 
+/**
+ * Chrome rejects the chooser with NotFoundError both when the user closes it and
+ * when no Bluetooth adapter is usable (off, missing, or the browser lacks system
+ * permission). Only the first is a quiet cancel.
+ */
+export class BluetoothUnavailableError extends Error {}
+
 export async function chooseBluetoothDevice(): Promise<RadioConnection | null> {
     try {
         const device = await navigator.bluetooth.requestDevice({
@@ -130,7 +141,11 @@ export async function chooseBluetoothDevice(): Promise<RadioConnection | null> {
         })
         return deviceConnection(device)
     } catch (error) {
-        if (error instanceof DOMException && error.name === 'NotFoundError') return null
+        if (error instanceof DOMException && error.name === 'NotFoundError') {
+            // Chrome says "Bluetooth adapter not available." when there is none to use.
+            if (/adapter/i.test(error.message)) throw new BluetoothUnavailableError(error.message)
+            return null
+        }
         throw error
     }
 }

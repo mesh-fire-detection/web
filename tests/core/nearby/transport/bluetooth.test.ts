@@ -1,10 +1,11 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import {
+    BluetoothUnavailableError,
     bluetoothSupport,
     chooseBluetoothDevice,
     knownBluetoothDevices,
-} from '@core/nearby/bluetooth'
+} from '@core/nearby/transport/bluetooth'
 
 afterEach(() => {
     vi.unstubAllGlobals()
@@ -75,7 +76,7 @@ describe('Web Bluetooth transport', () => {
         await connection!.connect(new Uint8Array([3]), receive, lost)
         expect(receive).toHaveBeenCalledWith(new Uint8Array([1, 2]))
         expect(mock.writeValueWithResponse).toHaveBeenCalledOnce()
-        connection!.disconnect()
+        void connection!.disconnect()
         const previousReads = mock.readValue.mock.calls.length
         mock.notifications.dispatchEvent(new Event('characteristicvaluechanged'))
         mock.device.dispatchEvent(new Event('gattserverdisconnected'))
@@ -103,6 +104,14 @@ describe('Web Bluetooth transport', () => {
             new DOMException('No device selected', 'NotFoundError')
         )
         expect(await chooseBluetoothDevice()).toBeNull()
+    })
+
+    it('reports a missing or disabled adapter instead of a quiet cancel', async () => {
+        const mock = mockBluetooth()
+        mock.requestDevice.mockRejectedValue(
+            new DOMException('Bluetooth adapter not available.', 'NotFoundError')
+        )
+        await expect(chooseBluetoothDevice()).rejects.toBeInstanceOf(BluetoothUnavailableError)
     })
 
     it('gets previously allowed devices without opening a chooser', async () => {

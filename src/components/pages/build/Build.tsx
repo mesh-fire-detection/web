@@ -28,7 +28,7 @@ export function BuildPage() {
             lede={buildContent.lede}
             aside={
                 <Row gap={3}>
-                    <ButtonLink to='/devices/nearby' variant='secondary' size='md'>
+                    <ButtonLink to='/connect' variant='secondary' size='md'>
                         {buildContent.nearbyCta}
                     </ButtonLink>
                     <ButtonLink

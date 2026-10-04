@@ -1,34 +1,19 @@
-import type { RadioConnection } from '@core/nearby/bluetooth'
 import { addActivity, emptyDevice, isRecentDevice, RECENT_CONNECTION_MS } from '@core/nearby/model'
-import type { ConnectionError, Device, Snapshot } from '@core/nearby/model'
+import type { ConnectionError, Device, Snapshot, Transport } from '@core/nearby/model'
 import type * as RadioProtocol from '@core/nearby/protocol'
-import type { DeviceMemory } from '@core/nearby/remembered'
+import { restoreDevices } from '@core/nearby/storage/devices'
+import type { DeviceMemory } from '@core/nearby/storage/devices'
+import { historyChanges, mergeHistory } from '@core/nearby/storage/readings'
+import type { ReadingStore } from '@core/nearby/storage/readings'
+import { BluetoothUnavailableError } from '@core/nearby/transport/bluetooth'
+import type { RadioConnection } from '@core/nearby/transport/bluetooth'
 
 const TIMEOUT_MS = 30_000
-
-function restoreDevices(saved: ReturnType<DeviceMemory['read']>['devices']): readonly Device[] {
-    const now = Date.now()
-    return saved.map((device) => {
-        const connectedAt = device.connectedAt ?? null
-        const recentUntil =
-            connectedAt !== null && connectedAt <= now && now < connectedAt + RECENT_CONNECTION_MS
-                ? connectedAt + RECENT_CONNECTION_MS
-                : null
-        return {
-            ...emptyDevice(device.id, device.bluetoothName),
-            name: device.name,
-            nodeNum: device.nodeNum,
-            connectedAt,
-            recentUntil,
-            history: device.history ?? {},
-            readings: Object.fromEntries(
-                (device.readings ?? []).map((reading) => [reading.metric, reading])
-            ),
-        }
-    })
-}
+/** How long a removal from the list can be undone. */
+const UNDO_MS = 10_000
 
 function connectionError(error: unknown): ConnectionError {
+    if (error instanceof BluetoothUnavailableError) return 'adapter'
     if (error instanceof DOMException) {
         if (error.name === 'NotAllowedError' || error.name === 'SecurityError') return 'permission'
         if (error.name === 'NotFoundError' || error.name === 'NotSupportedError')
@@ -39,9 +24,10 @@ function connectionError(error: unknown): ConnectionError {
 }
 
 export function createNearbySession(
-    choose: () => Promise<RadioConnection | null>,
+    choose: (transport: Transport) => Promise<RadioConnection | null>,
     options: {
         readonly memory?: DeviceMemory
+        readonly readings?: ReadingStore
         readonly known?: () => Promise<readonly RadioConnection[] | null>
         readonly loadProtocol?: () => Promise<typeof RadioProtocol>
     } = {}
@@ -52,8 +38,9 @@ export function createNearbySession(
         selectedId: initialDevices.find(isRecentDevice)?.id ?? null,
         busy: initialDevices.length > 0,
         error: null,
-        announcement: '',
+        announcement: null,
         restoration: initialDevices.length > 0 ? 'checking' : null,
+        removed: null,
     }
     const listeners = new Set<() => void>()
     const connections = new Map<string, RadioConnection>()
@@ -66,6 +53,8 @@ export function createNearbySession(
     let rememberedActive: string | null = null
     let protocolPromise: Promise<typeof RadioProtocol> | undefined
     let recentTimer: ReturnType<typeof setTimeout> | undefined
+    let undo: { index: number; connection: RadioConnection | undefined } | undefined
+    let undoTimer: ReturnType<typeof setTimeout> | undefined
     const isDisposed = () => disposed
     const downloadProtocol = async () => {
         try {
@@ -107,11 +96,62 @@ export function createNearbySession(
         }
         for (const listener of listeners) listener()
     }
+    /** Device IDs whose stored history has been read, or is being read. */
+    const hydrated = new Set<string>()
+    /**
+     * Reads a node's stored history once its number is known and merges it in.
+     * History the device already carries (from an older localStorage save, or
+     * from packets that arrived first) is written back, so nothing is lost.
+     */
+    const hydrate = (device: Device) => {
+        const store = options.readings
+        const nodeNum = device.nodeNum
+        if (!store || nodeNum === null || hydrated.has(device.id)) return
+        hydrated.add(device.id)
+        for (const [metric, samples] of Object.entries(device.history))
+            void store.apply(nodeNum, metric, { put: samples, remove: [] })
+        void (async () => {
+            const stored = await store.load(nodeNum)
+            if (disposed) return
+            publish({
+                ...snapshot,
+                devices: snapshot.devices.map((entry) =>
+                    entry.id === device.id && entry.nodeNum === nodeNum
+                        ? { ...entry, history: mergeHistory(stored, entry.history) }
+                        : entry
+                ),
+            })
+        })()
+    }
+    /** Writes the samples a packet added; hydration merges go through `publish` alone. */
+    const persist = (previous: Device, next: Device) => {
+        const store = options.readings
+        if (!store) return
+        if (
+            next.nodeNum !== previous.nodeNum ||
+            next.lastPacketAt !== previous.lastPacketAt ||
+            next.configuration !== previous.configuration ||
+            next.peers !== previous.peers ||
+            next.activity !== previous.activity
+        )
+            void store.saveObservation(next)
+        if (next.nodeNum === null || next.history === previous.history) return
+        for (const [metric, samples] of Object.entries(next.history)) {
+            const before = previous.history[metric]
+            if (samples !== before)
+                void store.apply(next.nodeNum, metric, historyChanges(before, samples))
+        }
+    }
     const update = (id: string, change: (device: Device) => Device) => {
+        const previous = snapshot.devices.find((device) => device.id === id)
         publish({
             ...snapshot,
             devices: snapshot.devices.map((device) => (device.id === id ? change(device) : device)),
         })
+        const next = snapshot.devices.find((device) => device.id === id)
+        if (!previous || !next) return
+        persist(previous, next)
+        hydrate(next)
     }
     // Most recently connected first; the saved order carries this across reloads.
     const promote = (id: string): readonly Device[] => {
@@ -120,7 +160,7 @@ export function createNearbySession(
             ? [device, ...snapshot.devices.filter((entry) => entry.id !== id)]
             : snapshot.devices
     }
-    const disconnect = (id: string, explicit = true) => {
+    const disconnect = async (id: string, explicit = true): Promise<void> => {
         const wasActive = active === id
         if (explicit && rememberedActive === id) rememberedActive = null
         if (wasActive) {
@@ -129,7 +169,7 @@ export function createNearbySession(
             cancelAttempt?.()
             cancelAttempt = undefined
         }
-        connections.get(id)?.disconnect()
+        const pending = connections.get(id)?.disconnect()
         update(id, (device) => {
             const next: Device = {
                 ...device,
@@ -140,10 +180,20 @@ export function createNearbySession(
                 ? next
                 : addActivity(next, 'Disconnected', Date.now())
         })
+        if (pending) {
+            publish({
+                ...snapshot,
+                busy: true,
+                announcement: 'disconnected',
+            })
+            await pending
+            if (!isDisposed()) publish({ ...snapshot, busy: false })
+            return
+        }
         publish({
             ...snapshot,
             busy: wasActive ? false : snapshot.busy,
-            announcement: 'Disconnected',
+            announcement: 'disconnected',
         })
     }
 
@@ -152,10 +202,11 @@ export function createNearbySession(
         const connection = connections.get(id)
         if (snapshot.devices.find((device) => device.id === id)?.state === 'connected') return
         if (!connection) {
-            await add()
+            await add(snapshot.devices.find((device) => device.id === id)?.transport)
             return
         }
-        if (active !== null) disconnect(active)
+        if (active !== null) await disconnect(active)
+        if (isDisposed()) return
         const attempt = ++generation
         active = id
         const nonce = Math.max(1, crypto.getRandomValues(new Uint32Array(1))[0] ?? 1)
@@ -164,11 +215,12 @@ export function createNearbySession(
             selectedId: id,
             busy: true,
             error: null,
-            announcement: 'Connecting',
+            announcement: 'connecting',
         })
         update(id, (device) =>
-            addActivity({ ...device, state: 'connecting', nodeNum: null }, 'Connecting', Date.now())
+            addActivity({ ...device, state: 'connecting' }, 'Connecting', Date.now())
         )
+        let identityReceived = false
         let timeout: ReturnType<typeof setTimeout> | undefined
         const ready = Promise.withResolvers<undefined>()
         const deadline = new Promise<never>((_resolve, reject) => {
@@ -195,14 +247,21 @@ export function createNearbySession(
                                       state: 'initializing' as const,
                                   }
                                 : device
-                        return codec.receiveRadio(initialized, bytes, Date.now(), nonce)
+                        identityReceived ||= codec.localNodeNum(bytes) !== null
+                        const next = codec.receiveRadio(
+                            identityReceived ? initialized : { ...initialized, nodeNum: null },
+                            bytes,
+                            Date.now(),
+                            nonce
+                        )
+                        return { ...next, nodeNum: next.nodeNum ?? device.nodeNum }
                     })
                     const state = snapshot.devices.find((device) => device.id === id)?.state
                     if (state === 'connected') ready.resolve(undefined)
-                    else if (state === 'disconnected') disconnect(id, false)
+                    else if (state === 'disconnected') void disconnect(id, false)
                 },
                 () => {
-                    if (current()) disconnect(id, false)
+                    if (current()) void disconnect(id, false)
                 }
             )
         }
@@ -221,16 +280,16 @@ export function createNearbySession(
                     ...snapshot,
                     devices: promote(id),
                     busy: false,
-                    announcement: 'Connected',
+                    announcement: 'connected',
                 })
             }
         } catch (error) {
             if (current()) {
-                disconnect(id, false)
+                void disconnect(id, false)
                 publish({
                     ...snapshot,
                     error: connectionError(error),
-                    announcement: 'Connection failed',
+                    announcement: 'failed',
                 })
             }
         } finally {
@@ -239,12 +298,19 @@ export function createNearbySession(
         }
     }
 
-    const add = async (): Promise<void> => {
+    const add = async (transport: Transport = 'bluetooth'): Promise<void> => {
         if (disposed || snapshot.busy) return
-        const selection = generation
         publish({ ...snapshot, busy: true, error: null })
         try {
-            const connection = await choose()
+            // USB turns the node's Bluetooth advertising off. End that session and
+            // wait for the goodbye so the node is visible in the browser chooser.
+            const current = snapshot.devices.find((device) => device.id === active)
+            if (transport === 'bluetooth' && current?.transport === 'usb')
+                await disconnect(current.id)
+            if (isDisposed()) return
+            const selection = generation
+            publish({ ...snapshot, busy: true, error: null })
+            const connection = await choose(transport)
             if (selection !== generation || isDisposed()) return
             publish({ ...snapshot, busy: false })
             if (!connection) return
@@ -260,7 +326,10 @@ export function createNearbySession(
             connections.set(connection.id, connection)
             publish({
                 ...snapshot,
-                devices: [emptyDevice(connection.id, connection.name), ...snapshot.devices],
+                devices: [
+                    emptyDevice(connection.id, connection.name, connection.transport),
+                    ...snapshot.devices,
+                ],
             })
             await connect(connection.id)
         } catch (error) {
@@ -295,7 +364,19 @@ export function createNearbySession(
             }
             const attempt = ++generation
             const current = () => !disposed && generation === attempt
-            const devices = restoreDevices(saved.devices)
+            let devices = restoreDevices(saved.devices)
+            if (options.readings) {
+                const store = options.readings
+                devices = await Promise.all(
+                    devices.map(async (device) => {
+                        const stored = await store.loadObservation(device.id)
+                        return stored?.nodeNum === device.nodeNum
+                            ? { ...device, ...stored }
+                            : device
+                    })
+                )
+                if (!current()) return
+            }
             publish({
                 ...snapshot,
                 devices,
@@ -303,6 +384,7 @@ export function createNearbySession(
                 busy: true,
                 restoration: 'checking',
             })
+            for (const device of devices) hydrate(device)
             let timeout: ReturnType<typeof setTimeout> | undefined
             const deadline = new Promise<never>((_resolve, reject) => {
                 cancelAttempt = () => {
@@ -350,22 +432,58 @@ export function createNearbySession(
             publish({ ...snapshot, selectedId: id })
         },
         remove(id: string) {
-            disconnect(id)
+            void disconnect(id)
+            const index = snapshot.devices.findIndex((device) => device.id === id)
+            const removed = snapshot.devices[index]
+            if (!removed) return
+            undo = { index, connection: connections.get(id) }
             connections.delete(id)
+            void options.readings?.removeObservation(id)
             const devices = snapshot.devices.filter((device) => device.id !== id)
             publish({
                 ...snapshot,
                 devices,
                 selectedId:
                     snapshot.selectedId === id ? (devices[0]?.id ?? null) : snapshot.selectedId,
+                removed,
+                announcement: 'removed',
+            })
+            clearTimeout(undoTimer)
+            undoTimer = setTimeout(() => {
+                undo = undefined
+                publish({ ...snapshot, removed: null })
+            }, UNDO_MS)
+        },
+        undoRemove() {
+            const removed = snapshot.removed
+            if (!removed || !undo) return
+            clearTimeout(undoTimer)
+            // Adding the same device again in the meantime already brought it back.
+            if (snapshot.devices.some((device) => device.id === removed.id)) {
+                undo = undefined
+                publish({ ...snapshot, removed: null })
+                return
+            }
+            if (undo.connection) connections.set(removed.id, undo.connection)
+            void options.readings?.saveObservation(removed)
+            const devices = [...snapshot.devices]
+            devices.splice(undo.index, 0, removed)
+            undo = undefined
+            publish({
+                ...snapshot,
+                devices,
+                selectedId: removed.id,
+                removed: null,
+                announcement: 'restored',
             })
         },
         dispose() {
             disposed = true
             generation += 1
             clearTimeout(recentTimer)
+            clearTimeout(undoTimer)
             cancelAttempt?.()
-            for (const connection of connections.values()) connection.disconnect()
+            for (const connection of connections.values()) void connection.disconnect()
             connections.clear()
             listeners.clear()
         },
