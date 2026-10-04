@@ -60,6 +60,9 @@ Pages:
 - **Home** — cost comparison, branch map, refusal to print an unbacked detection-time figure.
 - **Map** — node type, last heartbeat, battery, RSSI/SNR of every link. Dead nodes stay on the map, coloured red.
 - **Build** — BOM with supplier links, enclosure STLs, Meshtastic JSON presets, assembly.
+- **Nearby Devices** — local Bluetooth inspection of individually added nodes,
+  identity, reported configuration, and real telemetry. One active connection at
+  a time; no server upload. Available from Build and its footer section.
 - **Coverage** — link-budget calculator (FSPL, clutter, 4/3-earth radio horizon, Fresnel zone). No elevation model: it cannot see the ridge between two points. For that, use Meshtastic Site Planner or Splat!.
 - **Open Problems** — what is unsolved, with constraints, what has been tried, and what would close it.
 - **About** — goals, roadmap, licenses, privacy.
