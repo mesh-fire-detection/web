@@ -1,6 +1,6 @@
-# Nearby Devices
+# Connect a Node
 
-Status: first version implemented at `/devices/nearby`. Protocol, session, and
+Status: first version implemented at `/connect`. Protocol, session, and
 page behavior are covered by automated tests. The open browser page showed a
 connected RAK4631 with environmental and device telemetry during verification
 on October 3, 2026. Saved device restoration and reconnection of the last active
@@ -17,15 +17,14 @@ firmware. Other boards require separate compatibility checks.
 
 ## Page placement and copy
 
-- Page title: **Nearby Devices**.
-- Proposed route: `/devices/nearby`.
-- Entry point: a **Nearby Devices** link in the Build page and the footer's Build
+- Page title: **Connect a Node**.
+- Route: `/connect`.
+- Entry point: a **Connect a Node** link in the Build page and the footer's Build
   section. Keep the current main navigation intact.
-- Intro: **Connect your nodes over Bluetooth to check their identity, settings,
-  and sensor readings before deployment.**
-- Primary action: **Add device**.
-- Helper text: **Choose each device in your browser's Bluetooth dialog. Only
-  devices you add appear here.**
+- Intro: **Connect nodes over Bluetooth or USB to check their identity,
+  settings, and sensor readings before deployment.**
+- Primary actions: **Add Bluetooth device** and **Add USB device**.
+- Helper text: **Choose each device in your browser's Bluetooth or USB dialog.**
 
 Use the site's existing typography, colors, spacing, and interaction primitives.
 Keep the device list visible beside the details on desktop; use a list followed
@@ -69,7 +68,8 @@ Later additions:
 - Editing names, deployment roles, telemetry intervals, and other configuration.
 - Private-channel provisioning and admin-only backend registration.
 - Authenticated comparison with readings received by our backend.
-- Firmware installation on a separate page.
+- Flashing from this page. Firmware installs on `/firmware`; the official
+  Meshtastic Web Flasher remains an external alternative.
 
 ## Connection flow
 
@@ -92,18 +92,23 @@ device focuses its existing entry instead of creating a duplicate. Use the
 browser device identifier for the connection and the reported Meshtastic node
 number for packet attribution; a display name is not a unique identity.
 
-Observations stay in memory for the current page session. Reloading clears
-readings, configuration, peers, and activity. Store only the browser device ID,
-Bluetooth name, last reported node name and node number, plus the last
-successfully connected device ID and successful connection timestamp, in local browser storage.
+All displayed observations survive reloads in this browser: the last local packet
+time, supported non-secret configuration, mesh peers (including their identity,
+link quality and readings), and activity live in the IndexedDB `observations`
+store, keyed by browser device ID. The device list, public identity, latest local
+readings, successful connection time and automatic-reconnection preference stay
+in `localStorage`. Full observations are restored before automatic reconnection;
+original timestamps are retained and connection state always starts disconnected.
+Existing saves without observations still restore the fields they contain; missing
+data becomes available after reconnecting. No keys, pairing PINs, raw packets or
+device logs are saved.
 
 On page load, restore saved entries and retrieve previously allowed devices
 through `Bluetooth.getDevices()` when supported. These permissions do not prove
 that a device is powered on or reachable. Attempt to connect only the saved last
 active device, using the normal 30-second connection and initialization timeout.
 Read identity and readings again; never restore an old connected status. The
-latest local reading per metric and the battery-voltage history are kept in
-`localStorage` and shown again with their original receipt age. Other saved devices are not probed automatically.
+latest local readings and IndexedDB history are shown with their original receipt age. Other saved devices are not probed automatically.
 
 After reload or unexpected connection loss, keep a recently connected device in
 its original position above **Previously added** for ten minutes from the last
@@ -137,9 +142,43 @@ Explicit **Disconnect** clears the automatic-reconnection preference while
 keeping the entry. Unexpected loss retains it for the next page load; no
 continuous retry runs in the background. Leaving the page closes owned
 connections and removes listeners while retaining saved identities.
-**Remove from list** also removes the stored identity; an existing browser
-permission must not make the entry reappear. Permission revocation remains a
+**Remove from list** also removes the stored identity and observation snapshot; an existing browser
+permission must not make the entry reappear. For ten seconds a **Removed · Undo**
+line above the list puts the entry back in its place, without a confirmation
+dialog. Permission revocation remains a
 separate browser setting.
+
+### Stored history
+
+Reading history lives in IndexedDB (database `mesh-fire-detection`, store
+`readings`, database version 2), one record per sample: `nodeNum`, `metric`, `recordedAt` (epoch ms)
+and `value`, keyed by all three except `value`. This mirrors the backend's
+`readings` table (device, metric, recorded_at, value), so the two can be merged
+or synced later. History belongs to the node number, so a node connected over
+both Bluetooth and USB shares it. Samples older than 100 days are deleted when the
+database opens. In memory a device carries its history after the page loads it
+for that node; each new packet writes only the sample it added or replaced.
+`localStorage` keeps the device list and latest readings; history saved there by
+earlier versions is moved into IndexedDB on load. The database upgrade adds `observations` without replacing the existing
+`readings` store. Only history samples use the 100-day retention; observation
+snapshots are retained until removal from the list. A private window or blocked
+site data leaves persistence unavailable without breaking manual connection.
+
+### USB connection
+
+**Add USB device** opens the browser's serial-port chooser (Web Serial, desktop
+Chrome and Edge), filtered to the USB vendors of Meshtastic boards: Adafruit
+nRF52 bootloaders (RAK4631), CP210x, CH34x, Espressif and RP2040. The port opens
+at 115200 baud and speaks Meshtastic's stream API: each protobuf is framed as
+`0x94 0xC3`, a big-endian 16-bit length (at most 512) and the payload; bytes
+outside frames are console text and are skipped. The page sends 32 `0xC3` bytes
+to switch a console session to the API, then the same configuration request as
+over Bluetooth. Because the firmware leaves API mode after 15 minutes without
+client traffic, a heartbeat (nonce 0, answered only with queue status) is sent
+every five minutes. Unplugging ends the read stream and is treated as connection
+loss. Ports have no stable ID, so a saved USB device is identified by vendor,
+product and its order among identical ports. The card names its transport, and
+the transport is saved with the device.
 
 ## Page contents
 
@@ -154,6 +193,18 @@ Each entry shows:
 - Time of the last packet received from this node during this session.
 - **Reconnect** or **Disconnect**, and **Remove from list** actions. Selecting
   anywhere on the card opens its details; the name is the accessible control.
+  When the card's transport is unavailable in this browser, **Reconnect** is
+  disabled and the card's hint says so (**USB is not available in this browser.**).
+
+The details panel does not repeat the card's name and tag. In the one-column
+layout, where the panel sits below every card, selecting a card scrolls the
+panel into view; restoring a selection on reload does not scroll.
+
+Next to the **Add** buttons, a disabled button carries its short reason
+underneath (**HTTPS only**, **Chrome or Edge only**). When neither Bluetooth nor
+USB works in this browser, one notice with a browser-support link replaces those
+reasons. Connection errors appear in the same place, under the buttons that
+caused them.
 
 Order entries by the most recent successful connection, with newly added devices
 first. The saved list keeps this order across reloads.
@@ -167,24 +218,81 @@ devices. Disconnected entries live in **Previously added**, collapsed by default
 Lead with what a builder checks first and show each value once. Ages update
 in place; absolute times use the viewer's local time.
 
-| Order | Section         | Contents                                                                                          |
-| ----- | --------------- | ------------------------------------------------------------------------------------------------- |
-| 1     | Header          | Name, connection state, node ID, hardware, firmware, last local packet                            |
-| 2     | Battery         | Percentage, voltage and age                                                                       |
-| 2     | Solar charging  | Battery voltage trend: **Rising**, **Falling**, or **Stable**, with both compared voltages        |
-| 2     | Signal          | Best direct LoRa link: quality, SNR, RSSI and the peer it comes from, plus channel utilization    |
-| 3     | Sensor readings | Latest environmental and particle metrics with units, receipt age and device measurement time     |
-| 4     | Nearest nodes   | Peers reported by the radio: direct neighbors by SNR, then relayed nodes by hop count             |
-| 5     | More details    | Collapsed: short name, session connection time, reported configuration, other telemetry, activity |
+| Order | Section         | Contents                                                                                       |
+| ----- | --------------- | ---------------------------------------------------------------------------------------------- |
+| 1     | Header          | Name, connection state, node ID, hardware, firmware, last local packet                         |
+| 2     | Battery         | Percentage, voltage and age                                                                    |
+| 2     | Solar charging  | Battery voltage trend: **Rising**, **Falling**, or **Stable**, with both compared voltages     |
+| 2     | Signal          | Best direct LoRa link: quality, SNR, RSSI and the peer it comes from, plus channel utilization |
+| 3     | Sensor readings | Latest environmental and particle metrics with units, receipt age and device measurement time  |
+| 4     | Nearest nodes   | Peers reported by the radio: direct neighbors by SNR, then relayed nodes by hop count          |
+| 5     | Firmware update | Whether the node runs the current release, then how to install it                              |
+| 6     | More details    | Collapsed: short name, connection time, reported configuration, other telemetry, activity      |
+
+The nearest-node list uses aligned tags, a name (hardware or **Unnamed node**
+when absent), last-heard age, and a compact signal badge. Full node IDs are
+available on the tag tooltip instead of repeating the suffix in each row. On
+narrow screens the signal moves below the identity and long names wrap.
+Every row uses the same top and bottom padding, including the first and last.
+Reserve one metadata line even when hardware and last-heard time are absent, so
+missing text does not shift the name, node tag or signal relative to other rows.
+The tag, name and signal occupy the same first grid row; metadata occupies a
+separate second row under the name. All peers share column widths through a
+subgrid, keeping both edges of the signal badges aligned despite different values.
+
+**Firmware update** compares the reported build with `MFD_RELEASE` in
+`src/core/nearby/firmware.ts`: current, an older build of ours, not ours, or
+not reported yet. On `/connect`, show three short steps: disconnect here and
+plug in USB, open `/firmware` and enter update mode, then flash onto the RAK4631
+drive and reconnect to check the build. Keep the settings-preservation note.
+For the current build, show a compact **Up to date** badge beside the section
+heading instead of a sentence repeating the build number. Separate the header,
+steps and action area with generous spacing; keep the button and its helper
+note together. Other firmware states retain their explanatory text.
+There is no separate MFD Flasher in the site flow. `/firmware` provides the USB
+update controls, a link to the official `flasher.meshtastic.org`, and the
+MFD firmware source at `github.com/mesh-fire-detection/firmware`.
+The USB guide names the data cable, disconnecting other clients, selecting the
+node's serial port, then selecting the RAK4631 drive and granting write access.
+An already visible drive skips the serial step; if it does not appear, quickly
+press the node's reset button twice. After restart, verify the exact pinned build.
+The updater does not erase saved settings, keys or channels.
+
+The pinned UF2 is bundled under `public/files/`, served from this site's origin,
+and checked against its release SHA-256 before writing. Open the directory picker
+before fetching to preserve the click's user activation. Check the bootloader's
+`INFO_UF2.TXT` Board-ID for RAK4631; another UF2 board must be rejected. Copying
+does not prove the new build is running: write failures remain failures, and a
+completed copy asks the builder to reconnect and confirm the version.
+Reserve enough space for every USB status message at the current width, including
+while idle, so progress and errors do not change the update card's height.
+
+Publishing a new release means updating `MFD_RELEASE` and `MFD_UF2.sha256`,
+keeping the previous commit in `MFD_BUILDS`, and replacing the bundled UF2 and
+`public/files/firmware-SHA256SUMS` with checksum-verified release files from
+`mesh-fire-detection/firmware`. The current artifact is from release
+`mfd-v2.7.26.7d798c3`. This Meshtastic-based firmware is GPL-3.0; its license
+and source release are listed in `public/licenses/NOTICE.txt`.
+
+On external power the firmware reports battery level 101 instead of a
+percentage. The Battery tile and the card then show the charge estimated from
+voltage with the firmware's own LiPo curve (`OCV_ARRAY`, linear between 10 %
+points), marked **≈**, and the tile's note leads with a highlighted **On external
+power, estimated from voltage**; charging lifts the voltage, so it reads high
+while plugged in. Without a voltage the tile reads **Powered**. The charge is
+green above 80 % and red below 20 %. The voltage-trend tile is titled **Charging** instead
+of **Solar charging**, since the charger, not the panel, drives it. The header
+shows the connection, Bluetooth or USB, with its icon.
 
 The **Solar charging** tile uses the battery-voltage direction requested for
 this build. It keeps a history of positive, finite, fresh local
-`deviceMetrics.voltage` samples in `localStorage`: older samples at least five
-minutes apart, the newest one always last, up to 48 hours. The trend compares
+`deviceMetrics.voltage` samples in IndexedDB: older samples at least five
+minutes apart, the newest one always last, for 100 days. The trend compares
 the newest sample with the oldest one in the last hour, rounded to the displayed
 0.01 V precision, and shows the signed change (**↑ +0.04 V**, **→ ±0.00 V**),
 both voltages and the time between them. Show the current voltage while waiting
-for a second sample. Cached node records, peer telemetry and repeated or
+for a second sample; without stored history (a private window or blocked site
+data) that is the latest saved voltage reading, so the tile agrees with Battery. Cached node records, peer telemetry and repeated or
 out-of-order measurement timestamps are not added. The history survives
 reconnection and reload. This reports a voltage trend, not solar
 power in watts or a confirmed charging source. Actual power-monitor channel
@@ -212,12 +320,32 @@ their hop count or **Route unknown** instead.
 Telemetry must not move the page. Every caption and value slot is rendered in
 every state, with **—** or **Not reported** standing in for missing data. Single
 values stay on one line and truncate instead of wrapping; tile notes reserve two
-lines. Do not reserve space with fixed panel heights.
+lines. On sensor tiles the measurement or receipt time comes first, so a long
+trend line is what gets cut. The one exception is an empty **History** block: its six cells keep their
+**—** values but drop the time captions, so a first connection does not show a
+tall empty grid. **More details** is a plain disclosure row with a chevron, not
+a card. The connection time in **More details** is labelled
+**Session connected at** while connected and **Last connected** otherwise. Do not reserve space with fixed panel heights.
 
 The node ID's last four hex digits, which Meshtastic uses as the default short
 name, are shown as a tag beside the name. The firmware field marks builds of
 our fork (`MFD`) by the commit in the reported version; any other version is
 labelled **Meshtastic**.
+
+Peers do not report firmware, so a node counts as ours by its name: `MFD`
+followed by a kind word (`Sensor`, `Node` or `Base`, `Cellular`, `Vision`,
+`Test`) or a short name `MFDS`, `MFDN`, `MFDB`, `MFDC`, `MFDV`, `MFDT`. The same
+word sets the kind icon at the top right of a device card; `Test` marks a bench
+or debugging node. One click selects a whole node ID for copying.
+
+Over USB the firmware turns Bluetooth advertising off for the duration of the
+serial session and cannot see the port close, so it would wait 15 minutes before
+turning advertising back on. Disconnecting sends `ToRadio.disconnect` and waits
+briefly so the firmware can leave SERIAL and resume advertising before the port
+closes. **Add Bluetooth** ends an active USB session the same way before opening
+the browser chooser; otherwise the node is invisible in that list. An unplugged
+cable cannot send the goodbye; Bluetooth then returns after the 15 minutes or a
+restart.
 
 Show the reported Meshtastic firmware role as its own field. The project's
 deployment types (`base`, `cellular`, `sensor`, `vision`) are separate concepts;
@@ -237,9 +365,22 @@ listed under **Other reported telemetry**.
 
 Each sensor tile also shows its trend: the change between the newest sample and
 the oldest one in the last hour, with sign and unit (**↑ +0.4 °C over 52 min**).
-Samples come from the same `localStorage` history as battery voltage, kept per
-metric, five minutes apart and for up to 48 hours. Until a second sample exists
+Samples come from the same IndexedDB history as battery voltage, kept per
+metric, five minutes apart and for 100 days. Until a second sample exists
 the tile says the trend follows the next reading.
+
+A **History** block under the tiles summarises the selected metric's kept
+samples in three full-width columns (left, centre, right): lowest, average and
+highest, then fastest observed fall, span and fastest observed rise. The heading
+shows how many samples are kept for the metric, **0 readings** included. Values
+come with their times. The fastest changes compare neighbouring samples at least
+four minutes apart by their average rate, but show the actual measured difference
+and the actual interval, e.g. **−1.3 °C over 5 min**, rather than an hourly
+extrapolation. The span shows the time covered. All six cells are always rendered. The block
+reads through `browserHistory`, which returns the source and samples; the backend
+already stores readings under the same metric names but is not always running,
+so the browser is the primary source and a server source can be added later in
+the same shape.
 
 Tiles show a fixed clock time, **Measured** when the packet carries a valid device
 time and **Received** otherwise, instead of a ticking age. When no reading has a
@@ -370,7 +511,7 @@ Builder pages are grouped under `src/components/pages/build/`, with nearby
 widgets under `build/nearby/` and corresponding copy under
 `src/core/content/build/nearby/`. Transport, decoding, display mappings, and
 session state live under `src/core/nearby/`.
-Validated device identity storage lives in `src/core/nearby/remembered.ts`.
+Validated device identity and observation storage lives in `src/core/nearby/storage/`.
 Initialization runs in an effect and ignores stale discovery results after page
 cleanup, including React StrictMode effect replay.
 
@@ -401,7 +542,8 @@ server data. Any later backend integration needs its own specification update.
 - Unsupported browsers receive clear guidance instead of broken controls.
 - Local readings and secrets are not transmitted to the backend or analytics.
 - Reload restores saved identities, reconnects only the last active allowed
-  device, and starts with no previous readings or claimed connection status.
+  device, and shows all saved observations with their original ages and no claimed
+  connection status until a new connection succeeds.
 - Unavailable or unauthorized saved devices remain accessible in **Previously
   added**, with manual retry; unsupported restoration does not break pairing.
 - Explicit disconnect disables automatic reconnection; removal survives reload

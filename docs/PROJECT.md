@@ -60,9 +60,13 @@ Pages:
 - **Home** — cost comparison, branch map, refusal to print an unbacked detection-time figure.
 - **Map** — node type, last heartbeat, battery, RSSI/SNR of every link. Dead nodes stay on the map, coloured red.
 - **Build** — BOM with supplier links, enclosure STLs, Meshtastic JSON presets, assembly.
-- **Nearby Devices** — local Bluetooth inspection of individually added nodes,
+- **Connect a Node** — local Bluetooth or USB inspection of individually added nodes,
   identity, reported configuration, and real telemetry. One active connection at
   a time; no server upload. Available from Build and its footer section.
+- **Firmware** — USB updates directly at `/firmware` for RAK10722 / RAK4631, with
+  the pinned MFD UF2 bundled with the site and checked against its release SHA-256.
+  The official Meshtastic Flasher is the external alternative; no separate MFD
+  Flasher is part of the site flow. Updates keep settings; reconnect to verify the build.
 - **Coverage** — link-budget calculator (FSPL, clutter, 4/3-earth radio horizon, Fresnel zone). No elevation model: it cannot see the ridge between two points. For that, use Meshtastic Site Planner or Splat!.
 - **Open Problems** — what is unsolved, with constraints, what has been tried, and what would close it.
 - **About** — goals, roadmap, licenses, privacy.
@@ -108,3 +112,9 @@ The next useful thing is not a donation or a mailing list. It is a node that mak
 - Contact: contact@meshfiredetection.org
 
 The community URLs in `src/core/config/site.ts` should be confirmed before launch.
+
+## Audit follow-ups
+
+See the [October 4, 2026 web audit](reviews/2026-10-04.md) for reproduced bugs,
+interface improvements, documentation inconsistencies, and proposed acceptance criteria.
+The audit records proposals; it does not replace the project's approved decisions.
