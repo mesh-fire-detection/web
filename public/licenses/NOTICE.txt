@@ -1,0 +1,16 @@
+Nearby Devices uses the following third-party protocol libraries:
+
+@meshtastic/protobufs 2.8.0
+Meshtastic protocol definitions, licensed under GNU GPL version 3.
+Source: https://github.com/meshtastic/protobufs
+Package source and version: https://www.npmjs.com/package/@meshtastic/protobufs/v/2.8.0
+License text: meshtastic-protobufs.txt
+
+@bufbuild/protobuf 2.12.0
+Protocol Buffers runtime, licensed under Apache-2.0 AND BSD-3-Clause.
+Source: https://github.com/bufbuild/protobuf-es/tree/v2.12.0
+License texts: bufbuild-protobuf.txt and protobuf-well-known-types.txt
+
+The application source, dependency versions, and build instructions are available
+in the Mesh Fire Detection web repository:
+https://github.com/mesh-fire-detection/web
