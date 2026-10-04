@@ -17,6 +17,7 @@ export const APP_ROUTES = [
     { id: 'home', path: '/', label: 'Home', nav: false },
     { id: 'map', path: '/map', label: 'Map', nav: true },
     { id: 'build', path: '/build', label: 'Build', nav: true },
+    { id: 'nearby_devices', path: '/devices/nearby', label: 'Nearby Devices', nav: false },
     { id: 'coverage', path: '/coverage', label: 'Coverage', nav: true },
     { id: 'open_problems', path: '/open-problems', label: 'Open Problems', nav: true },
     { id: 'about', path: '/about', label: 'About', nav: true },

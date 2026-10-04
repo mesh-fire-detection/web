@@ -203,6 +203,7 @@ export type MapContent = PageHeading & {
 }
 
 export type BuildContent = PageHeading & {
+    readonly nearbyCta: string
     readonly nodeTypes: { readonly eyebrow: string; readonly title: string; readonly lede: string }
     readonly bom: {
         readonly eyebrow: string
@@ -272,6 +273,118 @@ export type BuildContent = PageHeading & {
     }
     readonly jumpCta: string
     readonly sourceCta: string
+}
+
+export type NearbyDevicesContent = PageHeading & {
+    readonly add: string
+    readonly helper: string
+    readonly sessionNote: string
+    readonly recentStatus: string
+    readonly emptyTitle: string
+    readonly emptyBody: string
+    readonly devicesTitle: string
+    readonly unnamed: string
+    readonly errorTitle: string
+    readonly battery: string
+    readonly lastPacket: string
+    readonly notReported: string
+    readonly previousTitle: string
+    readonly previousBody: string
+    readonly restoration: Readonly<Record<'checking' | 'unsupported' | 'failed', string>>
+    readonly unsupportedTitle: string
+    readonly support: Readonly<Record<'insecure' | 'unsupported', string>>
+    readonly errors: Readonly<Record<string, string>>
+    readonly hints: Readonly<
+        Record<'connected' | 'connecting' | 'initializing' | 'recent' | 'disconnected', string>
+    >
+    readonly states: Readonly<
+        Record<'disconnected' | 'connecting' | 'initializing' | 'connected', string>
+    >
+    readonly actions: {
+        readonly view: string
+        readonly connect: string
+        readonly disconnect: string
+        readonly remove: string
+    }
+}
+
+type SensorGuideEntry = {
+    readonly title: string
+    readonly summary: string
+    readonly rows: readonly { readonly term: string; readonly value: string }[]
+}
+
+export type NearbySensorGuideContent = {
+    readonly entries: Readonly<Record<string, SensorGuideEntry>>
+    readonly unknown: SensorGuideEntry
+}
+
+export type NearbyDetailsContent = {
+    readonly battery: string
+    readonly solar: string
+    readonly signal: string
+    readonly readings: string
+    readonly nearest: string
+    readonly more: string
+    readonly otherTelemetry: string
+    readonly activity: string
+    readonly lastPacket: string
+    readonly notReported: string
+    readonly voltageOver: string
+    readonly trendWaiting: string
+    readonly voltageSaved: string
+    readonly voltageWaiting: string
+    readonly voltageNone: string
+    readonly signalMissing: string
+    readonly bestLink: string
+    readonly channelUse: string
+    readonly quality: Readonly<Record<'good' | 'fair' | 'weak', string>>
+    readonly direct: string
+    readonly hop: string
+    readonly hops: string
+    readonly routeUnknown: string
+    readonly lastHeard: string
+    readonly peersNote: string
+    readonly noPeers: string
+    readonly showAll: string
+    readonly showFewer: string
+    readonly noActivity: string
+    readonly waiting: string
+    readonly sensorsDisabled: string
+    readonly disconnected: string
+    readonly initializing: string
+    readonly live: string
+    readonly sensors: Readonly<
+        Record<
+            | 'environment'
+            | 'particles'
+            | 'off'
+            | 'reporting'
+            | 'lastReading'
+            | 'waiting'
+            | 'missing'
+            | 'offline',
+            string
+        >
+    >
+    readonly timing: string
+    readonly received: string
+    readonly clockUnset: string
+    readonly measured: string
+    readonly cached: string
+    readonly firmware: {
+        readonly ours: string
+        readonly upstream: string
+        readonly oursTitle: string
+    }
+    readonly labels: {
+        readonly nodeId: string
+        readonly hardware: string
+        readonly firmware: string
+        readonly build: string
+        readonly shortName: string
+        readonly connectedAt: string
+    }
 }
 
 type CoveragePriorArt = {

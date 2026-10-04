@@ -100,3 +100,268 @@
     width: 2rem;
     padding-top: var(--s_hair);
 }
+
+/* Nearby device inspection uses the same surfaces and controls as Build. */
+.nearby_announcement {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    white-space: nowrap;
+    clip-path: inset(50%);
+}
+
+.nearby_workspace {
+    display: grid;
+    grid-template-columns: minmax(0, var(--nearby_sidebar)) minmax(0, 1fr);
+    align-items: start;
+    gap: var(--s_5);
+}
+
+.nearby_workspace_empty {
+    grid-template-columns: minmax(0, 1fr);
+}
+
+/* The device name stretches over the whole card, so any part of it selects the device. */
+.nearby_card {
+    position: relative;
+}
+
+.nearby_card:hover {
+    border-color: var(--line_hover);
+}
+
+.nearby_select {
+    flex: 1 1 auto;
+    width: auto;
+    min-width: 0;
+    cursor: pointer;
+}
+
+.nearby_select::after {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    content: '';
+}
+
+.nearby_select:focus-visible {
+    outline: none;
+}
+
+.nearby_select:focus-visible::after {
+    outline: 2px solid var(--fire);
+    outline-offset: 2px;
+}
+
+.nearby_card.nearby_selected {
+    border-color: var(--fire);
+}
+
+/* Connected wins over selection: the live link is what the colour reports. */
+.nearby_card.nearby_connected {
+    border-color: var(--live);
+}
+
+.nearby_card.nearby_recent {
+    border-color: var(--line_strong);
+}
+
+.nearby_device_actions {
+    z-index: 1;
+    position: relative;
+}
+
+/* Changing values sit in slots that are always rendered and never wrap, so
+   telemetry updates fill text in place instead of moving adjacent panels. */
+.nearby_line {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.nearby_connection_status .txt {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.nearby_sensor_status {
+    display: grid;
+    grid-template-columns: auto auto minmax(0, 1fr);
+    align-items: center;
+    padding-block: var(--s_2);
+    gap: var(--s_3);
+    border-bottom: 1px solid var(--line);
+}
+
+.nearby_sensor_status > :last-child {
+    text-align: end;
+}
+
+.nearby_node_tag {
+    flex: none;
+    min-width: 6ch;
+    padding: var(--s_2) var(--s_3);
+    border: 1px solid var(--fire_border);
+    border-radius: var(--r_sm);
+    background: var(--fire_wash);
+    color: var(--fire);
+    font-weight: 700;
+    font-size: var(--fs_lg);
+    line-height: 1;
+    font-family: var(--font_mono);
+    letter-spacing: 0.04em;
+    text-align: center;
+}
+
+.nearby_node_tag_sm {
+    min-width: 5.5ch;
+    padding: var(--s_1) var(--s_2);
+    font-size: var(--fs_xs);
+}
+
+.nearby_node_tag_other {
+    border-color: var(--line_strong);
+    background: var(--surface_2);
+    color: var(--text_2);
+}
+
+.nearby_node_tag_empty {
+    border-color: var(--line_strong);
+    background: var(--surface_2);
+    color: var(--text_3);
+}
+
+.nearby_node_id {
+    color: var(--text);
+}
+
+.nearby_node_id_prefix {
+    color: var(--text_3);
+}
+
+.nearby_identity {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(var(--nearby_identity_column), 1fr));
+    gap: var(--s_3) var(--s_5);
+}
+
+.nearby_identity .metric_value {
+    height: 1lh;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.nearby_firmware {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--s_2);
+}
+
+.nearby_firmware .badge {
+    line-height: 1.2;
+}
+
+.nearby_vitals .nearby_tile > .flex {
+    height: 100%;
+}
+
+/* Two lines are always reserved, so a short and a long note give equal tiles. */
+.nearby_tile_note {
+    min-height: 2lh;
+}
+
+/* All entries share one cell; the block is as tall as the longest and never resizes. */
+.nearby_guide {
+    display: grid;
+}
+
+.nearby_guide_entry {
+    grid-area: 1 / 1;
+}
+
+.nearby_tile_trend {
+    color: var(--text_2);
+}
+
+.nearby_mark_good {
+    color: var(--live_soft);
+}
+
+.nearby_mark_fair {
+    color: var(--warn_soft);
+}
+
+.nearby_mark_bad {
+    color: var(--dead_soft);
+}
+
+.nearby_guide_hidden {
+    visibility: hidden;
+}
+
+/* Raw protocol field names are long single words. */
+.nearby_tile {
+    overflow-wrap: anywhere;
+}
+
+.nearby_reading {
+    border-radius: var(--r_md);
+    cursor: pointer;
+}
+
+.nearby_reading .nearby_tile {
+    height: 100%;
+}
+
+.nearby_reading:hover .nearby_tile {
+    border-color: var(--line_hover);
+}
+
+.nearby_reading[aria-pressed='true'] .nearby_tile {
+    border-color: var(--warn);
+}
+
+.nearby_reading:focus-visible {
+    outline: 2px solid var(--warn);
+    outline-offset: 2px;
+}
+
+.nearby_peer {
+    padding-block: var(--s_3);
+    border-bottom: 1px solid var(--line);
+}
+
+.nearby_peer:first-child {
+    padding-top: 0;
+}
+
+.nearby_peer:last-child {
+    border-bottom: none;
+}
+
+.nearby_activity {
+    max-height: var(--nearby_activity_height);
+    overflow: auto;
+}
+
+.nearby_event {
+    padding-block: var(--s_3);
+    border-bottom: 1px solid var(--line);
+}
+
+@media (width <= 1000px) {
+    .nearby_workspace {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+/* On phones the longest status wraps to a second line; keep it reserved. */
+@media (width <= 600px) {
+    .nearby_details_status {
+        min-height: 2lh;
+    }
+}

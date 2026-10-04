@@ -21,6 +21,7 @@ export const footerContent = {
                 { label: 'Node Types', to: '/build#node-types' },
                 { label: 'Enclosures (STL)', to: '/build#enclosures' },
                 { label: 'Firmware & Config', to: '/build#firmware' },
+                { label: 'Nearby Devices', to: '/devices/nearby' },
                 { label: 'Assembly Guide', to: '/build#assembly' },
             ],
         },
