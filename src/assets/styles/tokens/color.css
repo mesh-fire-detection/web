@@ -36,7 +36,20 @@
     --dead_wash: color-mix(in srgb, var(--dead) 12%, transparent);
     --dead_border: color-mix(in srgb, var(--dead) 35%, transparent);
     --dead_hover: color-mix(in srgb, var(--dead) 20%, transparent);
+
+    /* Muted tones for marks inside running text, where full status colours shout. */
+    --live_soft: color-mix(in srgb, var(--live) 55%, var(--text_2));
+    --warn_soft: color-mix(in srgb, var(--warn) 55%, var(--text_2));
+    --dead_soft: color-mix(in srgb, var(--dead) 55%, var(--text_2));
     --link: #60a5fa;
+
+    /* Connection buttons: Bluetooth blue, USB black on white. */
+    --bluetooth: #0a7cff;
+    --bluetooth_hover: #3a95ff;
+    --on_bluetooth: #fff;
+    --usb: #fff;
+    --usb_hover: #e6e9e8;
+    --on_usb: #000;
     --link_hover: #93c5fd;
     --table_hover: color-mix(in srgb, var(--text) 2%, transparent);
 }

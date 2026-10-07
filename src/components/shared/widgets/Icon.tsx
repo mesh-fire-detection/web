@@ -19,6 +19,9 @@ export type IconName =
     | 'check'
     | 'alert'
     | 'chevron'
+    | 'bluetooth'
+    | 'usb'
+    | 'flask'
 
 const PATHS: Record<IconName, ReactNode> = {
     map: <path d='M9 3 3 5.5v15L9 18l6 3 6-2.5v-15L15 6 9 3Zm0 0v15m6-12v15' />,
@@ -77,6 +80,18 @@ const PATHS: Record<IconName, ReactNode> = {
     check: <path d='m4 12 5 5L20 6' />,
     alert: <path d='M12 4 2 20h20L12 4Zm0 6v5m0 3h.01' />,
     chevron: <path d='m8 10 4 4 4-4' />,
+    bluetooth: <path d='m7 7 10 10-5 5V2l5 5L7 17' />,
+    flask: (
+        <path d='M9 3h6m-5 0v6l-5.5 9.5A1.7 1.7 0 0 0 6 21h12a1.7 1.7 0 0 0 1.5-2.5L14 9V3m-7 11h10' />
+    ),
+    usb: (
+        <>
+            <path d='M12 3v14m-2-12 2-2 2 2m-2 9-4-2.5V8.5m4 3.5 4-2V7.5' />
+            <circle cx='8' cy='7.5' r='1' />
+            <path d='M15 5.5h2v2h-2z' />
+            <circle cx='12' cy='19' r='2' />
+        </>
+    ),
 }
 
 export function Icon({

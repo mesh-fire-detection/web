@@ -74,7 +74,7 @@ const promoteWarnings = (rules) =>
 
 export default tseslint.config(
     {
-        ignores: ['dist', 'node_modules', 'data', 'logs', 'coverage', 'public'],
+        ignores: ['.cache', 'dist', 'node_modules', 'data', 'logs', 'coverage', 'public'],
     },
 
     {

@@ -10,4 +10,6 @@
     --bom_cost_width: 7rem;
     --bom_part_width: 40rem;
     --bom_part_viewport_width: 50vw;
+    --nearby_sidebar: 360px;
+    --nearby_activity_height: 24rem;
 }

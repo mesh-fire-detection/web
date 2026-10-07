@@ -37,7 +37,14 @@ export function Wordmark({ size = 'md' }: { size?: 'md' | 'lg' }) {
                     >
                         Mesh Fire Detection
                     </Text>
-                    <Text as='span' mono size='2xs' tone='faint' uppercase>
+                    <Text
+                        as='span'
+                        className='wordmark_tagline'
+                        mono
+                        size='2xs'
+                        tone='faint'
+                        uppercase
+                    >
                         Open-source research · ~{money(nodeCost('base'))} BOM per node
                     </Text>
                 </Stack>

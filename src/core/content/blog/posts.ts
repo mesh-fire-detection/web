@@ -49,7 +49,8 @@ const toPost = ([file, source]: readonly [string, string]): SourcedPost => {
         file,
         {
             slug: text(data, 'slug') ?? fallbackSlug(file),
-            title: text(data, 'title') ?? (heading ? inlineText(heading.content) : fallbackSlug(file)),
+            title:
+                text(data, 'title') ?? (heading ? inlineText(heading.content) : fallbackSlug(file)),
             date: text(data, 'date') ?? '',
             excerpt: text(data, 'excerpt') ?? (lead ? inlineText(lead.content) : ''),
             tags: list(data, 'tags'),

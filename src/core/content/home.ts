@@ -18,7 +18,7 @@ export const homeContent = {
     },
     baseline: {
         eyebrow: 'The problem, quantified',
-        title: 'We do not have a detection-time baseline yet.',
+        title: 'We do not have a detection‑time baseline yet.',
         paragraphs: [
             "The project's first goal is to reduce wildfire detection time. Reduce it from what? We refuse to put an unbacked number on this page — a specific claim you cannot defend is the fastest way to lose the agency people this network needs.",
             'So the honest state is: unmeasured. A public records request for one Washington fire district is drafted and not yet filed. When the median comes back, it goes here, with the raw records next to it.',

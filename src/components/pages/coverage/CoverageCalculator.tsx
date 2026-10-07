@@ -6,7 +6,12 @@ import { Heading } from '@components/shared/typography/Heading'
 import { Text, Value } from '@components/shared/typography/Text'
 import { Button } from '@components/shared/widgets/Action'
 import { Badge, Metric } from '@components/shared/widgets/Badge'
-import { NumberField, SegmentedField, SelectField, SliderField } from '@components/shared/widgets/Field'
+import {
+    NumberField,
+    SegmentedField,
+    SelectField,
+    SliderField,
+} from '@components/shared/widgets/Field'
 import { nodeCost } from '@core/content/build/bom'
 import { decimal, money, plural, signed } from '@core/format/format'
 import {
@@ -288,7 +293,8 @@ export function CoverageCalculator() {
                             What that buys you
                         </Text>
                         <Text size='sm' tone='muted' measure={64}>
-                            A {formatDistance(CORRIDOR_KM, system)} corridor at this hop length needs{' '}
+                            A {formatDistance(CORRIDOR_KM, system)} corridor at this hop length
+                            needs{' '}
                             <Value tone='fire' size='sm'>
                                 {nodesNeeded}
                             </Value>{' '}

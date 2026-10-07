@@ -140,12 +140,7 @@ export function LinkProfile({ input, result }: { input: LinkInput; result: LinkR
                         r={4}
                     />
 
-                    <text
-                        className='profile_label'
-                        textAnchor='middle'
-                        x={xAt(0)}
-                        y={groundY + 18}
-                    >
+                    <text className='profile_label' textAnchor='middle' x={xAt(0)} y={groundY + 18}>
                         {formatLength(input.txHeightM, system)}
                     </text>
                     <text
@@ -156,12 +151,7 @@ export function LinkProfile({ input, result }: { input: LinkInput; result: LinkR
                     >
                         {formatLength(input.rxHeightM, system)}
                     </text>
-                    <text
-                        className='profile_label'
-                        textAnchor='middle'
-                        x={W / 2}
-                        y={groundY + 18}
-                    >
+                    <text className='profile_label' textAnchor='middle' x={W / 2} y={groundY + 18}>
                         {formatDistance(distance, system)}
                     </text>
                 </svg>

@@ -100,3 +100,462 @@
     width: 2rem;
     padding-top: var(--s_hair);
 }
+
+/* Nearby device inspection uses the same surfaces and controls as Build. */
+.nearby_announcement {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    white-space: nowrap;
+    clip-path: inset(50%);
+}
+
+/* Disabled, each drops its colours and looks like any other unavailable button. */
+.nearby_add_bluetooth:not([aria-disabled='true']) {
+    border-color: var(--bluetooth);
+    background: var(--bluetooth);
+    color: var(--on_bluetooth);
+}
+
+.nearby_add_bluetooth:not([aria-disabled='true']):hover {
+    border-color: var(--bluetooth_hover);
+    background: var(--bluetooth_hover);
+}
+
+.nearby_add_usb:not([aria-disabled='true']),
+.firmware_connect {
+    border-color: var(--on_usb);
+    background: var(--usb);
+    color: var(--on_usb);
+}
+
+.nearby_add_usb:not([aria-disabled='true']):hover,
+.firmware_connect:hover {
+    border-color: var(--on_usb);
+    background: var(--usb_hover);
+}
+
+/* The USB button inverted, for external firmware resources. */
+.firmware_external {
+    border-color: var(--usb);
+    background: var(--on_usb);
+    color: var(--usb);
+}
+
+.firmware_external:hover {
+    border-color: var(--usb_hover);
+    color: var(--usb_hover);
+}
+
+/* Reserve the tallest wrapped status at this width, including while idle. */
+.firmware_status,
+.firmware_status_space {
+    display: grid;
+}
+
+.firmware_status > div,
+.firmware_status_space > .txt {
+    grid-area: 1 / 1;
+}
+
+.firmware_status_space {
+    visibility: hidden;
+    pointer-events: none;
+}
+
+/* A button with its one-line reason underneath; keep the reason short. */
+.nearby_add {
+    display: grid;
+    justify-items: start;
+    gap: var(--s_2);
+}
+
+.nearby_add > .txt {
+    white-space: nowrap;
+}
+
+.nearby_workspace {
+    display: grid;
+    grid-template-columns: minmax(0, var(--nearby_sidebar)) minmax(0, 1fr);
+    align-items: start;
+    gap: var(--s_5);
+}
+
+.nearby_workspace_empty {
+    grid-template-columns: minmax(0, 1fr);
+}
+
+/* External power changes what the battery figure means, so it stands out from the note. */
+.nearby_power {
+    color: var(--text);
+    font-weight: 600;
+}
+
+.nearby_count {
+    flex: none;
+    white-space: nowrap;
+}
+
+.nearby_more {
+    align-self: flex-start;
+}
+
+.nearby_more[aria-expanded='true'] .icon {
+    scale: 1 -1;
+}
+
+/* Scrolled to on phones when a card is selected; clears the sticky header. */
+.nearby_details {
+    min-width: 0;
+    scroll-margin-top: calc(var(--header_height) + var(--s_4));
+}
+
+/* The device name stretches over the whole card, so any part of it selects the device. */
+.nearby_card {
+    position: relative;
+}
+
+.nearby_card:hover {
+    border-color: var(--line_hover);
+}
+
+.nearby_select {
+    flex: 1 1 auto;
+    width: auto;
+    min-width: 0;
+    cursor: pointer;
+}
+
+.nearby_select::after {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    content: '';
+}
+
+.nearby_select:focus-visible {
+    outline: none;
+}
+
+.nearby_select:focus-visible::after {
+    outline: 2px solid var(--fire);
+    outline-offset: 2px;
+}
+
+.nearby_card.nearby_connected {
+    border-color: var(--live_border);
+}
+
+.nearby_card.nearby_recent {
+    border-color: var(--line_strong);
+}
+
+/*
+ * The card whose details are shown: green while its link is live, yellow for
+ * saved data. The wash is an image so the surface colour stays underneath.
+ */
+.nearby_card.nearby_selected {
+    border-color: var(--warn);
+    background-image: linear-gradient(var(--warn_wash), var(--warn_wash));
+}
+
+.nearby_card.nearby_selected.nearby_connected {
+    border-color: var(--live);
+    background-image: linear-gradient(var(--live_wash), var(--live_wash));
+}
+
+.nearby_device_actions {
+    z-index: 1;
+    position: relative;
+}
+
+/* Changing values sit in slots that are always rendered and never wrap, so
+   telemetry updates fill text in place instead of moving adjacent panels. */
+.nearby_line {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.nearby_connection_status .txt {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.nearby_sensor_status {
+    display: grid;
+    grid-template-columns: auto auto minmax(0, 1fr);
+    align-items: center;
+    padding-block: var(--s_2);
+    gap: var(--s_3);
+    border-bottom: 1px solid var(--line);
+}
+
+.nearby_sensor_status > :last-child {
+    text-align: end;
+}
+
+/* Three columns across the whole block: left-aligned, centred, right-aligned. */
+.nearby_stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--s_4);
+}
+
+.nearby_stats > :nth-child(3n + 2),
+.nearby_stats > :nth-child(3n + 2) .metric {
+    align-items: center;
+    text-align: center;
+}
+
+.nearby_stats > :nth-child(3n),
+.nearby_stats > :nth-child(3n) .metric {
+    align-items: flex-end;
+    text-align: end;
+}
+
+.nearby_kind {
+    display: inline-flex;
+    flex: none;
+    align-self: flex-start;
+    color: var(--fire);
+}
+
+/* One click selects the whole ID for copying. Card IDs sit above the card's
+   select-the-device overlay so the click reaches them. */
+.nearby_selectable {
+    cursor: text;
+    user-select: all;
+}
+
+.nearby_node_tag {
+    flex: none;
+    min-width: 6ch;
+    padding: var(--s_2) var(--s_3);
+    border: 1px solid var(--fire_border);
+    border-radius: var(--r_sm);
+    background: var(--fire_wash);
+    color: var(--fire);
+    font-weight: 700;
+    font-size: var(--fs_lg);
+    line-height: 1;
+    font-family: var(--font_mono);
+    letter-spacing: 0.04em;
+    text-align: center;
+}
+
+.nearby_node_tag_sm {
+    min-width: 5.5ch;
+    padding: var(--s_1) var(--s_2);
+    font-size: var(--fs_xs);
+}
+
+.nearby_node_tag_other {
+    border-color: var(--line_strong);
+    background: var(--surface_2);
+    color: var(--text_2);
+}
+
+.nearby_node_tag_empty {
+    border-color: var(--line_strong);
+    background: var(--surface_2);
+    color: var(--text_3);
+}
+
+.nearby_card .nearby_node_tag {
+    z-index: 1;
+    position: relative;
+}
+
+.nearby_node_id {
+    color: var(--text);
+}
+
+.nearby_node_id_prefix {
+    color: var(--text_3);
+}
+
+/* Six fields: full rows of three, or of two on phones, never one left over. */
+.nearby_identity {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--s_3) var(--s_5);
+}
+
+.nearby_identity .metric_value {
+    height: 1lh;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.nearby_transport {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--s_1);
+}
+
+.nearby_firmware {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--s_2);
+}
+
+.nearby_firmware .badge {
+    line-height: 1.2;
+}
+
+.nearby_vitals .nearby_tile > .flex {
+    height: 100%;
+}
+
+/* Two lines are always reserved, so a short and a long note give equal tiles. */
+.nearby_tile_note {
+    min-height: 2lh;
+}
+
+/* All entries share one cell; the block is as tall as the longest and never resizes. */
+.nearby_guide {
+    display: grid;
+}
+
+.nearby_guide_entry {
+    grid-area: 1 / 1;
+}
+
+.nearby_tile_trend {
+    color: var(--text_2);
+}
+
+.nearby_mark_good {
+    color: var(--live_soft);
+}
+
+.nearby_mark_fair {
+    color: var(--warn_soft);
+}
+
+.nearby_mark_bad {
+    color: var(--dead_soft);
+}
+
+.nearby_guide_hidden {
+    visibility: hidden;
+}
+
+/* Raw protocol field names are long single words. */
+.nearby_tile {
+    overflow-wrap: anywhere;
+}
+
+.nearby_reading {
+    border-radius: var(--r_md);
+    cursor: pointer;
+}
+
+.nearby_reading .nearby_tile {
+    height: 100%;
+}
+
+.nearby_reading:hover .nearby_tile {
+    border-color: var(--line_hover);
+}
+
+.nearby_reading[aria-pressed='true'] .nearby_tile {
+    border-color: var(--warn);
+}
+
+.nearby_reading:focus-visible {
+    outline: 2px solid var(--warn);
+    outline-offset: 2px;
+}
+
+.nearby_peers {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    column-gap: var(--s_3);
+}
+
+.nearby_peer {
+    display: grid;
+    grid-template-columns: subgrid;
+    row-gap: var(--s_1);
+    grid-column: 1 / -1;
+    align-items: center;
+    padding-block: var(--s_3);
+    border-bottom: 1px solid var(--line);
+}
+
+.nearby_peer > .nearby_node_tag {
+    grid-area: 1 / 1;
+    justify-self: start;
+}
+
+.nearby_peer:last-child {
+    border-bottom-color: transparent;
+}
+
+.nearby_peer_meta {
+    grid-area: 2 / 2;
+    min-height: 1lh;
+}
+
+.nearby_peer_name {
+    grid-area: 1 / 2;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.nearby_peer_link {
+    display: flex;
+    grid-area: 1 / 3;
+    align-items: center;
+    padding: var(--s_1) var(--s_2);
+    gap: var(--s_2);
+    border-radius: var(--r_sm);
+    background: var(--surface_2);
+    color: var(--text_3);
+}
+
+.nearby_peer_readings {
+    grid-column: 2 / -1;
+    overflow-wrap: anywhere;
+}
+
+.nearby_activity {
+    max-height: var(--nearby_activity_height);
+    overflow: auto;
+}
+
+.nearby_event {
+    padding-block: var(--s_3);
+    border-bottom: 1px solid var(--line);
+}
+
+@media (width <= 1000px) {
+    .nearby_workspace {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+/* On phones the longest status wraps to a second line; keep it reserved. */
+@media (width <= 600px) {
+    .nearby_peers {
+        grid-template-columns: auto minmax(0, 1fr);
+    }
+
+    .nearby_peer_link {
+        grid-area: 3 / 2;
+    }
+
+    .nearby_details_status {
+        min-height: 2lh;
+    }
+
+    .nearby_identity {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}

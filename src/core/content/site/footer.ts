@@ -21,6 +21,8 @@ export const footerContent = {
                 { label: 'Node Types', to: '/build#node-types' },
                 { label: 'Enclosures (STL)', to: '/build#enclosures' },
                 { label: 'Firmware & Config', to: '/build#firmware' },
+                { label: 'Connect a Node', to: '/connect' },
+                { label: 'Firmware', to: '/firmware' },
                 { label: 'Assembly Guide', to: '/build#assembly' },
             ],
         },

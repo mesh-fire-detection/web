@@ -3,6 +3,7 @@ import type { BuildContent } from '@core/content/types'
 import { placement } from './placement'
 
 export const buildContent = {
+    nearbyCta: 'Connect a Node',
     title: 'Build a node',
     eyebrow: 'Bill of materials · STLs · firmware',
     lede: 'Every part, every price, every file. Nothing behind a form, nothing that needs an email. Prototype sections state their unanswered engineering questions instead of hiding them.',
