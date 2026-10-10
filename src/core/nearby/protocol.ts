@@ -260,6 +260,9 @@ export function receiveRadio(device: Device, bytes: Uint8Array, at: number, nonc
                         lastPacketAt:
                             peer?.lastPacketAt ??
                             (device.nodeNum === num ? device.lastPacketAt : null),
+                        // Equal USB boards share a port ID, so another node can take over
+                        // this entry; its history must not carry over to the new number.
+                        history: device.nodeNum === num ? device.history : {},
                         readings: {
                             ...peer?.readings,
                             ...Object.fromEntries(

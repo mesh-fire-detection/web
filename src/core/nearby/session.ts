@@ -96,7 +96,7 @@ export function createNearbySession(
         }
         for (const listener of listeners) listener()
     }
-    /** Device IDs whose stored history has been read, or is being read. */
+    /** Device ID and node number pairs whose stored history has been read, or is being read. */
     const hydrated = new Set<string>()
     /**
      * Reads a node's stored history once its number is known and merges it in.
@@ -106,8 +106,9 @@ export function createNearbySession(
     const hydrate = (device: Device) => {
         const store = options.readings
         const nodeNum = device.nodeNum
-        if (!store || nodeNum === null || hydrated.has(device.id)) return
-        hydrated.add(device.id)
+        const key = `${device.id}:${String(nodeNum)}`
+        if (!store || nodeNum === null || hydrated.has(key)) return
+        hydrated.add(key)
         for (const [metric, samples] of Object.entries(device.history))
             void store.apply(nodeNum, metric, { put: samples, remove: [] })
         void (async () => {
