@@ -6,7 +6,7 @@ const STORAGE_KEY = 'mesh-fire-detection.nearby-devices.v1'
 
 type RememberedDevice = Pick<Device, 'id' | 'bluetoothName' | 'name' | 'nodeNum'> &
     /** Missing in saves from before hardware and firmware were kept. */
-    Partial<Pick<Device, 'shortName' | 'hardware' | 'firmware'>> & {
+    Partial<Pick<Device, 'shortName' | 'hardware' | 'firmware' | 'port'>> & {
         /** Missing in saves from before USB support, which were all Bluetooth. */
         readonly transport?: Transport
         readonly connectedAt?: number | null
@@ -100,6 +100,7 @@ function isRememberedDevice(value: unknown): value is RememberedDevice {
                 Number.isSafeInteger(value.connectedAt) &&
                 value.connectedAt >= 0)) &&
         (!('transport' in value) || STORED_TRANSPORTS.includes(value.transport)) &&
+        (!('port' in value) || value.port === null || typeof value.port === 'string') &&
         (!('readings' in value) ||
             (Array.isArray(value.readings) && value.readings.every(isReading))) &&
         (!('voltageHistory' in value) ||
@@ -149,6 +150,7 @@ export function createDeviceMemory(storage: () => Pick<Storage, 'getItem' | 'set
                             voltageHistory,
                             readings,
                             transport,
+                            port,
                             shortName,
                             hardware,
                             firmware,
@@ -161,6 +163,7 @@ export function createDeviceMemory(storage: () => Pick<Storage, 'getItem' | 'set
                             ...(hardware !== undefined && { hardware }),
                             ...(firmware !== undefined && { firmware }),
                             ...(transport !== undefined && { transport }),
+                            ...(port !== undefined && { port }),
                             ...(connectedAt !== undefined && { connectedAt }),
                             ...((history !== undefined || voltageHistory !== undefined) && {
                                 history: Object.fromEntries(
@@ -207,6 +210,7 @@ export function createDeviceMemory(storage: () => Pick<Storage, 'getItem' | 'set
                         connectedAt,
                         readings,
                         transport,
+                        port,
                     }) => ({
                         id,
                         bluetoothName,
@@ -216,6 +220,7 @@ export function createDeviceMemory(storage: () => Pick<Storage, 'getItem' | 'set
                         hardware,
                         firmware,
                         transport,
+                        port,
                         connectedAt,
                         readings: Object.values(readings),
                     })
@@ -267,6 +272,7 @@ export function restoreDevices(
             shortName: device.shortName ?? '',
             hardware: device.hardware ?? '',
             firmware: device.firmware ?? '',
+            port: device.port ?? null,
             connectedAt,
             recentUntil,
             lastPacketAt:
