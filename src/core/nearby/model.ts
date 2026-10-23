@@ -60,6 +60,11 @@ export type Device = {
     readonly id: string
     readonly bluetoothName: string
     readonly transport: Transport
+    /**
+     * The USB port this node was last reached through. Equal boards share a port
+     * ID, so it only suggests which entry to open; the node number decides.
+     */
+    readonly port: string | null
     readonly state: ConnectionState
     readonly nodeNum: number | null
     readonly name: string
@@ -96,6 +101,7 @@ export function emptyDevice(
         id,
         bluetoothName,
         transport,
+        port: null,
         state: 'disconnected',
         nodeNum: null,
         name: '',
@@ -115,6 +121,11 @@ export function emptyDevice(
 
 export function addActivity(device: Device, message: string, at: number): Device {
     return { ...device, activity: [...device.activity, { at, message }] }
+}
+
+/** USB ports carry no stable ID, so a USB entry is named after its node once known. */
+export function usbDeviceId(num: number): string {
+    return `usb:node:${String(num)}`
 }
 
 export function nodeId(num: number): string {

@@ -223,6 +223,25 @@ describe('nearby device protocol', () => {
         expect(device.readings['environmentMetrics.temperature']?.sender).toBe(LOCAL)
     })
 
+    it('drops the history of another node that reported on the same entry', () => {
+        let device = receiveRadio(
+            localDevice(),
+            telemetryPacket(LOCAL, {
+                case: 'environmentMetrics',
+                value: create(Telemetry.EnvironmentMetricsSchema, { temperature: 23 }),
+            }),
+            NOW,
+            NONCE
+        )
+        expect(device.history['environmentMetrics.temperature']).toHaveLength(1)
+        const myInfo = (myNodeNum: number) =>
+            radioMessage({ case: 'myInfo', value: create(Mesh.MyNodeInfoSchema, { myNodeNum }) })
+        expect(receiveRadio(device, myInfo(LOCAL), NOW, NONCE).history).toBe(device.history)
+        device = receiveRadio(device, myInfo(PEER), NOW, NONCE)
+        expect(device.nodeNum).toBe(PEER)
+        expect(device.history).toEqual({})
+    })
+
     it('marks cached node database metrics as cached with no invented measurement time', () => {
         const next = receiveRadio(
             localDevice(),

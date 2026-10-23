@@ -49,6 +49,7 @@ describe('remembered nearby devices', () => {
                     firmware: '2.6.11.mfd',
                     connectedAt: null,
                     transport: 'bluetooth',
+                    port: null,
                     readings: [device.readings.temperature],
                 },
             ],

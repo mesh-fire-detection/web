@@ -442,6 +442,79 @@ describe('nearby sessions', () => {
         session.dispose()
     })
 
+    it('keeps one entry per node for equal USB boards that share a port ID', async () => {
+        const port = 'usb:9114:32809:0'
+        const usbRadio = (num: number) => {
+            const radio = mockRadio(num)
+            return {
+                ...radio,
+                connection: { ...radio.connection, id: port, name: '', transport: 'usb' as const },
+            }
+        }
+        const first = usbRadio(123)
+        const second = usbRadio(456)
+        const memory = deviceMemory()
+        const choose = vi
+            .fn<() => Promise<typeof first.connection>>()
+            .mockResolvedValueOnce(first.connection)
+            .mockResolvedValue(second.connection)
+        const session = createNearbySession(choose, { memory })
+        await session.restore()
+        await session.add('usb')
+        first.send(
+            telemetryPacket(123, {
+                case: 'environmentMetrics',
+                value: create(Telemetry.EnvironmentMetricsSchema, { temperature: 24 }),
+            })
+        )
+        expect(session.getSnapshot().devices).toMatchObject([
+            { id: 'usb:node:123', nodeNum: 123, port, state: 'connected' },
+        ])
+        await session.disconnect('usb:node:123')
+        await session.add('usb')
+        expect(session.getSnapshot()).toMatchObject({
+            selectedId: 'usb:node:456',
+            devices: [
+                { id: 'usb:node:456', nodeNum: 456, state: 'connected', history: {} },
+                { id: 'usb:node:123', nodeNum: 123, state: 'disconnected' },
+            ],
+        })
+        expect(
+            session.getSnapshot().devices[1]?.history['environmentMetrics.temperature']
+        ).toHaveLength(1)
+        session.dispose()
+
+        // After a reload the port opens the node last reached through it.
+        const restored = createNearbySession(choose, {
+            memory,
+            known: () => Promise.resolve([second.connection]),
+        })
+        await restored.restore()
+        expect(restored.getSnapshot().devices[0]).toMatchObject({
+            id: 'usb:node:456',
+            state: 'connected',
+        })
+        restored.dispose()
+    })
+
+    it('renames an entry saved under its port ID when another node answers on that port', async () => {
+        const port = 'usb:9114:32809:0'
+        const radio = mockRadio(456)
+        const connection = { ...radio.connection, id: port, name: '', transport: 'usb' as const }
+        const memory = deviceMemory()
+        memory.write([{ ...emptyDevice(port, '', 'usb'), nodeNum: 123 }], port)
+        const session = createNearbySession(() => Promise.resolve(connection), {
+            memory,
+            known: () => Promise.resolve([connection]),
+        })
+        await session.restore()
+        expect(session.getSnapshot().devices).toMatchObject([
+            { id: 'usb:node:456', nodeNum: 456, port, state: 'connected' },
+            { id: 'usb:node:123', nodeNum: 123, state: 'disconnected' },
+        ])
+        session.dispose()
+    })
+
     it('leaves the list unchanged when the chooser is canceled', async () => {
         const session = createNearbySession(() => Promise.resolve(null))
         await session.add()
