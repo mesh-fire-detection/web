@@ -487,6 +487,7 @@ export type OpenProblemsContent = PageHeading & {
         readonly notBuilding: string
     }
     readonly claimCta: string
+    readonly discordCta: string
 }
 
 export type FalsePositiveState = {

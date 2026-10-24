@@ -111,7 +111,7 @@ The next useful thing is not a donation or a mailing list. It is a node that mak
 - Discussions: https://github.com/orgs/mesh-fire-detection/discussions/
 - Contact: contact@meshfiredetection.org
 
-The community URLs in `src/core/config/site.ts` should be confirmed before launch.
+Community links are configured in `src/core/config/site.ts`. Change `SITE.discord` there to update the Discord invite used in the footer and on Open Problems.
 
 ## Audit follow-ups
 

@@ -33,6 +33,13 @@ export function OpenProblemsPage() {
                     >
                         {openProblemsContent.claimCta}
                     </ButtonAnchor>
+                    <ButtonAnchor
+                        href={SITE.discord}
+                        size='md'
+                        iconBefore={<Icon name='discord' size={16} />}
+                    >
+                        {openProblemsContent.discordCta}
+                    </ButtonAnchor>
                 </Row>
             }
         >
@@ -113,6 +120,13 @@ export function OpenProblemsPage() {
                                     iconBefore={<Icon name='github' size={14} />}
                                 >
                                     GitHub
+                                </ButtonAnchor>
+                                <ButtonAnchor
+                                    href={SITE.discord}
+                                    size='sm'
+                                    iconBefore={<Icon name='discord' size={14} />}
+                                >
+                                    {openProblemsContent.discordCta}
                                 </ButtonAnchor>
                             </Row>
                         </Stack>
