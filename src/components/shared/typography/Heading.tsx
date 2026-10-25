@@ -1,6 +1,6 @@
-import type { ReactNode } from 'react'
+import type { ElementType, ReactNode } from 'react'
 
-import { Text, type Tone } from '@components/shared/typography/Text'
+import { TEXT_TONE_CLASS, Text, type Tone } from '@components/shared/typography/Text'
 import { cx } from '@core/format/cx'
 
 type TextAlign = 'start' | 'center' | 'end'
@@ -13,6 +13,7 @@ export type HeadingProps = {
     align?: TextAlign | undefined
     mono?: boolean | undefined
     measure?: number | undefined
+    truncate?: boolean | undefined
     id?: string | undefined
     className?: string | undefined
 }
@@ -25,26 +26,28 @@ export function Heading({
     align = 'start',
     mono = false,
     measure,
+    truncate = false,
     id,
     className,
 }: HeadingProps) {
+    const Component = `h${String(level)}` as ElementType
+
     return (
-        <div
-            aria-level={level}
+        <Component
             className={cx(
                 'hd',
                 `hd_${size}`,
-                `tone_${tone}`,
+                TEXT_TONE_CLASS[tone],
                 align !== 'start' && `align_${align}`,
                 mono && 'txt_mono',
+                truncate && 'txt_truncate',
                 className
             )}
             id={id}
-            role='heading'
             style={measure === undefined ? undefined : { maxWidth: `${String(measure)}ch` }}
         >
             {children}
-        </div>
+        </Component>
     )
 }
 

@@ -23,6 +23,13 @@
     color: var(--text);
 }
 
+.icon_button {
+    width: var(--icon_hit);
+    min-width: var(--icon_hit);
+    height: var(--icon_hit);
+    padding: 0;
+}
+
 .bare {
     display: block;
     width: 100%;

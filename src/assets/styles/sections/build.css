@@ -16,22 +16,6 @@
     min-width: var(--bom_cost_width);
 }
 
-/* Node type cards =========================================================== */
-.ntype {
-    transition:
-        border-color 160ms var(--ease),
-        transform 160ms var(--ease);
-}
-
-.ntype:hover {
-    transform: translateY(-2px);
-    border-color: var(--line_strong);
-}
-
-.ntype_icon {
-    display: inline-flex;
-}
-
 /* Downloads ================================================================= */
 .dl {
     display: flex;
@@ -77,30 +61,6 @@
     color: var(--fire);
 }
 
-/* Assembly steps ============================================================ */
-.steps {
-    position: relative;
-}
-
-.steps_row {
-    padding-block: var(--s_5);
-    border-bottom: 1px solid var(--line);
-}
-
-.steps_row:first-child {
-    padding-top: 0;
-}
-
-.steps_row:last-child {
-    border-bottom: none;
-}
-
-.steps_num {
-    flex: none;
-    width: 2rem;
-    padding-top: var(--s_hair);
-}
-
 /* Nearby device inspection uses the same surfaces and controls as Build. */
 .nearby_announcement {
     position: absolute;
@@ -109,43 +69,6 @@
     overflow: hidden;
     white-space: nowrap;
     clip-path: inset(50%);
-}
-
-/* Disabled, each drops its colours and looks like any other unavailable button. */
-.nearby_add_bluetooth:not([aria-disabled='true']) {
-    border-color: var(--bluetooth);
-    background: var(--bluetooth);
-    color: var(--on_bluetooth);
-}
-
-.nearby_add_bluetooth:not([aria-disabled='true']):hover {
-    border-color: var(--bluetooth_hover);
-    background: var(--bluetooth_hover);
-}
-
-.nearby_add_usb:not([aria-disabled='true']),
-.firmware_connect {
-    border-color: var(--on_usb);
-    background: var(--usb);
-    color: var(--on_usb);
-}
-
-.nearby_add_usb:not([aria-disabled='true']):hover,
-.firmware_connect:hover {
-    border-color: var(--on_usb);
-    background: var(--usb_hover);
-}
-
-/* The USB button inverted, for external firmware resources. */
-.firmware_external {
-    border-color: var(--usb);
-    background: var(--on_usb);
-    color: var(--usb);
-}
-
-.firmware_external:hover {
-    border-color: var(--usb_hover);
-    color: var(--usb_hover);
 }
 
 /* Reserve the tallest wrapped status at this width, including while idle. */
@@ -184,12 +107,6 @@
 
 .nearby_workspace_empty {
     grid-template-columns: minmax(0, 1fr);
-}
-
-/* External power changes what the battery figure means, so it stands out from the note. */
-.nearby_power {
-    color: var(--text);
-    font-weight: 600;
 }
 
 .nearby_count {
@@ -268,21 +185,6 @@
 .nearby_device_actions {
     z-index: 1;
     position: relative;
-}
-
-/* Changing values sit in slots that are always rendered and never wrap, so
-   telemetry updates fill text in place instead of moving adjacent panels. */
-.nearby_line {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.nearby_connection_status .txt {
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
 }
 
 .nearby_sensor_status {
@@ -404,10 +306,6 @@
     gap: var(--s_2);
 }
 
-.nearby_firmware .badge {
-    line-height: 1.2;
-}
-
 .nearby_vitals .nearby_tile > .flex {
     height: 100%;
 }
@@ -424,22 +322,6 @@
 
 .nearby_guide_entry {
     grid-area: 1 / 1;
-}
-
-.nearby_tile_trend {
-    color: var(--text_2);
-}
-
-.nearby_mark_good {
-    color: var(--live_soft);
-}
-
-.nearby_mark_fair {
-    color: var(--warn_soft);
-}
-
-.nearby_mark_bad {
-    color: var(--dead_soft);
 }
 
 .nearby_guide_hidden {
@@ -510,14 +392,7 @@
 }
 
 .nearby_peer_link {
-    display: flex;
     grid-area: 1 / 3;
-    align-items: center;
-    padding: var(--s_1) var(--s_2);
-    gap: var(--s_2);
-    border-radius: var(--r_sm);
-    background: var(--surface_2);
-    color: var(--text_3);
 }
 
 .nearby_peer_readings {

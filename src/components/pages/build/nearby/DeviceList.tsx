@@ -161,7 +161,6 @@ function DeviceEntry({
                     <NodeTag num={device.nodeNum} ours={isMfdNode(device)} />
                     <Stack gap={1} grow minWidth0>
                         <Pressable
-                            role='button'
                             className='bare nearby_select'
                             pressed={selected}
                             accessibleLabel={`${copy.actions.view}: ${name}`}
@@ -173,7 +172,7 @@ function DeviceEntry({
                                 level={3}
                                 size='sm'
                                 tone={recent ? 'muted' : 'default'}
-                                className='nearby_line'
+                                truncate
                             >
                                 {name}
                             </Heading>
@@ -183,7 +182,7 @@ function DeviceEntry({
                     <NodeKindIcon kind={mfdKind(device)} />
                 </Row>
                 <Stack gap={1}>
-                    <Text mono size='xs' tone='faint' className='nearby_line'>
+                    <Text mono size='xs' tone='faint' truncate>
                         {copy.transports[device.transport]} · {copy.battery}{' '}
                         {percent === null ? (
                             battery ? (
@@ -196,11 +195,11 @@ function DeviceEntry({
                         )}
                         {powered ? ` · ${copy.externalPower}` : null}
                     </Text>
-                    <Text mono size='xs' tone='faint' className='nearby_line'>
+                    <Text mono size='xs' tone='faint' truncate>
                         {copy.lastPacket}{' '}
                         {device.lastPacketAt === null ? '—' : <Age time={device.lastPacketAt} />}
                     </Text>
-                    <Text size='xs' tone='faint' className='nearby_line'>
+                    <Text size='xs' tone='faint' truncate>
                         {hint}
                     </Text>
                 </Stack>

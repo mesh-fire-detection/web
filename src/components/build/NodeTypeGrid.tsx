@@ -13,19 +13,10 @@ export function NodeTypeGrid() {
             {NODE_TYPES.map((spec) => {
                 const deployed = nodesByType(spec.type).length
                 return (
-                    <Box
-                        key={spec.type}
-                        tone='surface'
-                        padding={5}
-                        radius='md'
-                        className='ntype'
-                        grow
-                    >
+                    <Box key={spec.type} tone='surface' padding={5} radius='md' lift grow>
                         <Stack gap={4} grow>
                             <Row justify='between' gap={3}>
-                                <Text as='span' tone='fire' className='ntype_icon'>
-                                    <Icon name={spec.icon} size={20} />
-                                </Text>
+                                <Icon name={spec.icon} size={20} tone='fire' />
                                 <Badge>{money(nodeCost(spec.type))}</Badge>
                             </Row>
 

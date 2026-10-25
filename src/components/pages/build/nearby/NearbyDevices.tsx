@@ -42,12 +42,7 @@ export function NearbyDevicesPage() {
                             return (
                                 <div key={transport} className='nearby_add'>
                                     <Button
-                                        variant='secondary'
-                                        className={
-                                            transport === 'usb'
-                                                ? 'nearby_add_usb'
-                                                : 'nearby_add_bluetooth'
-                                        }
+                                        variant={transport}
                                         iconBefore={<Icon name={transport} />}
                                         label={copy.add[transport]}
                                         disabled={availability !== 'available' || snapshot.busy}
@@ -110,7 +105,7 @@ export function NearbyDevicesPage() {
                     </Heading>
                     {snapshot.removed ? (
                         <Row gap={3} wrap={false}>
-                            <Text size='sm' tone='muted' className='nearby_line'>
+                            <Text size='sm' tone='muted' truncate>
                                 {copy.announcements.removed} ·{' '}
                                 {deviceName(snapshot.removed) || copy.unnamed}
                             </Text>

@@ -22,9 +22,10 @@
 - Keep shared code clearly separated from feature-local code.
 - Place entry/bootstrap logic in `src/components/app/`.
 - Put static assets in dedicated asset directories (`styles`, vendor CSS).
-- Shared UI splits by kind: `shared/primitives`, `shared/navigation`,
-  `shared/page`, `shared/typography`, `shared/widgets`. Core splits by role:
-  `format`, `a11y`, `config`, `content`, `map`.
+- Shared UI splits by kind: `shared/forms`, `shared/primitives`,
+  `shared/navigation`, `shared/page`, `shared/typography`, `shared/widgets`.
+  Core splits by role:
+  `format`, `config`, `content`, `map`.
 - Feature widgets used by more than one page live under `components/build` and
   `components/network`, not under a single page.
 - Folders under `src/` need at least two entries (structure gate); do not
@@ -38,11 +39,10 @@ src/
     app/           bootstrap
     layout/        site chrome
     pages/         routes; coverage/ and problems/ keep page-local widgets
-    shared/        primitives by kind
+    shared/        UI grouped by role: forms, primitives, navigation, page, typography, widgets
     build/         widgets used by Home and Build
     network/       widgets used by Home and Map
   core/
-    a11y/
     config/        SITE, APP_ROUTES
     content/       mirrors pages; `as const satisfies` shapes in types.ts
     format/
@@ -53,21 +53,35 @@ src/
 
 These rules are enforced by ESLint (`no-restricted-syntax` plus `jsx-a11y`).
 
-- Host elements are **default-deny**. The allowlist is exactly `div`, `span`,
-  `nav`, `main`, `header`, `footer`, `section`, `article`; every other lowercase
-  element is a lint error. Adding one means editing `ALLOWED_ELEMENTS` in
-  `config/lint/eslint.config.mjs` and justifying it here.
+- Host elements are **default-deny**. The global allowlist is exactly `div`,
+  `span`, `nav`, `main`, `header`, `footer`, `section`, `article`; every other
+  lowercase element is a lint error. Shared components may have a file-scoped
+  native-element exception in `config/lint/eslint.config.mjs`; add only the
+  elements that component uses and list the exception here. Do not expand the
+  global allowlist for component internals.
 - All visual appearance comes from CSS classes (`snake_case`).
 - Client navigation uses `NavHit`, which renders a real `<a href>` via
   react-router `NavLink`. Leaving the site uses `ExternalLink` (`<a>` with
   `rel='noopener noreferrer'`). The host-element `a` is allowed only in those
   two files; `href` stays banned everywhere else.
-- Because most clickables are not native controls, every non-anchor interactive
-  element must carry a literal `role`, `tabIndex={0}`, and an `onKeyDown`
-  honouring Enter and Space for buttons (`activationKeyDown`) or Enter only for
-  `role='link'` (`linkActivationKeyDown`). Prefer `Pressable`.
+- Shared actions use native `button` elements through `Pressable`; shared
+  navigation uses native anchors through `NavHit` and `ExternalLink`. Native
+  controls own keyboard activation and disabled behavior. Use `Pressable` or
+  the action/navigation components rather than recreating those contracts.
+- Native element exceptions stay file-scoped: buttons in
+  `primitives/Pressable.tsx` and `page/DataTable.tsx`; headings in
+  `typography/Heading.tsx`; form controls and submission in `shared/forms/`;
+  tables in `page/DataTable.tsx`; lists in `page/List.tsx`, `StepList.tsx`, and
+  `Timeline.tsx`; code blocks in `typography/Text.tsx`. Reset default
+  presentation in component CSS.
+- Any remaining non-native interactive element must carry a literal `role`,
+  `tabIndex={0}`, and keyboard handling for its role.
 
 ## CSS Standards
+
+- `docs/DESIGN_SYSTEM.md` defines the shared visual language and component
+  contracts. Read it before changing shared UI or visual patterns, and update
+  it when those contracts change.
 
 - Keep style architecture layered, in this order — the import order in
   `src/assets/styles/index.css` is the cascade order:

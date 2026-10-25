@@ -15,8 +15,7 @@ export function FirmwarePage() {
                 <Row gap={3}>
                     <ButtonLink
                         to='/connect'
-                        variant='secondary'
-                        className='firmware_connect'
+                        variant='usb'
                         iconBefore={<Icon name='usb' />}
                         iconAfter={<Icon name='arrow-up-right' />}
                     >
@@ -24,14 +23,14 @@ export function FirmwarePage() {
                     </ButtonLink>
                     <ButtonAnchor
                         href={copy.meshtastic.href}
-                        className='firmware_external'
+                        variant='contrast'
                         iconAfter={<Icon name='arrow-up-right' />}
                     >
                         {copy.meshtastic.label}
                     </ButtonAnchor>
                     <ButtonAnchor
                         href={copy.firmwareRepo.href}
-                        className='firmware_external'
+                        variant='contrast'
                         iconAfter={<Icon name='arrow-up-right' />}
                     >
                         {copy.firmwareRepo.label}

@@ -90,10 +90,10 @@ export function Vitals({ device }: { readonly device: Device }) {
                 tone={percent === null ? (battery ? 'default' : 'muted') : batteryTone(percent)}
             >
                 {powered ? (
-                    <div className='nearby_power'>
+                    <Text as='span' size='inherit' tone='inherit' weight={600}>
                         {copy.externalPower}
                         {percent === null ? null : `, ${copy.byVoltage}`}
-                    </div>
+                    </Text>
                 ) : null}
                 {voltage ? `${readingValue(voltage)} · ` : null}
                 {battery ? <Age time={battery.receivedAt} /> : copy.notReported}
@@ -164,11 +164,11 @@ function TrendLine({
 }) {
     const change = trend(samples)
     return (
-        <div className='nearby_tile_trend'>
+        <Text as='div' size='inherit' tone='muted'>
             {change
                 ? `${TREND_ARROW[change.direction]} ${signedChange(metric, change.change)} ${copy.voltageOver} ${duration(change.latest.at - change.reference.at)}`
                 : copy.trendWaiting}
-        </div>
+        </Text>
     )
 }
 
@@ -209,7 +209,6 @@ export function SensorGrid({
                 return (
                     <Pressable
                         key={metric}
-                        role='button'
                         className='bare nearby_reading'
                         pressed={active === metric}
                         accessibleLabel={label}
@@ -241,10 +240,10 @@ export function SensorGrid({
     )
 }
 
-const MARK_CLASS = {
-    good: 'nearby_mark_good',
-    fair: 'nearby_mark_fair',
-    bad: 'nearby_mark_bad',
+const MARK_TONE = {
+    good: 'liveSoft',
+    fair: 'warnSoft',
+    bad: 'deadSoft',
 } as const
 
 function Toned({ text }: { readonly text: string }) {
@@ -252,9 +251,9 @@ function Toned({ text }: { readonly text: string }) {
         segment.tone === null ? (
             segment.text
         ) : (
-            <span key={segment.start} className={MARK_CLASS[segment.tone]}>
+            <Text key={segment.start} as='span' size='inherit' tone={MARK_TONE[segment.tone]}>
                 {segment.text}
-            </span>
+            </Text>
         )
     )
 }
@@ -278,7 +277,7 @@ function StatCell({
                 tone={value === '—' ? 'muted' : 'default'}
             />
             {note === null ? null : (
-                <Text size='2xs' tone='faint' className='nearby_line'>
+                <Text size='2xs' tone='faint' truncate>
                     {note}
                 </Text>
             )}
@@ -311,7 +310,7 @@ export function MetricHistoryStats({
     return (
         <Stack gap={3}>
             <Row gap={3} justify='between' wrap={false}>
-                <Heading level={3} size='sm' className='nearby_line'>
+                <Heading level={3} size='sm' truncate>
                     {labels.title} · {metricLabel(metric)}
                 </Heading>
                 <Text mono size='xs' tone='faint' className='nearby_count'>

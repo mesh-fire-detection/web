@@ -1,5 +1,6 @@
 import { useState } from 'react'
 
+import { SegmentedField } from '@components/shared/forms/ChoiceFields'
 import type { Column } from '@components/shared/page/DataTable'
 import { DataTable } from '@components/shared/page/DataTable'
 import { Box, Row, Stack } from '@components/shared/primitives/Layout'
@@ -7,7 +8,6 @@ import { Heading } from '@components/shared/typography/Heading'
 import { Text, Value } from '@components/shared/typography/Text'
 import { TextLink } from '@components/shared/widgets/Action'
 import { Badge, Metric } from '@components/shared/widgets/Badge'
-import { SegmentedField } from '@components/shared/widgets/Field'
 import type { Basket, BomLine } from '@core/content/build/bom'
 import {
     BOMS,

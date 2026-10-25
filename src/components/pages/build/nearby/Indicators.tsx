@@ -63,14 +63,13 @@ export function DeviceStatus({
 }) {
     const pending = state === 'connecting' || state === 'initializing'
     return (
-        <div className='nearby_connection_status'>
-            <StatusLabel
-                kind={state === 'connected' ? 'live' : pending ? 'warn' : 'neutral'}
-                pulse={pending}
-            >
-                {recent ? copy.recentStatus : copy.states[state]}
-            </StatusLabel>
-        </div>
+        <StatusLabel
+            kind={state === 'connected' ? 'live' : pending ? 'warn' : 'neutral'}
+            pulse={pending}
+            truncate
+        >
+            {recent ? copy.recentStatus : copy.states[state]}
+        </StatusLabel>
     )
 }
 
@@ -176,12 +175,7 @@ export function SensorStatus({
             <Text as='span' size='sm' weight={600}>
                 {labels[group]}
             </Text>
-            <Text
-                as='span'
-                size='sm'
-                tone={kind === 'neutral' ? 'faint' : kind}
-                className='nearby_line'
-            >
+            <Text as='span' size='sm' tone={kind === 'neutral' ? 'faint' : kind} truncate>
                 {text}
             </Text>
         </div>

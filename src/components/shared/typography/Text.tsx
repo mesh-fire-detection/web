@@ -1,8 +1,33 @@
-import type { CSSProperties, ReactNode } from 'react'
+import type { AriaRole, CSSProperties, ReactNode } from 'react'
 
 import { cx } from '@core/format/cx'
 
-export type Tone = 'default' | 'muted' | 'faint' | 'fire' | 'live' | 'warn' | 'dead' | 'inherit'
+export type Tone =
+    | 'default'
+    | 'muted'
+    | 'faint'
+    | 'fire'
+    | 'live'
+    | 'warn'
+    | 'dead'
+    | 'liveSoft'
+    | 'warnSoft'
+    | 'deadSoft'
+    | 'inherit'
+
+export const TEXT_TONE_CLASS: Readonly<Record<Tone, string>> = {
+    default: 'tone_default',
+    muted: 'tone_muted',
+    faint: 'tone_faint',
+    fire: 'tone_fire',
+    live: 'tone_live',
+    warn: 'tone_warn',
+    dead: 'tone_dead',
+    liveSoft: 'tone_live_soft',
+    warnSoft: 'tone_warn_soft',
+    deadSoft: 'tone_dead_soft',
+    inherit: 'tone_inherit',
+}
 
 export type TextSize = '2xs' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'inherit'
 export type TextWeight = 400 | 500 | 600 | 700
@@ -20,8 +45,11 @@ export type TextProps = {
     uppercase?: boolean | undefined
     measure?: number | undefined
     clamp?: number | undefined
+    truncate?: boolean | undefined
     htmlFor?: string | undefined
     id?: string | undefined
+    ariaLive?: 'off' | 'polite' | 'assertive' | undefined
+    role?: AriaRole | undefined
     className?: string | undefined
 }
 
@@ -36,7 +64,10 @@ export function Text({
     uppercase = false,
     measure,
     clamp,
+    truncate = false,
     id,
+    ariaLive,
+    role,
     className,
 }: TextProps) {
     const style: CSSProperties | undefined =
@@ -52,15 +83,18 @@ export function Text({
             className={cx(
                 'txt',
                 `txt_${size}`,
-                `tone_${tone}`,
+                TEXT_TONE_CLASS[tone],
                 `w_${String(weight)}`,
                 align !== 'start' && `align_${align}`,
                 mono && 'txt_mono',
                 uppercase && 'txt_upper',
                 clamp !== undefined && 'txt_clamp',
+                truncate && 'txt_truncate',
                 className
             )}
             id={id}
+            aria-live={ariaLive}
+            role={role}
             style={style}
         >
             {children}
@@ -84,6 +118,15 @@ export function Value({
         <Text as='span' mono size={size} tone={tone} weight={weight}>
             {children}
         </Text>
+    )
+}
+
+/** Preformatted text in a scrollable shared surface, for payloads and snippets. */
+export function CodeBlock({ children }: { children: string }) {
+    return (
+        <pre className='code_block'>
+            <code>{children}</code>
+        </pre>
     )
 }
 

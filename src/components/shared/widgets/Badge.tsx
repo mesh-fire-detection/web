@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 
-import { Row } from '@components/shared/primitives/Layout'
+import { Box, Row } from '@components/shared/primitives/Layout'
 import { Text } from '@components/shared/typography/Text'
 import { cx } from '@core/format/cx'
 
@@ -11,20 +11,22 @@ export function Badge({
     kind = 'neutral',
     size = 'sm',
     mono = true,
+    uppercase = true,
 }: {
     children: ReactNode
     kind?: StatusKind | undefined
     size?: 'xs' | 'sm' | undefined
     mono?: boolean | undefined
+    uppercase?: boolean | undefined
 }) {
     return (
         <Text
             as='span'
-            className={cx('badge', `badge_${kind}`)}
+            className={cx('badge', `badge_${kind}`, size === 'xs' && 'badge_xs')}
             mono={mono}
             size={size === 'xs' ? '2xs' : 'xs'}
             tone='inherit'
-            uppercase
+            uppercase={uppercase}
             weight={600}
         >
             {children}
@@ -41,10 +43,12 @@ export function StatusLabel({
     kind,
     children,
     pulse = false,
+    truncate = false,
 }: {
     kind: StatusKind
     children: ReactNode
     pulse?: boolean | undefined
+    truncate?: boolean | undefined
 }) {
     return (
         <Row gap={2} wrap={false}>
@@ -54,6 +58,7 @@ export function StatusLabel({
                 mono
                 size='xs'
                 tone={kind === 'neutral' ? 'faint' : kind}
+                truncate={truncate}
                 uppercase
                 weight={600}
             >
@@ -64,19 +69,15 @@ export function StatusLabel({
 }
 
 /** Small key/value pair used across cards and tables. */
-export function Metric({
-    label,
-    value,
-    tone = 'default',
-    hint,
-    size = 'md',
-}: {
+type MetricProps = {
     label: string
     value: ReactNode
-    tone?: 'default' | 'fire' | 'live' | 'warn' | 'dead' | 'muted' | undefined
+    tone?: 'default' | 'muted' | 'faint' | 'fire' | 'live' | 'warn' | 'dead' | undefined
     hint?: string | undefined
     size?: 'sm' | 'md' | 'lg' | undefined
-}) {
+}
+
+export function Metric({ label, value, tone = 'default', hint, size = 'md' }: MetricProps) {
     return (
         <div className={cx('metric', `metric_${size}`)}>
             <Text as='div' mono size='2xs' tone='faint' uppercase weight={600}>
@@ -91,5 +92,14 @@ export function Metric({
                 </Text>
             ) : null}
         </div>
+    )
+}
+
+/** Metric in a shared surface, for summary grids and compact dashboards. */
+export function MetricCard(props: MetricProps) {
+    return (
+        <Box padding={3} radius='sm' tone='surface'>
+            <Metric {...props} />
+        </Box>
     )
 }

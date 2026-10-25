@@ -1,5 +1,8 @@
 import type { ReactNode } from 'react'
 
+import { TEXT_TONE_CLASS, type Tone } from '@components/shared/typography/Text'
+import { cx } from '@core/format/cx'
+
 export type IconName =
     | 'map'
     | 'build'
@@ -106,14 +109,16 @@ export function Icon({
     name,
     size = 16,
     label,
+    tone,
 }: {
     name: IconName
     size?: number | undefined
     label?: string | undefined
+    tone?: Tone | undefined
 }) {
     return (
         <svg
-            className='icon'
+            className={cx('icon', tone && TEXT_TONE_CLASS[tone])}
             width={size}
             height={size}
             viewBox='0 0 24 24'

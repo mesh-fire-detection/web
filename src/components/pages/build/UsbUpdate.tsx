@@ -1,4 +1,5 @@
 import { useUsbUpdate } from '@components/pages/build/useUsbUpdate'
+import { StepItem, StepList } from '@components/shared/page/StepList'
 import { Row, Stack } from '@components/shared/primitives/Layout'
 import { Heading } from '@components/shared/typography/Heading'
 import { Text } from '@components/shared/typography/Text'
@@ -30,8 +31,7 @@ function UpdateActions() {
         <Stack gap={2}>
             <Row gap={3}>
                 <Button
-                    variant='secondary'
-                    className='nearby_add_usb'
+                    variant='usb'
                     iconBefore={<Icon name='usb' />}
                     disabled={support !== 'available' || busy}
                     onClick={() => {
@@ -85,27 +85,15 @@ export function UsbUpdate() {
                     {copy.lede}
                 </Text>
             </Stack>
-            <Stack gap={0} className='steps'>
+            <StepList>
                 {copy.steps.map((step, index) => (
-                    <Row key={step} gap={4} align='start' wrap={false} className='steps_row'>
-                        <Text
-                            as='div'
-                            size='xs'
-                            mono
-                            weight={600}
-                            tone='fire'
-                            className='steps_num'
-                        >
-                            {String(index + 1).padStart(2, '0')}
+                    <StepItem key={step} index={index + 1}>
+                        <Text size='sm' tone='muted' measure={82}>
+                            {step}
                         </Text>
-                        <Stack gap={3} minWidth0>
-                            <Text size='sm' tone='muted' measure={82}>
-                                {step}
-                            </Text>
-                        </Stack>
-                    </Row>
+                    </StepItem>
                 ))}
-            </Stack>
+            </StepList>
             <Text size='xs' tone='faint'>
                 {copy.driveHelp}
             </Text>

@@ -1,4 +1,6 @@
 :root {
     --shadow_lg: 0 24px 60px -24px rgb(0 0 0 / 85%);
     --ease: cubic-bezier(0.22, 1, 0.36, 1);
+    --duration_standard: 160ms;
+    --lift_distance: 2px;
 }

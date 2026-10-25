@@ -112,6 +112,34 @@
     display: grid;
 }
 
+.metric_grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(var(--metric_grid_min), 100%), 1fr));
+}
+
+.collection_toolbar {
+    align-items: end;
+}
+
+.collection_controls {
+    flex: 1 1 auto;
+    align-items: end;
+}
+
+.collection_controls > * {
+    flex: 1 1 var(--collection_control_basis);
+    max-width: var(--collection_control_max);
+}
+
+.collection_count {
+    flex: none;
+    padding-bottom: var(--s_2);
+}
+
+.collection_form {
+    min-width: 0;
+}
+
 .grid_1 {
     grid-template-columns: 1fr;
 }
@@ -259,6 +287,17 @@
 
 .box_border {
     border: 1px solid var(--line);
+}
+
+.box_lift {
+    transition:
+        border-color var(--duration_standard) var(--ease),
+        transform var(--duration_standard) var(--ease);
+}
+
+.box_lift:hover {
+    transform: translateY(calc(-1 * var(--lift_distance)));
+    border-color: var(--line_strong);
 }
 
 .box_accent {

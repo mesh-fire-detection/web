@@ -2,6 +2,7 @@
 import { create } from '@bufbuild/protobuf'
 import { Mesh, ModuleConfig, Telemetry } from '@meshtastic/protobufs'
 import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { StrictMode } from 'react'
 import { MemoryRouter } from 'react-router-dom'
 import { afterEach, describe, expect, it, vi } from 'vitest'
@@ -64,10 +65,8 @@ describe('Connect a Node page', () => {
         vi.mocked(bluetoothSupport).mockReturnValue('unsupported')
         renderPage()
         expect(
-            screen
-                .getByRole('button', { name: 'Add Bluetooth device' })
-                .getAttribute('aria-disabled')
-        ).toBe('true')
+            screen.getByRole('button', { name: 'Add Bluetooth device' }).hasAttribute('disabled')
+        ).toBe(true)
         fireEvent.click(screen.getByRole('button', { name: 'Add Bluetooth device' }))
         expect(chooseBluetoothDevice).not.toHaveBeenCalled()
         // Neither connection works, so one explanation replaces the per-button reasons.
@@ -170,7 +169,10 @@ describe('Connect a Node page', () => {
         expect(screen.queryByText('Connected')).toBeNull()
         const card = screen.getByRole('button', { name: /Reconnect:/ }).closest('.nearby_card')
         expect(card?.classList.contains('nearby_recent')).toBe(true)
-        fireEvent.keyDown(screen.getByRole('button', { name: /Reconnect:/ }), { key: 'Enter' })
+        const user = userEvent.setup()
+        const reconnect = screen.getByRole('button', { name: /Reconnect:/ })
+        reconnect.focus()
+        await user.keyboard('{Enter}')
         await waitFor(() => {
             expect(screen.getByText('1 added · 1 connected')).toBeDefined()
         })
@@ -240,14 +242,16 @@ describe('Connect a Node page', () => {
         expect(screen.queryByText('No active connection')).toBeNull()
         expect(screen.queryByText('Device details')).toBeNull()
         expect(chooseBluetoothDevice).not.toHaveBeenCalled()
-        fireEvent.keyDown(toggle, { key: 'Enter' })
+        const user = userEvent.setup()
+        toggle.focus()
+        await user.keyboard('{Enter}')
         expect(toggle.getAttribute('aria-expanded')).toBe('false')
         expect(screen.queryByRole('button', { name: /Reconnect:/ })).toBeNull()
-        fireEvent.keyDown(toggle, { key: 'Enter' })
+        await user.keyboard('{Enter}')
         expect(toggle.getAttribute('aria-expanded')).toBe('true')
-        fireEvent.keyDown(screen.getByRole('button', { name: 'Reconnect: Meshtastic_123' }), {
-            key: ' ',
-        })
+        const reconnect = screen.getByRole('button', { name: 'Reconnect: Meshtastic_123' })
+        reconnect.focus()
+        await user.keyboard('[Space]')
         await waitFor(() => {
             expect(screen.getByText('2 added · 1 connected')).toBeDefined()
         })

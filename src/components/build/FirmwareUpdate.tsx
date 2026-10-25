@@ -1,3 +1,4 @@
+import { StepItem, StepList } from '@components/shared/page/StepList'
 import { Row, Stack } from '@components/shared/primitives/Layout'
 import { Heading } from '@components/shared/typography/Heading'
 import { Text } from '@components/shared/typography/Text'
@@ -38,25 +39,15 @@ export function FirmwareUpdate({ firmware }: { readonly firmware: string }) {
                     </Text>
                 )}
             </Stack>
-            <Stack gap={0} className='steps'>
+            <StepList>
                 {copy.steps.map((step, index) => (
-                    <Row key={step} gap={4} align='start' wrap={false} className='steps_row'>
-                        <Text
-                            as='div'
-                            size='xs'
-                            mono
-                            weight={600}
-                            tone='fire'
-                            className='steps_num'
-                        >
-                            {String(index + 1).padStart(2, '0')}
-                        </Text>
+                    <StepItem key={step} index={index + 1}>
                         <Text size='sm' tone='muted' measure={82}>
                             {step}
                         </Text>
-                    </Row>
+                    </StepItem>
                 ))}
-            </Stack>
+            </StepList>
             <Stack gap={3}>
                 <ButtonLink to='/firmware' variant='primary'>
                     {copy.cta}

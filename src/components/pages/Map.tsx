@@ -6,11 +6,13 @@ import { LazyNetworkMap } from '@components/network/LazyNetworkMap'
 import { MapLegend } from '@components/network/MapLegend'
 import { NodePanel } from '@components/network/NodePanel'
 import { NodeTable } from '@components/network/NodeTable'
+import { MetricGrid } from '@components/shared/page/MetricGrid'
 import { SectionHead } from '@components/shared/page/SectionHead'
-import { Box, Grid, Row, Section, Stack } from '@components/shared/primitives/Layout'
+import { Timeline, TimelineItem } from '@components/shared/page/Timeline'
+import { Box, Section, Stack } from '@components/shared/primitives/Layout'
 import { Heading } from '@components/shared/typography/Heading'
 import { Text } from '@components/shared/typography/Text'
-import { Metric } from '@components/shared/widgets/Badge'
+import { MetricCard } from '@components/shared/widgets/Badge'
 import { Callout } from '@components/shared/widgets/Callout'
 import { SampleDataBanner } from '@components/shared/widgets/SampleDataBanner'
 import { nodeCost } from '@core/content/build/bom'
@@ -69,24 +71,29 @@ export function MapPage() {
                         </Callout>
                     )}
 
-                    <Grid columns={5} minColumnWidth={150} gap={5}>
-                        <Metric label='Online' value={counts.online} tone='live' size='lg' />
-                        <Metric label='Degraded' value={counts.degraded} tone='warn' size='lg' />
-                        <Metric label='Offline' value={counts.offline} tone='dead' size='lg' />
-                        <Metric
+                    <MetricGrid>
+                        <MetricCard label='Online' value={counts.online} tone='live' size='lg' />
+                        <MetricCard
+                            label='Degraded'
+                            value={counts.degraded}
+                            tone='warn'
+                            size='lg'
+                        />
+                        <MetricCard label='Offline' value={counts.offline} tone='dead' size='lg' />
+                        <MetricCard
                             label='Marginal links'
                             value={marginalLinks}
                             tone={marginalLinks > 0 ? 'warn' : 'live'}
                             size='lg'
                             hint={`of ${LINKS.length} total`}
                         />
-                        <Metric
+                        <MetricCard
                             hint={`${formatLength(totalHeight, system)} of mast total`}
                             label='Longest hop'
                             size='lg'
                             value={formatDistance(longestHop, system)}
                         />
-                    </Grid>
+                    </MetricGrid>
                 </Stack>
             </Section>
 
@@ -108,18 +115,17 @@ export function MapPage() {
                         title={mapContent.log.title}
                         lede={mapContent.log.lede}
                     />
-                    <Stack gap={0}>
+                    <Timeline>
                         {mapContent.log.entries.map((entry) => (
-                            <Row
+                            <TimelineItem
                                 key={entry.date}
-                                gap={5}
-                                align='start'
-                                wrap={false}
-                                className='log_row'
+                                metaWidth='md'
+                                meta={
+                                    <Text as='span' size='xs' mono tone='faint'>
+                                        {entry.date}
+                                    </Text>
+                                }
                             >
-                                <Text as='span' size='xs' mono tone='faint' className='log_date'>
-                                    {entry.date}
-                                </Text>
                                 <Text
                                     size='sm'
                                     tone={
@@ -133,9 +139,9 @@ export function MapPage() {
                                 >
                                     {formatCopy(entry.event, system)}
                                 </Text>
-                            </Row>
+                            </TimelineItem>
                         ))}
-                    </Stack>
+                    </Timeline>
                     <Heading level={3} size='sm' tone='faint'>
                         {mapContent.log.older}
                     </Heading>

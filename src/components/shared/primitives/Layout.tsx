@@ -20,7 +20,7 @@ type FlexProps = {
     style?: CSSProperties | undefined
     id?: string | undefined
     tabIndex?: number | undefined
-    role?: 'group' | 'list' | 'toolbar' | 'tablist' | 'presentation' | undefined
+    role?: 'group' | 'list' | 'listitem' | 'toolbar' | 'tablist' | 'presentation' | undefined
     ariaLabel?: string | undefined
 }
 
@@ -215,6 +215,7 @@ export function Box({
     border = true,
     accent,
     grow = false,
+    lift = false,
     className,
     as: Component = 'div',
     id,
@@ -235,6 +236,7 @@ export function Box({
     border?: boolean | undefined
     accent?: 'fire' | 'live' | 'warn' | 'dead' | undefined
     grow?: boolean | undefined
+    lift?: boolean | undefined
     className?: string | undefined
     as?: 'div' | 'article' | undefined
     id?: string | undefined
@@ -251,6 +253,7 @@ export function Box({
                 border && 'box_border',
                 accent && `box_accent box_accent_${accent}`,
                 grow && 'grow',
+                lift && 'box_lift',
                 className
             )}
             id={id}

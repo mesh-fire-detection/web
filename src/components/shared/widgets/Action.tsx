@@ -5,7 +5,8 @@ import { NavHit } from '@components/shared/navigation/NavHit'
 import { Pressable } from '@components/shared/primitives/Pressable'
 import { cx } from '@core/format/cx'
 
-export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger'
+export type ButtonVariant =
+    'primary' | 'secondary' | 'ghost' | 'danger' | 'bluetooth' | 'usb' | 'contrast'
 export type ButtonSize = 'sm' | 'md' | 'lg'
 
 type ActionBase = {
@@ -32,6 +33,8 @@ export function Button({
     onClick,
     disabled = false,
     pressed,
+    loading = false,
+    type = 'button',
     label,
     className,
     ariaControls,
@@ -41,6 +44,8 @@ export function Button({
     onClick?: (() => void) | undefined
     disabled?: boolean | undefined
     pressed?: boolean | undefined
+    loading?: boolean | undefined
+    type?: 'button' | 'submit' | 'reset' | undefined
     label?: string | undefined
     ariaControls?: string | undefined
     ariaExpanded?: boolean | undefined
@@ -51,19 +56,51 @@ export function Button({
             accessibleLabel={label}
             ariaControls={ariaControls}
             ariaExpanded={ariaExpanded}
-            className={actionClass(variant, size, full, className)}
-            disabled={disabled}
+            busy={loading}
+            className={actionClass(variant, size, full, cx(loading && 'act_loading', className))}
+            disabled={disabled || loading}
             id={id}
             onActivate={() => {
                 onClick?.()
             }}
             pressed={pressed}
-            role='button'
+            type={type}
         >
-            {iconBefore}
-            {children}
-            {iconAfter}
+            <span className='act_content'>
+                {iconBefore}
+                {children}
+                {iconAfter}
+            </span>
         </Pressable>
+    )
+}
+
+export function IconButton({
+    children,
+    label,
+    variant = 'ghost',
+    onClick,
+    disabled = false,
+    className,
+}: {
+    children: ReactNode
+    label: string
+    variant?: ButtonVariant | undefined
+    onClick: () => void
+    disabled?: boolean | undefined
+    className?: string | undefined
+}) {
+    return (
+        <Button
+            className={cx('icon_button', className)}
+            disabled={disabled}
+            label={label}
+            onClick={onClick}
+            size='sm'
+            variant={variant}
+        >
+            {children}
+        </Button>
     )
 }
 
@@ -190,12 +227,7 @@ export function BareButton({
     className?: string | undefined
 }) {
     return (
-        <Pressable
-            accessibleLabel={label}
-            className={cx('bare', className)}
-            onActivate={onClick}
-            role='button'
-        >
+        <Pressable accessibleLabel={label} className={cx('bare', className)} onActivate={onClick}>
             {children}
         </Pressable>
     )
@@ -211,7 +243,6 @@ export function SkipLink({ to, children }: { to: string; children: ReactNode }) 
                 const target = document.querySelector(`#${id}`)
                 if (target instanceof HTMLElement) target.focus()
             }}
-            role='link'
         >
             {children}
         </Pressable>

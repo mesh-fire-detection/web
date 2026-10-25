@@ -54,6 +54,34 @@
     overflow: hidden;
 }
 
+.txt_truncate {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.code_block {
+    max-width: 100%;
+    margin: 0;
+    padding: var(--s_2) var(--s_3);
+    overflow: auto;
+    border-radius: var(--r_sm);
+    background: var(--bg_sunken);
+    color: var(--text_2);
+    font-size: var(--fs_xs);
+    line-height: 1.5;
+    font-family: var(--font_mono);
+    font-variant-numeric: tabular-nums;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.code_block code {
+    color: inherit;
+    font: inherit;
+}
+
 .w_400 {
     font-weight: 400;
 }
@@ -104,6 +132,18 @@
 
 .tone_dead {
     color: var(--dead);
+}
+
+.tone_live_soft {
+    color: var(--live_soft);
+}
+
+.tone_warn_soft {
+    color: var(--warn_soft);
+}
+
+.tone_dead_soft {
+    color: var(--dead_soft);
 }
 
 .tone_inherit {

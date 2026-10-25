@@ -11,6 +11,7 @@ import { useEffect, useRef, useState } from 'react'
 
 import { useUnitSystem } from '@components/app/UnitsProvider'
 import { Canvas } from '@components/shared/primitives/Layout'
+import { ErrorState } from '@components/shared/widgets/Callout'
 import { findNode, type MeshNode } from '@core/content/network/network'
 import { linksToGeoJson, networkBounds, nodesToGeoJson } from '@core/map/mapGeo'
 import { BASEMAP_STYLE, LINK_COLORS, NODE_COLORS } from '@core/map/mapStyle'
@@ -243,12 +244,11 @@ export function NetworkMap({
     }, [selectedId])
 
     return failed ? (
-        <Canvas
-            className='map map_failed'
-            style={{ height }}
-            role='img'
-            ariaLabel='Network map unavailable'
-        />
+        <div className='map map_failed' style={{ height }}>
+            <ErrorState title='Map unavailable'>
+                This browser could not initialize the map. The node list below is still available.
+            </ErrorState>
+        </div>
     ) : (
         <Canvas
             ref={containerRef}

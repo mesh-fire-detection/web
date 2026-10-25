@@ -231,6 +231,18 @@ export default tseslint.config(
     },
 
     {
+        files: ['src/components/shared/primitives/Pressable.tsx'],
+        rules: {
+            'no-restricted-syntax': [
+                'error',
+                hostElementRule([...ALLOWED_ELEMENTS, 'button']),
+                hrefRule,
+                inlineStyleRule,
+            ],
+        },
+    },
+
+    {
         files: [
             'src/components/shared/navigation/ExternalLink.tsx',
             'src/components/shared/navigation/NavHit.tsx',
@@ -245,11 +257,118 @@ export default tseslint.config(
     },
 
     {
-        files: ['src/components/shared/widgets/Field.tsx'],
+        files: ['src/components/shared/forms/Field.tsx'],
+        rules: {
+            'no-restricted-syntax': [
+                'error',
+                hostElementRule([...ALLOWED_ELEMENTS, 'input', 'textarea', 'label']),
+                hrefRule,
+                inlineStyleRule,
+            ],
+        },
+    },
+
+    {
+        files: ['src/components/shared/forms/NumericFields.tsx'],
         rules: {
             'no-restricted-syntax': [
                 'error',
                 hostElementRule([...ALLOWED_ELEMENTS, 'input', 'select', 'option', 'label']),
+                hrefRule,
+                inlineStyleRule,
+            ],
+        },
+    },
+
+    {
+        files: ['src/components/shared/forms/ChoiceFields.tsx'],
+        rules: {
+            'no-restricted-syntax': [
+                'error',
+                hostElementRule([...ALLOWED_ELEMENTS, 'input', 'label', 'fieldset', 'legend']),
+                hrefRule,
+                inlineStyleRule,
+            ],
+        },
+    },
+
+    {
+        files: ['src/components/shared/forms/Form.tsx'],
+        rules: {
+            'no-restricted-syntax': [
+                'error',
+                hostElementRule([...ALLOWED_ELEMENTS, 'form', 'fieldset', 'legend']),
+                hrefRule,
+                inlineStyleRule,
+            ],
+        },
+    },
+
+    {
+        files: ['src/components/shared/typography/Heading.tsx'],
+        rules: {
+            'no-restricted-syntax': [
+                'error',
+                hostElementRule([...ALLOWED_ELEMENTS, 'h1', 'h2', 'h3', 'h4', 'h5', 'h6']),
+                hrefRule,
+            ],
+        },
+    },
+
+    {
+        files: ['src/components/shared/typography/Text.tsx'],
+        rules: {
+            'no-restricted-syntax': [
+                'error',
+                hostElementRule([...ALLOWED_ELEMENTS, 'pre', 'code']),
+                hrefRule,
+            ],
+        },
+    },
+
+    {
+        files: ['src/components/shared/page/List.tsx'],
+        rules: {
+            'no-restricted-syntax': [
+                'error',
+                hostElementRule([...ALLOWED_ELEMENTS, 'ul', 'ol', 'li', 'dl', 'dt', 'dd']),
+                hrefRule,
+                inlineStyleRule,
+            ],
+        },
+    },
+
+    {
+        files: [
+            'src/components/shared/page/StepList.tsx',
+            'src/components/shared/page/Timeline.tsx',
+        ],
+        rules: {
+            'no-restricted-syntax': [
+                'error',
+                hostElementRule([...ALLOWED_ELEMENTS, 'ol', 'li']),
+                hrefRule,
+                inlineStyleRule,
+            ],
+        },
+    },
+
+    {
+        files: ['src/components/shared/page/DataTable.tsx'],
+        rules: {
+            'no-restricted-syntax': [
+                'error',
+                hostElementRule([
+                    ...ALLOWED_ELEMENTS,
+                    'table',
+                    'caption',
+                    'thead',
+                    'tbody',
+                    'tr',
+                    'th',
+                    'td',
+                    'button',
+                ]),
                 hrefRule,
                 inlineStyleRule,
             ],
@@ -307,9 +426,6 @@ export default tseslint.config(
     {
         files: [
             'src/components/shared/primitives/Layout.tsx',
-            'src/components/shared/typography/Text.tsx',
-            'src/components/shared/typography/Heading.tsx',
-            'src/components/shared/page/DataTable.tsx',
             'src/components/network/NetworkMap.tsx',
             'src/components/network/LazyNetworkMap.tsx',
         ],

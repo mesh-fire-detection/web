@@ -1,89 +1,53 @@
-import type { KeyboardEvent as ReactKeyboardEvent, ReactNode, Ref } from 'react'
-
-import { activationKeyDown, linkActivationKeyDown } from '@core/a11y/interactive'
+import type { ButtonHTMLAttributes, ReactNode, Ref } from 'react'
 
 type PressableProperties = {
     readonly children: ReactNode
     readonly className?: string | undefined
     readonly onActivate: () => void
-    readonly role: 'button' | 'link'
     readonly accessibleLabel?: string | undefined
     readonly disabled?: boolean | undefined
     readonly pressed?: boolean | undefined
+    readonly busy?: boolean | undefined
+    readonly type?: ButtonHTMLAttributes<HTMLButtonElement>['type'] | undefined
     readonly ariaControls?: string | undefined
     readonly ariaExpanded?: boolean | undefined
-    readonly ariaCurrent?: 'page' | undefined
     readonly ariaHasPopup?: boolean | 'menu' | undefined
     readonly id?: string | undefined
-    readonly ref?: Ref<HTMLDivElement> | undefined
+    readonly ref?: Ref<HTMLButtonElement> | undefined
 }
 
-/**
- * Activate-on-click control with the keyboard contract the markup rules require.
- * Roles are spelled out per branch so jsx-a11y can verify them literally.
- * Links activate on Enter only (Space scrolls, matching native `<a>`).
- */
+/** Native button with shared activation, disabled, and toggle semantics. */
 export const Pressable = ({
     children,
     className,
     onActivate,
-    role,
     accessibleLabel,
     disabled = false,
     pressed,
+    busy = false,
+    type = 'button',
     ariaControls,
     ariaExpanded,
-    ariaCurrent,
     ariaHasPopup,
     id,
     ref,
 }: PressableProperties) => {
-    const onKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
-        if (disabled) return
-        if (role === 'link') linkActivationKeyDown(event, onActivate)
-        else activationKeyDown(event, onActivate)
-    }
-
-    const activate = () => {
-        if (disabled) return
-        onActivate()
-    }
-
-    return role === 'link' ? (
-        <div
+    return (
+        <button
             ref={ref}
             aria-controls={ariaControls}
-            aria-current={ariaCurrent}
-            aria-disabled={disabled || undefined}
-            aria-expanded={ariaExpanded}
-            aria-haspopup={ariaHasPopup}
-            aria-label={accessibleLabel}
-            className={className}
-            id={id}
-            onClick={activate}
-            onKeyDown={onKeyDown}
-            role='link'
-            tabIndex={disabled ? -1 : 0}
-        >
-            {children}
-        </div>
-    ) : (
-        <div
-            ref={ref}
-            aria-controls={ariaControls}
-            aria-disabled={disabled || undefined}
+            aria-busy={busy || undefined}
             aria-expanded={ariaExpanded}
             aria-haspopup={ariaHasPopup}
             aria-label={accessibleLabel}
             aria-pressed={pressed}
             className={className}
+            disabled={disabled}
             id={id}
-            onClick={activate}
-            onKeyDown={onKeyDown}
-            role='button'
-            tabIndex={disabled ? -1 : 0}
+            onClick={onActivate}
+            type={type}
         >
             {children}
-        </div>
+        </button>
     )
 }

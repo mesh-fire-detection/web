@@ -10,11 +10,7 @@ describe('Pressable', () => {
         const user = userEvent.setup()
         const onActivate = vi.fn()
 
-        render(
-            <Pressable onActivate={onActivate} role='button'>
-                Go
-            </Pressable>
-        )
+        render(<Pressable onActivate={onActivate}>Go</Pressable>)
 
         const control = screen.getByRole('button', { name: 'Go' })
         control.focus()
@@ -24,21 +20,21 @@ describe('Pressable', () => {
         expect(onActivate).toHaveBeenCalledTimes(2)
     })
 
-    it('activates a link role on Enter only', async () => {
+    it('uses the native disabled state and prevents activation', async () => {
         const user = userEvent.setup()
         const onActivate = vi.fn()
 
         render(
-            <Pressable onActivate={onActivate} role='link'>
+            <Pressable disabled onActivate={onActivate}>
                 Jump
             </Pressable>
         )
 
-        const control = screen.getByRole('link', { name: 'Jump' })
-        control.focus()
+        const control = screen.getByRole('button', { name: 'Jump' })
+        expect((control as HTMLButtonElement).disabled).toBe(true)
         await user.keyboard('{Enter}')
         await user.keyboard(' ')
 
-        expect(onActivate).toHaveBeenCalledTimes(1)
+        expect(onActivate).not.toHaveBeenCalled()
     })
 })

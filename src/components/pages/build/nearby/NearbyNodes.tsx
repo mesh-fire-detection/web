@@ -4,6 +4,7 @@ import { Age, NodeTag } from '@components/pages/build/nearby/Indicators'
 import { Stack } from '@components/shared/primitives/Layout'
 import { Text } from '@components/shared/typography/Text'
 import { Button } from '@components/shared/widgets/Action'
+import { Badge } from '@components/shared/widgets/Badge'
 import { Icon } from '@components/shared/widgets/Icon'
 import { nearbyDetailsContent as copy } from '@core/content/build/nearby/deviceDetails'
 import { isMfdNode } from '@core/nearby/firmware'
@@ -25,7 +26,7 @@ function Link({ peer }: { readonly peer: Peer }) {
     if (peer.hopsAway === 0 && peer.snr !== null) {
         const quality = signalQuality(peer.snr)
         return (
-            <Text size='xs' tone={SIGNAL_TONE[quality]}>
+            <Text as='span' size='xs' tone={SIGNAL_TONE[quality]}>
                 {copy.quality[quality]} · {formatNumber(peer.snr, 'dB')}
                 {peer.rssi === null ? '' : ` · ${formatNumber(peer.rssi, 'dBm')}`}
             </Text>
@@ -38,7 +39,7 @@ function Link({ peer }: { readonly peer: Peer }) {
               ? copy.direct
               : `${String(peer.hopsAway)} ${peer.hopsAway === 1 ? copy.hop : copy.hops}`
     return (
-        <Text size='xs' tone='muted'>
+        <Text as='span' size='xs' tone='muted'>
             {route}
         </Text>
     )
@@ -74,8 +75,10 @@ function PeerRow({ peer }: { readonly peer: Peer }) {
                 )}
             </Text>
             <div className='nearby_peer_link'>
-                <Icon name='radio' />
-                <Link peer={peer} />
+                <Badge kind='neutral' size='xs' mono={false} uppercase={false}>
+                    <Icon name='radio' size={14} />
+                    <Link peer={peer} />
+                </Badge>
             </div>
             {values.length > 0 ? (
                 <Text size='xs' tone='muted' className='nearby_peer_readings'>

@@ -2,7 +2,7 @@ import { useUnitSystem } from '@components/app/UnitsProvider'
 import { Box, Divider, Grid, Row, Stack } from '@components/shared/primitives/Layout'
 import { Heading } from '@components/shared/typography/Heading'
 import { Text } from '@components/shared/typography/Text'
-import { Button } from '@components/shared/widgets/Action'
+import { IconButton } from '@components/shared/widgets/Action'
 import { Badge, Metric, StatusLabel } from '@components/shared/widgets/Badge'
 import { Icon } from '@components/shared/widgets/Icon'
 import { findNode, LINKS, linkQuality, type MeshNode } from '@core/content/network/network'
@@ -33,9 +33,9 @@ export function NodePanel({ node, onClose }: { node: MeshNode; onClose: () => vo
                             {node.id} · {coordinate(node.position)}
                         </Text>
                     </Stack>
-                    <Button variant='ghost' size='sm' label='Close node details' onClick={onClose}>
+                    <IconButton label='Close node details' onClick={onClose}>
                         <Icon name='close' size={16} />
-                    </Button>
+                    </IconButton>
                 </Row>
 
                 <Divider space={0} />

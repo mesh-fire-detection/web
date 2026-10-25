@@ -1,6 +1,7 @@
 import { Page } from '@components/layout/Page'
 import { List, ListItem } from '@components/shared/page/List'
 import { SectionHead } from '@components/shared/page/SectionHead'
+import { Timeline, TimelineItem } from '@components/shared/page/Timeline'
 import { Box, Container, Grid, Row, Section, Stack } from '@components/shared/primitives/Layout'
 import { Heading } from '@components/shared/typography/Heading'
 import { Text } from '@components/shared/typography/Text'
@@ -115,27 +116,25 @@ export function AboutPage() {
                         lede={copy.roadmap.lede}
                     />
 
-                    <Stack gap={0}>
+                    <Timeline>
                         {copy.roadmap.items.map((item) => (
-                            <Row
+                            <TimelineItem
                                 key={item.title}
-                                gap={5}
-                                align='start'
-                                wrap={false}
-                                className='roadmap_row'
+                                metaWidth='sm'
+                                meta={
+                                    <Text
+                                        as='span'
+                                        size='2xs'
+                                        mono
+                                        uppercase
+                                        weight={600}
+                                        tone={item.done ? 'live' : 'faint'}
+                                    >
+                                        {item.when}
+                                    </Text>
+                                }
                             >
-                                <Text
-                                    as='span'
-                                    size='2xs'
-                                    mono
-                                    uppercase
-                                    weight={600}
-                                    tone={item.done ? 'live' : 'faint'}
-                                    className='roadmap_when'
-                                >
-                                    {item.when}
-                                </Text>
-                                <Stack gap={1} minWidth0>
+                                <Stack gap={1}>
                                     <Row gap={2}>
                                         <Heading
                                             level={3}
@@ -152,9 +151,9 @@ export function AboutPage() {
                                         {item.detail}
                                     </Text>
                                 </Stack>
-                            </Row>
+                            </TimelineItem>
                         ))}
-                    </Stack>
+                    </Timeline>
                 </Stack>
             </Section>
 

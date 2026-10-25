@@ -44,8 +44,8 @@ body {
 
 :focus-visible {
     border-radius: var(--r_sm);
-    outline: 2px solid var(--fire);
-    outline-offset: 2px;
+    outline: var(--focus_width) solid var(--fire);
+    outline-offset: var(--focus_offset);
 }
 
 button {
@@ -56,15 +56,20 @@ button {
     cursor: pointer;
 }
 
-/* Most clickables here are divs carrying a role, not native controls, so the
-   `button` rule above never reaches them. Key off the role instead. */
-[role='button'],
-[role='link'] {
-    cursor: pointer;
+button:disabled {
+    cursor: not-allowed;
 }
 
-[aria-disabled='true'] {
-    cursor: not-allowed;
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+figure,
+blockquote {
+    margin: 0;
 }
 
 input,

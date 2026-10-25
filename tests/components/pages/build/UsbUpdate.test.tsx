@@ -38,8 +38,8 @@ describe('USB update actions', () => {
         expect(pickUf2Drive).toHaveBeenCalledOnce()
         expect(fetchUf2).not.toHaveBeenCalled()
         expect(
-            screen.getByRole('button', { name: 'Flash firmware' }).getAttribute('aria-disabled')
-        ).toBe('true')
+            screen.getByRole('button', { name: 'Flash firmware' }).hasAttribute('disabled')
+        ).toBe(true)
         selection.resolve(directory)
         expect(
             await within(screen.getByRole('status')).findByText(
@@ -59,8 +59,8 @@ describe('USB update actions', () => {
         fireEvent.click(screen.getByRole('button', { name: 'Flash firmware' }))
         await waitFor(() => {
             expect(
-                screen.getByRole('button', { name: 'Flash firmware' }).getAttribute('aria-disabled')
-            ).not.toBe('true')
+                screen.getByRole('button', { name: 'Flash firmware' }).hasAttribute('disabled')
+            ).toBe(false)
         })
         expect(fetchUf2).not.toHaveBeenCalled()
         expect(screen.getByRole('status').textContent).toBe('')

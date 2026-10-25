@@ -192,13 +192,11 @@ export function HomePage() {
                                 tone='surface'
                                 padding={5}
                                 radius='md'
-                                className='problem_teaser'
+                                lift
                                 grow
                             >
                                 <Stack gap={3} grow>
-                                    <Text as='span' tone='fire' className='problem_teaser_icon'>
-                                        <Icon name='problem' size={18} />
-                                    </Text>
+                                    <Icon name='problem' size={18} tone='fire' />
                                     <Heading level={3} size='sm'>
                                         {problem.title}
                                     </Heading>

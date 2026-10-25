@@ -1,3 +1,4 @@
+import { StepItem, StepList } from '@components/shared/page/StepList'
 import { Box, Row, Stack } from '@components/shared/primitives/Layout'
 import { Heading } from '@components/shared/typography/Heading'
 import { Text } from '@components/shared/typography/Text'
@@ -8,20 +9,10 @@ export function AssemblySteps() {
 
     return (
         <Stack gap={4}>
-            <Stack gap={0} className='steps'>
+            <StepList>
                 {ASSEMBLY.map((step, index) => (
-                    <Row key={step.title} gap={4} align='start' wrap={false} className='steps_row'>
-                        <Text
-                            as='div'
-                            size='xs'
-                            mono
-                            weight={600}
-                            tone='fire'
-                            className='steps_num'
-                        >
-                            {String(index + 1).padStart(2, '0')}
-                        </Text>
-                        <Stack gap={2} minWidth0>
+                    <StepItem key={step.title} index={index + 1}>
+                        <Stack gap={2}>
                             <Row justify='between' gap={3}>
                                 <Heading level={3} size='sm'>
                                     {step.title}
@@ -34,9 +25,9 @@ export function AssemblySteps() {
                                 {step.detail}
                             </Text>
                         </Stack>
-                    </Row>
+                    </StepItem>
                 ))}
-            </Stack>
+            </StepList>
 
             <Box tone='surface-2' padding={4} radius='sm'>
                 <Text size='sm' tone='muted'>

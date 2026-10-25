@@ -1,29 +1,3 @@
-.log_row {
-    padding-block: var(--s_4);
-    border-bottom: 1px solid var(--line);
-}
-
-.log_row:last-child {
-    border-bottom: none;
-}
-
-.log_date {
-    flex: none;
-    width: 6.5rem;
-    padding-top: var(--s_hair);
-}
-
-@media (width <= 560px) {
-    .log_row {
-        flex-direction: column;
-        gap: var(--s_1);
-    }
-
-    .log_date {
-        width: auto;
-    }
-}
-
 /* Node table ================================================================ */
 .node_row {
     border-radius: var(--r_sm);
@@ -53,6 +27,10 @@
         linear-gradient(var(--line) 1px, transparent 1px),
         linear-gradient(90deg, var(--line) 1px, transparent 1px);
     background-size: 32px 32px;
+}
+
+.map_failed .error_state {
+    width: min(var(--feedback_max), calc(100% - var(--s_6)));
 }
 
 .map_legend {

@@ -1,6 +1,7 @@
 /* ------------------------------------------------------------- Actions --- */
 .act {
     display: inline-flex;
+    position: relative;
     align-items: center;
     justify-content: center;
     gap: var(--s_2);
@@ -19,14 +20,41 @@
         transform 140ms var(--ease);
 }
 
-.act:not([aria-disabled='true']):active {
-    transform: translateY(1px);
+.act_content {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--s_2);
 }
 
-/* Buttons are Pressable divs, which report disabled through aria-disabled. */
-.act[aria-disabled='true'] {
+.act_loading .act_content {
+    visibility: hidden;
+}
+
+.act_loading::after {
+    position: absolute;
+    width: var(--spinner_size);
+    height: var(--spinner_size);
+    border: 2px solid currentcolor;
+    border-radius: var(--r_full);
+    border-right-color: transparent;
+    content: '';
+    animation: act-spin 700ms linear infinite;
+}
+
+@keyframes act-spin {
+    to {
+        transform: rotate(1turn);
+    }
+}
+
+.act:disabled {
     cursor: not-allowed;
     opacity: 0.45;
+}
+
+.act:not(:disabled):active {
+    transform: translateY(1px);
 }
 
 .act_sm {
@@ -52,7 +80,7 @@
     color: var(--on_fire);
 }
 
-.act_primary:not([aria-disabled='true']):hover {
+.act_primary:not(:disabled):hover {
     background: var(--fire_hover);
 }
 
@@ -62,7 +90,7 @@
     color: var(--text);
 }
 
-.act_secondary:not([aria-disabled='true']):hover {
+.act_secondary:not(:disabled):hover {
     border-color: var(--line_hover);
     background: var(--surface_3);
 }
@@ -72,7 +100,7 @@
     color: var(--text_2);
 }
 
-.act_ghost:not([aria-disabled='true']):hover {
+.act_ghost:not(:disabled):hover {
     background: var(--surface_2);
     color: var(--text);
 }
@@ -83,8 +111,51 @@
     color: var(--dead);
 }
 
-.act_danger:not([aria-disabled='true']):hover {
+.act_danger:not(:disabled):hover {
     background: var(--dead_hover);
+}
+
+.act_bluetooth {
+    border-color: var(--bluetooth);
+    background: var(--bluetooth);
+    color: var(--on_bluetooth);
+}
+
+.act_bluetooth:disabled {
+    border-color: var(--line_strong);
+    background: var(--surface_2);
+    color: var(--text);
+}
+
+.act_bluetooth:not(:disabled):hover {
+    background: var(--bluetooth_hover);
+}
+
+.act_usb {
+    border-color: var(--on_usb);
+    background: var(--usb);
+    color: var(--on_usb);
+}
+
+.act_usb:disabled {
+    border-color: var(--line_strong);
+    background: var(--surface_2);
+    color: var(--text);
+}
+
+.act_usb:not(:disabled):hover {
+    background: var(--usb_hover);
+}
+
+.act_contrast {
+    border-color: var(--usb);
+    background: var(--on_usb);
+    color: var(--usb);
+}
+
+.act_contrast:not(:disabled):hover {
+    border-color: var(--usb_hover);
+    color: var(--usb_hover);
 }
 
 .tlink {

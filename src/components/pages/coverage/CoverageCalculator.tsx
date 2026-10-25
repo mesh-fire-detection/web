@@ -1,17 +1,13 @@
 import { useMemo, useState } from 'react'
 
 import { useUnitSystem } from '@components/app/UnitsProvider'
+import { SegmentedField } from '@components/shared/forms/ChoiceFields'
+import { NumberField, SelectField, SliderField } from '@components/shared/forms/NumericFields'
 import { Box, Divider, Grid, Row, Stack } from '@components/shared/primitives/Layout'
 import { Heading } from '@components/shared/typography/Heading'
 import { Text, Value } from '@components/shared/typography/Text'
 import { Button } from '@components/shared/widgets/Action'
 import { Badge, Metric } from '@components/shared/widgets/Badge'
-import {
-    NumberField,
-    SegmentedField,
-    SelectField,
-    SliderField,
-} from '@components/shared/widgets/Field'
 import { nodeCost } from '@core/content/build/bom'
 import { decimal, money, plural, signed } from '@core/format/format'
 import {
