@@ -12,8 +12,7 @@
     border-color: var(--fire);
 }
 
-.control_invalid,
-.control_invalid:focus-within {
+.control_invalid {
     border-color: var(--dead);
 }
 
@@ -67,6 +66,11 @@
 
 .control:has(.control_textarea) {
     align-items: stretch;
+}
+
+.control:has(.control_input:focus-visible) {
+    outline: var(--focus_width) solid var(--fire);
+    outline-offset: var(--focus_offset);
 }
 
 .field_reveal {

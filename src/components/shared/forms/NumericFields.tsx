@@ -19,6 +19,7 @@ export function NumberField({
     required = false,
     disabled = false,
     name,
+    onEmptyChange,
 }: {
     label: string
     value: number
@@ -33,6 +34,7 @@ export function NumberField({
     required?: boolean | undefined
     disabled?: boolean | undefined
     name?: string | undefined
+    onEmptyChange?: ((empty: boolean) => void) | undefined
 }) {
     const id = useId()
     const initialDraft = Number.isFinite(value) ? String(value) : ''
@@ -65,8 +67,14 @@ export function NumberField({
                 onChange={(event) => {
                     const nextDraft = event.currentTarget.value
                     setDraftState({ value, text: nextDraft })
+                    onEmptyChange?.(nextDraft === '')
                     const nextValue = event.currentTarget.valueAsNumber
                     if (Number.isFinite(nextValue)) onChange(nextValue)
+                }}
+                onBlur={() => {
+                    if (draft !== '' || required) return
+                    setDraftState({ value, text: initialDraft })
+                    onEmptyChange?.(false)
                 }}
                 required={required}
                 step={step}

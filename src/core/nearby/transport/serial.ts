@@ -10,7 +10,7 @@ const START2 = 0xc3
 const HEADER_LENGTH = 4
 /** The firmware's MAX_TO_FROM_RADIO_SIZE; longer lengths are noise. */
 const MAX_PAYLOAD = 512
-const BAUD_RATE = 115_200
+export const BAUD_RATE = 115_200
 /** The firmware leaves API mode after 15 minutes without client traffic. */
 const HEARTBEAT_MS = 5 * 60 * 1000
 /**
@@ -24,11 +24,11 @@ export const SERIAL_DISCONNECT_DRAIN_MS = 500
  * USB vendors of boards that run Meshtastic: Adafruit nRF52 bootloaders (RAK4631),
  * Silicon Labs CP210x, WCH CH34x, Espressif and Raspberry Pi RP2040.
  */
-const USB_VENDORS = [0x23_9a, 0x10_c4, 0x1a_86, 0x30_3a, 0x2e_8a] as const
+export const USB_VENDORS = [0x23_9a, 0x10_c4, 0x1a_86, 0x30_3a, 0x2e_8a] as const
 
 /* The subset of Web Serial this module uses; TypeScript's DOM library has none of it. */
 type SerialPortInfo = { readonly usbVendorId?: number; readonly usbProductId?: number }
-type SerialPort = {
+export type SerialPort = {
     readonly readable: ReadableStream<Uint8Array> | null
     readonly writable: WritableStream<Uint8Array> | null
     open: (options: { readonly baudRate: number }) => Promise<void>
@@ -42,7 +42,7 @@ type Serial = {
     getPorts: () => Promise<SerialPort[]>
 }
 
-function serialApi(): Serial | undefined {
+export function serialApi(): Serial | undefined {
     return (navigator as Navigator & { readonly serial?: Serial }).serial
 }
 

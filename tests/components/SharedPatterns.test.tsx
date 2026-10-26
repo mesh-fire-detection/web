@@ -146,14 +146,34 @@ describe('shared patterns', () => {
     it('renders non-finite numbers safely and keeps empty edits out of feature state', async () => {
         const user = userEvent.setup()
         const onChange = vi.fn()
-        const view = render(<NumberField label='Height' onChange={onChange} value={NaN} />)
+        const onEmptyChange = vi.fn()
+        const view = render(
+            <NumberField
+                label='Height'
+                onChange={onChange}
+                onEmptyChange={onEmptyChange}
+                value={NaN}
+            />
+        )
         const input = screen.getByRole<HTMLInputElement>('spinbutton')
         expect(input.value).toBe('')
-        view.rerender(<NumberField label='Height' onChange={onChange} value={12} />)
+        view.rerender(
+            <NumberField
+                label='Height'
+                onChange={onChange}
+                onEmptyChange={onEmptyChange}
+                value={12}
+            />
+        )
         expect(input.value).toBe('12')
         await user.clear(input)
         expect(input.value).toBe('')
         expect(onChange).not.toHaveBeenCalled()
+        expect(onEmptyChange).toHaveBeenLastCalledWith(true)
+        await user.tab()
+        expect(input.value).toBe('12')
+        expect(onEmptyChange).toHaveBeenLastCalledWith(false)
+        await user.clear(input)
         await user.type(input, '7')
         expect(onChange).toHaveBeenLastCalledWith(7)
     })

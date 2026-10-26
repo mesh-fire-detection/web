@@ -70,7 +70,13 @@ function MarkdownTable({ block }: { block: TableBlock }) {
     }))
 
     return (
-        <DataTable columns={columns} getRowKey={(row) => String(row.at)} rows={block.rows} dense />
+        <DataTable
+            columns={columns}
+            getRowKey={(row) => String(row.at)}
+            label='Article table'
+            rows={block.rows}
+            dense
+        />
     )
 }
 
