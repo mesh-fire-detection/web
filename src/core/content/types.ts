@@ -320,6 +320,163 @@ export type NearbyDevicesContent = PageHeading & {
     }
 }
 
+export type SatelliteReceiverContent = PageHeading & {
+    readonly connect: Readonly<Record<'bluetooth' | 'usb', string>>
+    readonly transports: Readonly<Record<'bluetooth' | 'usb', string>>
+    readonly helper: readonly string[]
+    readonly support: Readonly<Record<'insecure' | 'unsupported', string>>
+    readonly states: Readonly<Record<'idle' | 'connecting' | 'connected', string>>
+    readonly errors: Readonly<Record<'failed' | 'closed', string>>
+    readonly errorTitle: string
+    readonly summaryTitle: string
+    readonly summary: Readonly<
+        Record<
+            | 'radio'
+            | 'listening'
+            | 'fault'
+            | 'frequency'
+            | 'packets'
+            | 'damaged'
+            | 'stored'
+            | 'noise'
+            | 'mode'
+            | 'profile',
+            string
+        >
+    > & { readonly lastHeartbeat: string; readonly notYet: string }
+    readonly views: Readonly<Record<'packets' | 'records', string>>
+    readonly actions: Readonly<
+        Record<'disconnect' | 'status' | 'history' | 'download' | 'clear', string>
+    >
+    readonly compatibility: string
+    readonly txBuildTitle: string
+    readonly txBuild: string
+}
+
+export type SatellitePacketListContent = {
+    readonly emptyPackets: string
+    readonly emptyRecords: string
+    readonly status: Readonly<Record<'ok' | 'damaged' | 'error', string>>
+    readonly replayed: string
+    readonly fields: Readonly<
+        Record<
+            'rssi' | 'snr' | 'offset' | 'length' | 'profile' | 'mode' | 'satellite' | 'doppler',
+            string
+        >
+    >
+    readonly payload: string
+    readonly emptyPayload: string
+    readonly unknownTime: string
+    readonly boot: string
+    readonly showJson: string
+    readonly hideJson: string
+    /** Words in the one-line record summaries. */
+    readonly summary: Readonly<Record<'noise' | 'ok' | 'crc' | 'radio' | 'replayed', string>>
+}
+
+export type SatelliteModePanelContent = {
+    readonly title: string
+    readonly modes: Readonly<Record<'auto' | 'fixed' | 'scan' | 'range', string>>
+    readonly profile: string
+    readonly range: Readonly<
+        Record<'start' | 'end' | 'bandwidth' | 'sf' | 'cad' | 'timeout', string>
+    >
+    readonly start: string
+    readonly estimate: string
+    readonly manualWarning: string
+    readonly unsupported: string
+    readonly cadDetected: string
+    readonly decoded: string
+    readonly identified: string
+    readonly stageStatus: Readonly<Record<'observed' | 'notYet' | 'unconfirmed', string>>
+    readonly identificationNote: string
+    readonly commandFailed: string
+}
+
+export type SatelliteTrackerPanelContent = {
+    readonly title: string
+    readonly clock: string
+    readonly synced: string
+    readonly unsynced: string
+    readonly location: string
+    readonly trackingSettings: string
+    readonly minimumElevation: string
+    readonly saveTrackingSettings: string
+    readonly dopplerCorrection: string
+    readonly dopplerEnabled: string
+    readonly dopplerDisabled: string
+    readonly latitude: string
+    readonly longitude: string
+    readonly altitude: string
+    readonly useLocation: string
+    readonly sendLocation: string
+    readonly fetchTles: string
+    readonly loadTleFile: string
+    readonly sendTles: string
+    readonly stored: string
+    readonly missing: string
+    readonly stale: string
+    readonly fresh: string
+    readonly busy: string
+    readonly error: string
+    readonly supportedOnly: string
+}
+
+export type SatellitePassListContent = {
+    readonly title: string
+    readonly empty: string
+    readonly computing: string
+    readonly fields: Readonly<
+        Record<
+            'satellite' | 'aos' | 'tca' | 'los' | 'maximumElevation' | 'tleAge' | 'stale',
+            string
+        >
+    >
+    readonly selected: string
+    readonly minutes: string
+}
+
+export type SatelliteProfileTableContent = {
+    readonly title: string
+    readonly empty: string
+    readonly fields: Readonly<
+        Record<
+            | 'profile'
+            | 'satellite'
+            | 'frequency'
+            | 'mode'
+            | 'confidence'
+            | 'packets'
+            | 'crc'
+            | 'cad'
+            | 'falseCad'
+            | 'last',
+            string
+        >
+    >
+}
+
+export type SatelliteRangeResultsContent = {
+    readonly title: string
+    readonly empty: string
+    readonly sortOrder: string
+    readonly fields: Readonly<
+        Record<
+            | 'frequency'
+            | 'bandwidth'
+            | 'spreadingFactor'
+            | 'cadHits'
+            | 'packets'
+            | 'timeouts'
+            | 'crcErrors'
+            | 'errors'
+            | 'bestRssi'
+            | 'lastRssi',
+            string
+        >
+    >
+}
+
 type SensorGuideEntry = {
     readonly title: string
     readonly summary: string

@@ -66,6 +66,12 @@ function hopSlider(system: UnitSystem) {
 export function CoverageCalculator() {
     const { system } = useUnitSystem()
     const [input, setInput] = useState<LinkInput>(DEFAULT_LINK)
+    const [emptyFields, setEmptyFields] = useState<readonly string[]>([])
+    const trackEmpty = (key: string) => (empty: boolean) => {
+        setEmptyFields((current) =>
+            empty ? [...new Set([...current, key])] : current.filter((item) => item !== key)
+        )
+    }
     const result = useMemo(() => computeLink(input), [input])
     const hop = hopSlider(system)
     const heightMax = system === 'imperial' ? 400 : 120
@@ -116,6 +122,7 @@ export function CoverageCalculator() {
                     <Grid columns={2} gap={4}>
                         <NumberField
                             label='Transmit antenna'
+                            onEmptyChange={trackEmpty('txHeightM')}
                             max={heightMax}
                             min={0}
                             onChange={(value) => {
@@ -130,6 +137,7 @@ export function CoverageCalculator() {
                         />
                         <NumberField
                             label='Receive antenna'
+                            onEmptyChange={trackEmpty('rxHeightM')}
                             max={heightMax}
                             min={0}
                             onChange={(value) => {
@@ -165,6 +173,7 @@ export function CoverageCalculator() {
                         <NumberField
                             hint='US915 cap: 30'
                             label='TX power'
+                            onEmptyChange={trackEmpty('txPowerDbm')}
                             max={30}
                             min={2}
                             onChange={set('txPowerDbm')}
@@ -173,6 +182,7 @@ export function CoverageCalculator() {
                         />
                         <NumberField
                             label='Fade margin'
+                            onEmptyChange={trackEmpty('fadeMarginDb')}
                             max={30}
                             min={0}
                             onChange={set('fadeMarginDb')}
@@ -181,6 +191,7 @@ export function CoverageCalculator() {
                         />
                         <NumberField
                             label='TX antenna gain'
+                            onEmptyChange={trackEmpty('txGainDbi')}
                             max={12}
                             min={0}
                             onChange={set('txGainDbi')}
@@ -190,6 +201,7 @@ export function CoverageCalculator() {
                         />
                         <NumberField
                             label='RX antenna gain'
+                            onEmptyChange={trackEmpty('rxGainDbi')}
                             max={12}
                             min={0}
                             onChange={set('rxGainDbi')}
@@ -201,108 +213,116 @@ export function CoverageCalculator() {
                 </Stack>
             </Box>
 
-            <Stack gap={4}>
-                <Box
-                    accent={verdict.kind === 'live' ? 'live' : verdict.kind}
-                    padding={6}
-                    radius='md'
-                    tone='surface-2'
-                >
-                    <Stack gap={5}>
-                        <Row justify='between' gap={3}>
-                            <Badge kind={verdict.kind}>{verdict.label}</Badge>
-                            <Text as='span' size='2xs' mono tone='faint' uppercase>
-                                {input.frequencyMhz} MHz
+            {emptyFields.length > 0 ? (
+                <Box padding={5}>
+                    <Text>Please complete the numeric fields to see the calculation.</Text>
+                </Box>
+            ) : (
+                <Stack gap={4}>
+                    <Box
+                        accent={verdict.kind === 'live' ? 'live' : verdict.kind}
+                        padding={6}
+                        radius='md'
+                        tone='surface-2'
+                    >
+                        <Stack gap={5}>
+                            <Row justify='between' gap={3}>
+                                <Badge kind={verdict.kind}>{verdict.label}</Badge>
+                                <Text as='span' size='2xs' mono tone='faint' uppercase>
+                                    {input.frequencyMhz} MHz
+                                </Text>
+                            </Row>
+
+                            <Row gap={7} wrap>
+                                <Metric
+                                    hint={`over ${result.sensitivityDbm} dBm sensitivity`}
+                                    label='Link margin'
+                                    size='lg'
+                                    tone={
+                                        result.marginDb >= input.fadeMarginDb
+                                            ? 'live'
+                                            : result.marginDb >= 0
+                                              ? 'warn'
+                                              : 'dead'
+                                    }
+                                    value={`${signed(result.marginDb, 1)} dB`}
+                                />
+                                <Metric
+                                    hint='at these settings'
+                                    label='Max hop'
+                                    size='lg'
+                                    tone='fire'
+                                    value={formatDistance(result.maxRangeKm, system)}
+                                />
+                            </Row>
+
+                            <Text size='sm' tone='muted' measure={62}>
+                                {verdict.copy}
                             </Text>
-                        </Row>
-
-                        <Row gap={7} wrap>
-                            <Metric
-                                hint={`over ${result.sensitivityDbm} dBm sensitivity`}
-                                label='Link margin'
-                                size='lg'
-                                tone={
-                                    result.marginDb >= input.fadeMarginDb
-                                        ? 'live'
-                                        : result.marginDb >= 0
-                                          ? 'warn'
-                                          : 'dead'
-                                }
-                                value={`${signed(result.marginDb, 1)} dB`}
-                            />
-                            <Metric
-                                hint='at these settings'
-                                label='Max hop'
-                                size='lg'
-                                tone='fire'
-                                value={formatDistance(result.maxRangeKm, system)}
-                            />
-                        </Row>
-
-                        <Text size='sm' tone='muted' measure={62}>
-                            {verdict.copy}
-                        </Text>
-                    </Stack>
-                </Box>
-
-                <LinkProfile input={input} result={result} />
-
-                <Box tone='surface' padding={5} radius='md'>
-                    <Stack gap={4}>
-                        <Text as='div' size='2xs' mono uppercase weight={600} tone='faint'>
-                            Budget breakdown
-                        </Text>
-                        <Stack gap={2}>
-                            <BudgetRow
-                                label='Free-space path loss'
-                                value={`-${decimal(result.fsplDb)} dB`}
-                            />
-                            <BudgetRow
-                                label='Terrain excess loss'
-                                value={`-${decimal(result.excessLossDb)} dB`}
-                            />
-                            <BudgetRow
-                                label='Cable and connectors'
-                                value={`-${decimal(input.cableLossDb)} dB`}
-                            />
-                            <BudgetRow
-                                emphasis
-                                label='Received power'
-                                value={`${decimal(result.receivedDbm)} dBm`}
-                            />
-                            <BudgetRow
-                                label='Radio horizon (4/3 earth)'
-                                value={formatDistance(result.radioHorizonKm, system)}
-                            />
-                            <BudgetRow
-                                hint='clearance you need above any obstruction'
-                                label='Fresnel radius at mid-path'
-                                value={formatLength(result.fresnelRadiusM, system, { places: 1 })}
-                            />
                         </Stack>
-                    </Stack>
-                </Box>
+                    </Box>
 
-                <Box accent='fire' border={false} padding={5} radius='sm' tone='fire'>
-                    <Stack gap={2}>
-                        <Text size='sm' weight={600}>
-                            What that buys you
-                        </Text>
-                        <Text size='sm' tone='muted' measure={64}>
-                            A {formatDistance(CORRIDOR_KM, system)} corridor at this hop length
-                            needs{' '}
-                            <Value tone='fire' size='sm'>
-                                {nodesNeeded}
-                            </Value>{' '}
-                            Base {plural(nodesNeeded, 'node')} — about{' '}
-                            <Value tone='fire' size='sm'>
-                                {money(nodesNeeded * nodeCost('base'))}
-                            </Value>{' '}
-                            in hardware. One camera site costs more than that.
-                        </Text>
-                    </Stack>
-                </Box>
-            </Stack>
+                    <LinkProfile input={input} result={result} />
+
+                    <Box tone='surface' padding={5} radius='md'>
+                        <Stack gap={4}>
+                            <Text as='div' size='2xs' mono uppercase weight={600} tone='faint'>
+                                Budget breakdown
+                            </Text>
+                            <Stack gap={2}>
+                                <BudgetRow
+                                    label='Free-space path loss'
+                                    value={`-${decimal(result.fsplDb)} dB`}
+                                />
+                                <BudgetRow
+                                    label='Terrain excess loss'
+                                    value={`-${decimal(result.excessLossDb)} dB`}
+                                />
+                                <BudgetRow
+                                    label='Cable and connectors'
+                                    value={`-${decimal(input.cableLossDb)} dB`}
+                                />
+                                <BudgetRow
+                                    emphasis
+                                    label='Received power'
+                                    value={`${decimal(result.receivedDbm)} dBm`}
+                                />
+                                <BudgetRow
+                                    label='Radio horizon (4/3 earth)'
+                                    value={formatDistance(result.radioHorizonKm, system)}
+                                />
+                                <BudgetRow
+                                    hint='clearance you need above any obstruction'
+                                    label='Fresnel radius at mid-path'
+                                    value={formatLength(result.fresnelRadiusM, system, {
+                                        places: 1,
+                                    })}
+                                />
+                            </Stack>
+                        </Stack>
+                    </Box>
+
+                    <Box accent='fire' border={false} padding={5} radius='sm' tone='fire'>
+                        <Stack gap={2}>
+                            <Text size='sm' weight={600}>
+                                What that buys you
+                            </Text>
+                            <Text size='sm' tone='muted' measure={64}>
+                                A {formatDistance(CORRIDOR_KM, system)} corridor at this hop length
+                                needs{' '}
+                                <Value tone='fire' size='sm'>
+                                    {nodesNeeded}
+                                </Value>{' '}
+                                Base {plural(nodesNeeded, 'node')} — about{' '}
+                                <Value tone='fire' size='sm'>
+                                    {money(nodesNeeded * nodeCost('base'))}
+                                </Value>{' '}
+                                in hardware. One camera site costs more than that.
+                            </Text>
+                        </Stack>
+                    </Box>
+                </Stack>
+            )}
         </Grid>
     )
 }

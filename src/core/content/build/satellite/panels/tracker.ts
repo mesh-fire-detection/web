@@ -1,0 +1,31 @@
+import type { SatelliteTrackerPanelContent } from '@core/content/types'
+
+export const satelliteTrackerContent = {
+    title: 'Auto tracking station',
+    clock: 'Station clock',
+    synced: 'Synchronized for this boot',
+    unsynced: 'Not synchronized',
+    location: 'Station location',
+    trackingSettings: 'Pass tracking',
+    minimumElevation: 'Minimum elevation',
+    saveTrackingSettings: 'Save tracking settings',
+    dopplerCorrection: 'Doppler correction',
+    dopplerEnabled: 'On',
+    dopplerDisabled: 'Off',
+    latitude: 'Latitude',
+    longitude: 'Longitude',
+    altitude: 'Altitude',
+    useLocation: 'Use my location',
+    sendLocation: 'Save and send location',
+    fetchTles: 'Fetch from CelesTrak',
+    loadTleFile: 'Load TLE file',
+    sendTles: 'Send newer TLEs to station',
+    stored: 'Stored on station',
+    missing: 'No TLE',
+    stale: 'Stale',
+    fresh: 'Fresh',
+    busy: 'Working…',
+    error: 'Could not load or send the TLE data. Check the file and connection, then try again.',
+    supportedOnly:
+        'Location and TLE data are sent to the connected receiver and saved in its flash.',
+} as const satisfies SatelliteTrackerPanelContent

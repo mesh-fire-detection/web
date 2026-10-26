@@ -51,6 +51,8 @@ src/
 
 ## Markup Rules
 
+- Build UI with the shared UI Kit; do not bypass it by recreating existing components or visual contracts.
+
 These rules are enforced by ESLint (`no-restricted-syntax` plus `jsx-a11y`).
 
 - Host elements are **default-deny**. The global allowlist is exactly `div`,

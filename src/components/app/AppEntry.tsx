@@ -10,11 +10,13 @@ import { BlogPostPage } from '@components/pages/blog/BlogPost'
 import { BuildPage } from '@components/pages/build/Build'
 import { FirmwarePage } from '@components/pages/build/Firmware'
 import { NearbyDevicesPage } from '@components/pages/build/nearby/NearbyDevices'
+import { SatellitePage } from '@components/pages/build/satellite/Satellite'
 import { CoveragePage } from '@components/pages/coverage/Coverage'
 import { HomePage } from '@components/pages/Home'
 import { MapPage } from '@components/pages/Map'
 import { OpenProblemsPage } from '@components/pages/problems/OpenProblems'
 import { AboutPage } from '@components/pages/site/About'
+import { DesignPage } from '@components/pages/site/Design'
 import { PrivacyPage, TermsPage } from '@components/pages/site/Legal'
 import { NotFoundPage } from '@components/pages/site/NotFound'
 import { SkipLink } from '@components/shared/widgets/Action'
@@ -25,6 +27,7 @@ import { APP_ROUTES, type RouteId } from '@core/config/routes'
  * route added to `APP_ROUTES` has a page here.
  */
 const PAGES: Record<RouteId, ComponentType> = {
+    design: DesignPage,
     home: HomePage,
     map: MapPage,
     build: BuildPage,
@@ -37,6 +40,7 @@ const PAGES: Record<RouteId, ComponentType> = {
     terms: TermsPage,
     connect: NearbyDevicesPage,
     firmware: FirmwarePage,
+    satellite: SatellitePage,
 }
 
 const AppEntry = () => {

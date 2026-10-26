@@ -275,8 +275,7 @@ components directly from the role modules; there is no separate package.
 - Native semantics and keyboard behavior belong to the shared components.
   Styling controls appearance without removing form validation or file selection.
 - Number fields render non-finite values as an empty draft and never publish
-  non-finite edits. An empty draft leaves the feature's last numeric value intact;
-  use `required` when a form must reject empty input.
+  non-finite edits. An empty draft leaves the feature's last numeric value intact. On blur, optional fields restore that value; required fields stay empty for native validation. Features with live results must use `onEmptyChange` to hide results while the draft is empty.
 - File fields retain the native selection so `required` validation and native
   form data remain meaningful. Sliders expose formatted values and help text.
 - Run `npm run check` before committing changes to components, consumers, styles,

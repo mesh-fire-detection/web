@@ -16,11 +16,19 @@ type RouteShape = {
 }
 
 export const APP_ROUTES = [
+    { id: 'design', path: '/design', label: 'UI Kit', nav: false },
     { id: 'home', path: '/', label: 'Home', nav: false },
     { id: 'map', path: '/map', label: 'Map', nav: true },
     { id: 'build', path: '/build', label: 'Build', nav: true },
     { id: 'connect', path: '/connect', label: 'Connect a Node', nav: false, newTab: true },
     { id: 'firmware', path: '/firmware', label: 'Firmware', nav: false },
+    {
+        id: 'satellite',
+        path: '/satellite',
+        label: 'Satellite Receiver',
+        nav: false,
+        newTab: true,
+    },
     { id: 'coverage', path: '/coverage', label: 'Coverage', nav: true },
     { id: 'open_problems', path: '/open-problems', label: 'Open Problems', nav: true },
     { id: 'about', path: '/about', label: 'About', nav: true },
