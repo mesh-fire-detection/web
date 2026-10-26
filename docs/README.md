@@ -2,6 +2,7 @@
 
 | Path                                                   | What it is                                                              |
 | ------------------------------------------------------ | ----------------------------------------------------------------------- |
+| [CHANGELOG.md](CHANGELOG.md)                           | Notable changes by version                                              |
 | [PROJECT.md](PROJECT.md)                               | Project overview: goals, node types, site pages, open problems, roadmap |
 | [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md)                   | Shared visual tokens, UI components, and rules for extending them       |
 | [specs/connect-a-node.md](specs/connect-a-node.md)     | Spec for the Connect a Node page (`/connect`)                           |
