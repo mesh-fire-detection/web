@@ -29,6 +29,11 @@
     padding: var(--s_2);
 }
 
+/* A long name truncates instead of pushing the nav aside. */
+.header_account {
+    max-width: var(--header_account_max);
+}
+
 .header_drawer {
     padding-block: var(--s_2) var(--s_4);
     border-top: 1px solid var(--line);
@@ -53,7 +58,8 @@
         display: inline-flex;
     }
 
-    .header_cta {
+    .header_cta,
+    .header_account {
         display: none;
     }
 

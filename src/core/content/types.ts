@@ -170,6 +170,43 @@ export type NotFoundContent = {
     readonly buildCta: string
 }
 
+export type SignInContent = {
+    readonly title: string
+    readonly email: {
+        readonly lede: string
+        readonly label: string
+        readonly submit: string
+        readonly invalid: string
+    }
+    readonly code: {
+        /** `{address}` is replaced with the address the code went to. */
+        readonly lede: string
+        readonly label: string
+        readonly submit: string
+        readonly resend: string
+        readonly resent: string
+        readonly changeEmail: string
+        readonly noEmail: string
+        readonly invalid: string
+    }
+    /** Keyed by the API's error code, plus our own `rate_limited` and `unreachable`. */
+    readonly errors: {
+        readonly INVALID_OTP: string
+        readonly OTP_EXPIRED: string
+        readonly TOO_MANY_ATTEMPTS: string
+        readonly rate_limited: string
+        readonly unreachable: string
+        readonly fallback: string
+    }
+}
+
+export type AccountContent = {
+    readonly title: string
+    readonly labels: { readonly name: string; readonly email: string; readonly role: string }
+    readonly roles: { readonly admin: string; readonly user: string }
+    readonly signOut: string
+}
+
 type FooterLink = {
     readonly label: string
     readonly to: string
