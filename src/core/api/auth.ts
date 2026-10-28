@@ -30,6 +30,26 @@ export async function signInWithCode(email: string, code: string): Promise<ApiRe
     return result.ok ? { ok: true, data: result.data.user } : result
 }
 
+/**
+ * Asks to join. The API answers every address the same way: an invited one
+ * gets a join code, a member gets a sign-in code, anyone else gets nothing.
+ */
+export function requestJoin(email: string, name: string): Promise<ApiResult<unknown>> {
+    return apiRequest('/v1/join', { method: 'POST', body: { email, name } })
+}
+
+/**
+ * Exchanges a join code for membership. It is Better Auth's email check, and
+ * the backend makes the person a member as part of it, then signs them in.
+ */
+export async function joinWithCode(email: string, code: string): Promise<ApiResult<SessionUser>> {
+    const result = await apiRequest<{ user: SessionUser }>(`${AUTH}/email-otp/verify-email`, {
+        method: 'POST',
+        body: { email, otp: code },
+    })
+    return result.ok ? { ok: true, data: result.data.user } : result
+}
+
 /** `null` means nobody is signed in; the API answers that with a `200` and an empty session. */
 export async function fetchSession(): Promise<ApiResult<SessionUser | null>> {
     const result = await apiRequest<{ user: SessionUser } | null>(`${AUTH}/get-session`)

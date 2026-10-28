@@ -8,9 +8,9 @@ import { NavMenuProvider } from '@components/app/NavMenuProvider'
 import { SessionProvider } from '@components/app/SessionProvider'
 import { UnitsProvider } from '@components/app/UnitsProvider'
 import { Header } from '@components/layout/Header'
-import { AccountPage } from '@components/pages/site/Account'
+import { AccountPage } from '@components/pages/site/account/Account'
 
-import { json, MEMBER, sentBodies, stubApi } from '../../../support/api'
+import { json, MEMBER, sentBodies, stubApi } from '../../../../support/api'
 
 afterEach(cleanup)
 

@@ -170,30 +170,65 @@ export type NotFoundContent = {
     readonly buildCta: string
 }
 
+/** What the code step says on a particular page; the rest is `CodeStepContent`. */
+type CodeStepWording = {
+    /**
+     * `{address}` is replaced with the address typed. Worded so it reads true
+     * whether or not a code went out, because the page cannot know.
+     */
+    readonly lede: string
+    readonly noEmail: string
+    readonly submit: string
+}
+
 export type SignInContent = {
     readonly title: string
     readonly email: {
         readonly lede: string
         readonly label: string
         readonly submit: string
-        readonly invalid: string
     }
-    readonly code: {
-        /** `{address}` is replaced with the address the code went to. */
-        readonly lede: string
-        readonly label: string
+    readonly code: CodeStepWording
+    readonly join: { readonly prompt: string; readonly link: string }
+}
+
+export type JoinContent = PageHeading & {
+    readonly node: {
+        readonly title: string
+        readonly body: string
+        readonly connect: string
+        readonly ask: string
+    }
+    readonly invited: {
+        readonly title: string
+        readonly body: string
+        readonly emailLabel: string
+        readonly nameLabel: string
+        readonly nameInvalid: string
+        readonly updates: string
         readonly submit: string
-        readonly resend: string
-        readonly resent: string
-        readonly changeEmail: string
-        readonly noEmail: string
-        readonly invalid: string
     }
+    readonly code: CodeStepWording
+    readonly signIn: { readonly prompt: string; readonly link: string }
+}
+
+/** Shared by every page that takes an emailed code. */
+export type CodeStepContent = {
+    readonly label: string
+    readonly limits: string
+    readonly resend: string
+    /** `{seconds}` is replaced with the time left. */
+    readonly resendIn: string
+    readonly resent: string
+    readonly changeEmail: string
+    readonly invalidCode: string
+    readonly invalidEmail: string
     /** Keyed by the API's error code, plus our own `rate_limited` and `unreachable`. */
     readonly errors: {
         readonly INVALID_OTP: string
         readonly OTP_EXPIRED: string
         readonly TOO_MANY_ATTEMPTS: string
+        readonly NOT_INVITED: string
         readonly rate_limited: string
         readonly unreachable: string
         readonly fallback: string

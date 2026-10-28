@@ -5,7 +5,7 @@ import { Page } from '@components/layout/Page'
 import { DescriptionItem, DescriptionList } from '@components/shared/page/List'
 import { Row, Section, Stack } from '@components/shared/primitives/Layout'
 import { Button } from '@components/shared/widgets/Action'
-import { accountContent } from '@core/content/site/account'
+import { accountContent } from '@core/content/site/account/account'
 
 const copy = accountContent
 

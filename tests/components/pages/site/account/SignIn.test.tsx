@@ -1,16 +1,19 @@
 // @vitest-environment jsdom
-import { cleanup, render, screen } from '@testing-library/react'
+import { act, cleanup, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { SessionProvider } from '@components/app/SessionProvider'
-import { AccountPage } from '@components/pages/site/Account'
-import { SignInPage } from '@components/pages/site/SignIn'
+import { AccountPage } from '@components/pages/site/account/Account'
+import { SignInPage } from '@components/pages/site/account/SignIn'
 
-import { json, MEMBER, sentBodies, stubApi } from '../../../support/api'
+import { json, MEMBER, sentBodies, stubApi } from '../../../../support/api'
 
-afterEach(cleanup)
+afterEach(() => {
+    cleanup()
+    vi.useRealTimers()
+})
 
 const SEND = 'POST /v1/auth/email-otp/send-verification-otp'
 const VERIFY = 'POST /v1/auth/sign-in/email-otp'
@@ -49,7 +52,13 @@ describe('Sign in', () => {
         renderAt('/sign-in')
 
         const code = await reachCodeStep(user)
-        expect(screen.getByText(/Enter the code we sent to ada@example.org/)).toBeDefined()
+        // Never "we sent": the page cannot know whether the address has an account.
+        expect(
+            screen.getByText('If ada@example.org can sign in, a code is on its way.')
+        ).toBeDefined()
+        expect(
+            screen.getByText('A code works once, for ten minutes, and allows three tries.')
+        ).toBeDefined()
         expect(document.activeElement).toBe(code)
 
         // Pasted from an email, with a space in the middle.
@@ -117,6 +126,14 @@ describe('Sign in', () => {
         ).toBeDefined()
     })
 
+    it('offers a way to join for people without an account', async () => {
+        stubApi({ [SESSION]: json(null) })
+        renderAt('/sign-in')
+
+        const link = await screen.findByRole('link', { name: 'Join' })
+        expect(link.getAttribute('href')).toBe('/join')
+    })
+
     it('checks the code is six digits before asking the server', async () => {
         const user = userEvent.setup()
         const api = stubApi({ [SESSION]: json(null), [SEND]: json({ success: true }) })
@@ -129,15 +146,28 @@ describe('Sign in', () => {
         expect(sentBodies(api, '/v1/auth/sign-in/email-otp')).toEqual([])
     })
 
-    it('sends a new code on request, and lets the person change address', async () => {
-        const user = userEvent.setup()
+    it('waits before sending a new code, then sends one and restarts the wait', async () => {
+        vi.useFakeTimers({ shouldAdvanceTime: true })
+        const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime.bind(vi) })
         const api = stubApi({ [SESSION]: json(null), [SEND]: json({ success: true }) })
         renderAt('/sign-in')
 
         await user.type(await reachCodeStep(user), '1')
-        await user.click(screen.getByRole('button', { name: 'Send a new code' }))
+        const waiting = screen.getByRole<HTMLButtonElement>('button', {
+            name: /Send a new code in \d+ s/,
+        })
+        expect(waiting.disabled).toBe(true)
 
-        expect(await screen.findByText('New code sent.')).toBeDefined()
+        act(() => {
+            vi.advanceTimersByTime(30_000)
+        })
+        await user.click(await screen.findByRole('button', { name: 'Send a new code' }))
+
+        expect(
+            await screen.findByText('New code sent. The previous one no longer works.')
+        ).toBeDefined()
+        // The wait starts again, because that request spent an email too.
+        expect(screen.getByRole('button', { name: /Send a new code in \d+ s/ })).toBeDefined()
         expect(screen.getByLabelText<HTMLInputElement>('Code').value).toBe('')
         expect(sentBodies(api, '/v1/auth/email-otp/send-verification-otp')).toHaveLength(2)
 

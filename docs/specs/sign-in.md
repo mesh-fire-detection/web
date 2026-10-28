@@ -1,19 +1,13 @@
-# Sign In and Account
+# Sign In, Join and Account
 
-Status: first version implemented at `/sign-in` and `/account`, covered by
-automated tests against a stubbed API and tried by hand against a local
-backend. Not yet tried against the live API. The backend half shipped in
-`mesh-fire-detection/backend#31`; this page is the website half.
+Status: implemented at `/sign-in`, `/join` and `/account`, covered by
+automated tests against a stubbed API. Sign-in was tried by hand against a
+local backend; joining was tried against the local API. Not yet tried against
+the live API. The backend halves are `mesh-fire-detection/backend#31` (sign-in)
+and the membership release (`docs/plans/membership.md` in the backend).
 
-Still owed to web#3, and due in the membership release
-(`docs/plans/membership.md` in the backend):
-
-- A visible cooldown on **Send a new code**.
-- Code-step copy that does not imply a code was sent: **If that address can
-  sign in, a code is on its way.** The current wording names the address as if
-  the email went out, which tells someone it has an account.
-- Saying **three attempts** up front, not only after the third.
-- A **No account? Join** link to `/join`.
+Not yet built: joining with a node (waits on device registration, backend#12),
+Subscribe in the footer (backend#29), and Google (later).
 
 ## Purpose
 
@@ -23,9 +17,9 @@ site that talks to the authenticated API, so it also sets the pattern later
 signed-in pages follow: where the API address comes from, how the session is
 read, and what a page does when nobody is signed in.
 
-There is no open sign-up. An account exists because an admin created it
-(backend `POST /v1/users`, or `createAdmin` on the server). How else a person
-becomes an account is backend issues #9 and #29, and out of scope here.
+There is no open sign-up. A person becomes a member by joining with an address
+an admin has invited (`/join`), or, once it is built, with a node they
+connected (backend#9).
 
 ## Page placement and copy
 
@@ -33,6 +27,8 @@ becomes an account is backend issues #9 and #29, and out of scope here.
 - **Account** — route `/account`, not in the primary nav.
 - Both are `unlisted` in `APP_ROUTES`: they get page shells like every route,
   but stay out of the sitemap.
+- **Join** — route `/join`, listed in the sitemap: it is how people find their
+  way in. Linked from **No account? Join** under the sign-in form.
 - Header, signed out: a **Sign in** button in `header_actions`, beside
   **Build a Node**, using the `ghost` variant so the primary call to action
   stays primary.
@@ -49,11 +45,17 @@ retypes it.
 
 1. **Email.** Field label **Email**, `type='email'`, `autoComplete='email'`.
    Action **Send code**. Intro: **We'll email you a six-digit code.**
-2. **Code.** Intro: **Enter the code we sent to {address}. It expires in ten
-   minutes.** Field label **Code**, `inputMode='numeric'`,
+2. **Code.** Intro: **If {address} can sign in, a code is on its way.** Then
+   the limits, up front: **A code works once, for ten minutes, and allows
+   three tries.** Field label **Code**, `inputMode='numeric'`,
    `autoComplete='one-time-code'` so phones offer it from the notification.
    Action **Sign in**. Secondary actions: **Send a new code** and **Use a
    different email**.
+
+    **Send a new code** waits 30 seconds after each code, counting down on the
+    button (**Send a new code in 27 s**): every request spends an email from a
+    daily allowance everyone shares.
+
 3. On success, go to where the person was headed (a `next` query parameter,
    same-site paths only), otherwise `/account`.
 
@@ -61,23 +63,49 @@ Visiting `/sign-in` while signed in goes straight to `/account`.
 
 The email step always advances to the code step, whatever the address. The
 backend answers an unknown address exactly as a known one and sends nothing,
-so the page cannot tell them apart and must not pretend to. The code step's
-helper text covers that case: **No email? Check spam, or ask whoever invited
-you whether your account uses this address.**
+so the page cannot tell them apart and must not pretend to — hence "if", never
+"we sent". The code step's helper text covers the unknown case: **Nothing
+after a few minutes? Check spam, or ask whoever invited you which address they
+used.**
+
+The code step is one component (`components/account/CodeStep`) shared with
+Join, so both pages say the same limits, wait the same time and give the same
+messages.
 
 ## Messages
 
-| Backend response              | Shown at          | Message                                                               |
-| ----------------------------- | ----------------- | --------------------------------------------------------------------- |
-| `INVALID_OTP`                 | Code field        | **That code doesn't match. Check it and try again.**                  |
-| `OTP_EXPIRED`                 | Code field        | **That code has expired. Send a new one.**                            |
-| `TOO_MANY_ATTEMPTS`           | Code field        | **Too many tries with that code. Send a new one.**                    |
-| `429` from the rate limiter   | Form              | **Too many requests. Wait a few minutes and try again.**              |
-| Network failure or `5xx`      | Form              | **Can't reach the server right now. Try again in a moment.**          |
-| **Send a new code** succeeded | Code step, inline | **New code sent.** Clears the field. The previous code stops working. |
+| Backend response              | Shown at          | Message                                                                |
+| ----------------------------- | ----------------- | ---------------------------------------------------------------------- |
+| `INVALID_OTP`                 | Code field        | **That code doesn't match. Check it and try again.**                   |
+| `OTP_EXPIRED`                 | Code field        | **That code has expired. Send a new one.**                             |
+| `TOO_MANY_ATTEMPTS`           | Code field        | **Too many tries with that code. Send a new one.**                     |
+| `NOT_INVITED` (Join only)     | Code field        | **This invitation is no longer open. Ask whoever invited you.**        |
+| `429` from the rate limiter   | Form              | **Too many requests. Wait a few minutes and try again.**               |
+| Network failure or `5xx`      | Form              | **Can't reach the server right now. Try again in a moment.**           |
+| **Send a new code** succeeded | Code step, inline | **New code sent. The previous one no longer works.** Clears the field. |
 
-Validation before submitting: the email field must contain an `@`; the code
-must be six digits after stripping spaces, which people paste from email.
+Validation before submitting: the browser's own checks on the required email
+field, then a full address (`name@host`); the code must be six digits after
+stripping spaces, which people paste from email.
+
+## Join flow
+
+`/join` shows the two ways in side by side (backend#9).
+
+- **I was invited** — email and **Your name**, with one plain line: **Joining
+  also signs you up for occasional project updates. You can stop them at any
+  time.** Action **Send code** calls `POST /v1/join`, which answers every
+  address the same way. The code step then says **If {address} is on our list,
+  a code is on its way.** and its action is **Join**, which calls Better Auth's
+  `POST /v1/auth/email-otp/verify-email`; the backend makes the person a member
+  as part of that and signs them in. On success, go to `next` or `/account`.
+- **I've built a node** — joining with a node is not built yet, so this says so
+  and offers **Connect a Node** (`/connect`) and **Ask for an invitation**
+  (the contact address).
+- **Already a member? Sign in** under both.
+
+A member who asks to join is sent a sign-in code instead by the backend; the
+page does not know and does not need to.
 
 ## Account page
 

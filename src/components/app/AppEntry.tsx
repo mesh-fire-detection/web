@@ -16,11 +16,12 @@ import { HomePage } from '@components/pages/Home'
 import { MapPage } from '@components/pages/Map'
 import { OpenProblemsPage } from '@components/pages/problems/OpenProblems'
 import { AboutPage } from '@components/pages/site/About'
-import { AccountPage } from '@components/pages/site/Account'
+import { AccountPage } from '@components/pages/site/account/Account'
+import { JoinPage } from '@components/pages/site/account/Join'
+import { SignInPage } from '@components/pages/site/account/SignIn'
 import { DesignPage } from '@components/pages/site/Design'
 import { PrivacyPage, TermsPage } from '@components/pages/site/Legal'
 import { NotFoundPage } from '@components/pages/site/NotFound'
-import { SignInPage } from '@components/pages/site/SignIn'
 import { SkipLink } from '@components/shared/widgets/Action'
 import { APP_ROUTES, type RouteId } from '@core/config/routes'
 
@@ -44,6 +45,7 @@ const PAGES: Record<RouteId, ComponentType> = {
     firmware: FirmwarePage,
     satellite: SatellitePage,
     sign_in: SignInPage,
+    join: JoinPage,
     account: AccountPage,
 }
 
