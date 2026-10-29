@@ -44,7 +44,7 @@ describe('Header drawer', () => {
             </MemoryRouter>
         )
         // Settle the session first, so the drawer has its final set of links.
-        await screen.findByRole('link', { name: 'Sign in' })
+        await screen.findByRole('link', { name: 'Join' })
 
         await user.click(screen.getByRole('button', { name: 'Force open' }))
 

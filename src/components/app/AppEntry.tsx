@@ -19,6 +19,7 @@ import { AboutPage } from '@components/pages/site/About'
 import { AccountPage } from '@components/pages/site/account/Account'
 import { JoinPage } from '@components/pages/site/account/Join'
 import { SignInPage } from '@components/pages/site/account/SignIn'
+import { SubscribeConfirmPage } from '@components/pages/site/account/SubscribeConfirm'
 import { DesignPage } from '@components/pages/site/Design'
 import { PrivacyPage, TermsPage } from '@components/pages/site/Legal'
 import { NotFoundPage } from '@components/pages/site/NotFound'
@@ -46,6 +47,7 @@ const PAGES: Record<RouteId, ComponentType> = {
     satellite: SatellitePage,
     sign_in: SignInPage,
     join: JoinPage,
+    subscribe_confirm: SubscribeConfirmPage,
     account: AccountPage,
 }
 

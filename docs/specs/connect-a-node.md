@@ -48,8 +48,15 @@ with the actual computer, Bluetooth adapter, browser, and firmware. A list of
 added devices must never imply that all of them are currently connected.
 
 The page is available without a project account: browser authorization controls
-access to local hardware. It does not call authenticated backend endpoints or
-send local observations to the server in the first version.
+access to local hardware. It never sends local observations to the server.
+
+Once a node has connected and identified itself, the page offers membership
+(`docs/specs/sign-in.md`, "Becoming a member from `/connect`"). Signed out, it
+links to `/join`, and the nodes this page remembers in the browser are what the
+person joins with. Signed in, it reads which nodes are on the person's account
+and offers **Add to my account** for the rest: the node's number, name,
+hardware, firmware and when it was first connected, sent only when they press
+it.
 
 Included:
 

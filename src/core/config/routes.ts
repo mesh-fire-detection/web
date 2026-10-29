@@ -39,7 +39,14 @@ export const APP_ROUTES = [
     { id: 'privacy', path: '/privacy', label: 'Privacy', nav: false },
     { id: 'terms', path: '/terms', label: 'Terms', nav: false },
     { id: 'sign_in', path: '/sign-in', label: 'Sign in', nav: false, unlisted: true },
-    { id: 'join', path: '/join', label: 'Join', nav: false },
+    { id: 'join', path: '/join', label: 'Become a member', nav: false },
+    {
+        id: 'subscribe_confirm',
+        path: '/subscribe/confirm',
+        label: 'Confirm your updates',
+        nav: false,
+        unlisted: true,
+    },
     { id: 'account', path: '/account', label: 'Account', nav: false, unlisted: true },
 ] as const satisfies readonly RouteShape[]
 

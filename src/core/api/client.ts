@@ -13,21 +13,30 @@ const API_URL = (configured ?? (import.meta.env.PROD ? SITE.api : 'http://localh
 )
 
 /**
- * Every outcome a caller has to handle. Failures carry Better Auth's error code
- * when there is one (`INVALID_OTP`, …) so pages can choose their own wording;
- * `rate_limited` and `unreachable` are ours, because they are not the API's
- * opinion of the request but a reason it was never answered.
+ * Every outcome a caller has to handle. Failures carry the API's error code
+ * when there is one (`INVALID_OTP`, `bad_request`, …) so pages can choose their
+ * own wording; `rate_limited` and `unreachable` are ours, because they are not
+ * the API's opinion of the request but a reason it was never answered.
  */
 export type ApiResult<T> =
     | { readonly ok: true; readonly data: T }
     | { readonly ok: false; readonly error: 'rate_limited' | 'unreachable' | (string & {}) }
 
+const codeOf = (value: unknown): string | undefined =>
+    typeof value === 'object' && value !== null && 'code' in value && typeof value.code === 'string'
+        ? value.code
+        : undefined
+
+/**
+ * Better Auth answers `{ code, message }`; the rest of the API answers
+ * `{ error: { code, message } }`. Both reach the page as a code.
+ */
 const errorCode = (body: unknown): string => {
-    if (typeof body === 'object' && body !== null && 'code' in body) {
-        const { code } = body
-        if (typeof code === 'string') return code
-    }
-    return 'unknown'
+    const nested =
+        typeof body === 'object' && body !== null && 'error' in body
+            ? codeOf(body.error)
+            : undefined
+    return nested ?? codeOf(body) ?? 'unknown'
 }
 
 /**
@@ -37,7 +46,7 @@ const errorCode = (body: unknown): string => {
  */
 export async function apiRequest<T>(
     path: `/${string}`,
-    init: { readonly method?: 'GET' | 'POST'; readonly body?: unknown } = {}
+    init: { readonly method?: 'GET' | 'POST' | 'PATCH'; readonly body?: unknown } = {}
 ): Promise<ApiResult<T>> {
     let response: Response
     try {

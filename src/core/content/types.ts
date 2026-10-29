@@ -192,24 +192,69 @@ export type SignInContent = {
     readonly join: { readonly prompt: string; readonly link: string }
 }
 
+type PromptLink = { readonly prompt: string; readonly link: string }
+
 export type JoinContent = PageHeading & {
-    readonly node: {
+    /** Shown when this browser has connected no node yet. */
+    readonly noNodes: { readonly title: string; readonly body: string; readonly connect: string }
+    readonly nodes: { readonly title: string; readonly body: string; readonly unnamed: string }
+    readonly form: {
         readonly title: string
-        readonly body: string
-        readonly connect: string
-        readonly ask: string
-    }
-    readonly invited: {
-        readonly title: string
-        readonly body: string
         readonly emailLabel: string
         readonly nameLabel: string
         readonly nameInvalid: string
+        /** Recorded by the backend as consent; keep identical to its `JOIN_CONSENT`. */
         readonly updates: string
         readonly submit: string
     }
     readonly code: CodeStepWording
-    readonly signIn: { readonly prompt: string; readonly link: string }
+    readonly signIn: PromptLink
+}
+
+/** The "become a member" prompt, on `/connect` and in the footer. */
+export type MembershipContent = {
+    readonly connect: {
+        readonly title: string
+        readonly body: string
+        readonly cta: string
+        readonly signIn: PromptLink
+    }
+    readonly signedIn: {
+        readonly title: string
+        readonly add: string
+        readonly added: string
+        readonly allAdded: string
+        readonly failed: string
+    }
+    readonly footer: { readonly title: string; readonly body: string; readonly cta: string }
+}
+
+/** Project updates: the footer form, the confirmation page and the account setting. */
+export type UpdatesContent = {
+    readonly footer: {
+        readonly title: string
+        readonly label: string
+        readonly submit: string
+        /** Recorded by the backend as consent; keep identical to its `FOOTER_CONSENT`. */
+        readonly consent: string
+        readonly sent: string
+    }
+    readonly confirm: {
+        readonly title: string
+        readonly lede: string
+        readonly button: string
+        readonly done: string
+        readonly invalid: string
+        readonly missing: string
+    }
+    readonly account: {
+        readonly title: string
+        readonly on: string
+        readonly off: string
+        /** Recorded by the backend as consent; keep identical to its `ACCOUNT_CONSENT`. */
+        readonly turnOn: string
+        readonly turnOff: string
+    }
 }
 
 /** Shared by every page that takes an emailed code. */
@@ -237,9 +282,21 @@ export type CodeStepContent = {
 
 export type AccountContent = {
     readonly title: string
-    readonly labels: { readonly name: string; readonly email: string; readonly role: string }
-    readonly roles: { readonly admin: string; readonly user: string }
+    readonly details: {
+        readonly name: string
+        readonly nameInvalid: string
+        readonly email: string
+        readonly emailFixed: string
+        readonly save: string
+        readonly saved: string
+    }
     readonly signOut: string
+    readonly nodes: {
+        readonly title: string
+        readonly empty: string
+        readonly unnamed: string
+        readonly connect: string
+    }
 }
 
 type FooterLink = {

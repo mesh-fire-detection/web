@@ -11,7 +11,7 @@ export const MEMBER: SessionUser = {
 
 /** `offline` rejects like a dropped connection; `pending` never answers. */
 type Reply = Response | 'offline' | 'pending'
-type Route = `${'GET' | 'POST'} /v1/${string}`
+type Route = `${'GET' | 'POST' | 'PATCH'} /v1/${string}`
 
 export const json = (body: unknown, status = 200): Response => Response.json(body, { status })
 
@@ -46,11 +46,42 @@ export function stubApi(routes: Partial<Record<Route, Reply | readonly Reply[]>>
     return fetchMock
 }
 
-/** The parsed JSON bodies sent to one route, in order. */
+/** The parsed JSON bodies sent to one path, in order. Requests without a body, such as a GET, are skipped. */
 export function sentBodies(fetchMock: ReturnType<typeof stubApi>, path: string): unknown[] {
-    return fetchMock.mock.calls
-        .filter(([input]) => new URL(input).pathname === path)
-        .map(
-            ([, init]) => (typeof init?.body === 'string' ? JSON.parse(init.body) : null) as unknown
-        )
+    return fetchMock.mock.calls.flatMap(([input, init]) =>
+        new URL(input).pathname === path && typeof init?.body === 'string'
+            ? [JSON.parse(init.body) as unknown]
+            : []
+    )
+}
+
+/** The node `rememberNode` stores, as the API would receive it. */
+export const BENCH_NODE = {
+    nodeNum: 0x12_34_56_78,
+    name: 'Bench node',
+    hardware: 'RAK4631',
+    firmware: '2.7.15',
+    connectedAt: '2026-10-27T18:00:00.000Z',
+} as const
+
+/** Stores one connected node the way `/connect` remembers it in this browser. */
+export function rememberNode(): void {
+    window.localStorage.setItem(
+        'mesh-fire-detection.nearby-devices.v1',
+        JSON.stringify({
+            version: 1,
+            devices: [
+                {
+                    id: 'bench',
+                    bluetoothName: 'Meshtastic_5678',
+                    name: BENCH_NODE.name,
+                    nodeNum: BENCH_NODE.nodeNum,
+                    hardware: BENCH_NODE.hardware,
+                    firmware: BENCH_NODE.firmware,
+                    connectedAt: Date.parse(BENCH_NODE.connectedAt),
+                },
+            ],
+            activeId: null,
+        })
+    )
 }

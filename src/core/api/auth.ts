@@ -31,11 +31,12 @@ export async function signInWithCode(email: string, code: string): Promise<ApiRe
 }
 
 /**
- * Asks to join. The API answers every address the same way: an invited one
- * gets a join code, a member gets a sign-in code, anyone else gets nothing.
+ * Asks to join, saying this browser has connected a node. The nodes themselves
+ * are sent only once the person is a member (`addMyNodes`). The API answers
+ * every address the same way; a member gets a sign-in code instead.
  */
 export function requestJoin(email: string, name: string): Promise<ApiResult<unknown>> {
-    return apiRequest('/v1/join', { method: 'POST', body: { email, name } })
+    return apiRequest('/v1/join', { method: 'POST', body: { email, name, withNode: true } })
 }
 
 /**
@@ -58,4 +59,13 @@ export async function fetchSession(): Promise<ApiResult<SessionUser | null>> {
 
 export function signOut(): Promise<ApiResult<unknown>> {
     return apiRequest(`${AUTH}/sign-out`, { method: 'POST', body: {} })
+}
+
+/** Renames the signed-in member. The address is how they sign in, so it cannot change here. */
+export async function renameMe(name: string): Promise<ApiResult<SessionUser>> {
+    const result = await apiRequest<{ user: SessionUser }>('/v1/me', {
+        method: 'PATCH',
+        body: { name },
+    })
+    return result.ok ? { ok: true, data: result.data.user } : result
 }

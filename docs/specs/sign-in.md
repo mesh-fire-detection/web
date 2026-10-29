@@ -1,13 +1,15 @@
 # Sign In, Join and Account
 
-Status: implemented at `/sign-in`, `/join` and `/account`, covered by
-automated tests against a stubbed API. Sign-in was tried by hand against a
-local backend; joining was tried against the local API. Not yet tried against
-the live API. The backend halves are `mesh-fire-detection/backend#31` (sign-in)
-and the membership release (`docs/plans/membership.md` in the backend).
+Status: implemented at `/sign-in`, `/join`, `/account` and
+`/subscribe/confirm`, with the membership prompt on `/connect` and the footer's
+sign-up, covered by automated tests against a stubbed API. Sign-in was tried by
+hand against a local backend; joining with a node and subscribing were tried
+against the local API. Not yet tried against the live API. The backend halves
+are `mesh-fire-detection/backend#31` (sign-in) and the membership release
+(`docs/plans/membership.md` in the backend).
 
-Not yet built: joining with a node (waits on device registration, backend#12),
-Subscribe in the footer (backend#29), and Google (later).
+Not yet built: Google (later), and unsubscribe links in update emails, which
+arrive with the first update.
 
 ## Purpose
 
@@ -17,9 +19,10 @@ site that talks to the authenticated API, so it also sets the pattern later
 signed-in pages follow: where the API address comes from, how the session is
 read, and what a page does when nobody is signed in.
 
-There is no open sign-up. A person becomes a member by joining with an address
-an admin has invited (`/join`), or, once it is built, with a node they
-connected (backend#9).
+There is no open sign-up. The website's way in is a node: someone who has
+connected one on `/connect` joins at `/join` (backend#9). An address an admin
+invited can also join, through the API; the website no longer offers that
+route.
 
 ## Page placement and copy
 
@@ -27,13 +30,20 @@ connected (backend#9).
 - **Account** — route `/account`, not in the primary nav.
 - Both are `unlisted` in `APP_ROUTES`: they get page shells like every route,
   but stay out of the sitemap.
-- **Join** — route `/join`, listed in the sitemap: it is how people find their
-  way in. Linked from **No account? Join** under the sign-in form.
-- Header, signed out: a **Sign in** button in `header_actions`, beside
-  **Build a Node**, using the `ghost` variant so the primary call to action
-  stays primary.
-- Header, signed in: the same slot shows the person's name, linking to
-  `/account`. Long names truncate.
+- **Join** — route `/join`, titled **Become a member**, listed in the sitemap.
+  Linked from **No account? Join** under the sign-in form, from the prompt on
+  `/connect`, and from the footer.
+- **Confirm your updates** — route `/subscribe/confirm`, `unlisted`, opened from
+  the confirmation email.
+- Header, signed out: a **Join** button in `header_actions`, linking to
+  `/join`, beside **Build a Node**, using the `ghost` variant so the primary
+  call to action stays primary. Members reach sign-in from the join page.
+- Header, signed in: the same slot shows a person icon labelled **Account**,
+  linking to `/account`. Never the person's name: it is long, personal, and
+  shown to anyone looking at the screen. The drawer shows the icon with the
+  word.
+- The nav never shrinks below its links; the wordmark truncates instead, so the
+  header cannot overlap itself.
 - The header shows neither until the session check has answered, so a signed-in
   person does not see **Sign in** flash on every load.
 - The mobile drawer carries the same entry as its last item.
@@ -90,31 +100,72 @@ stripping spaces, which people paste from email.
 
 ## Join flow
 
-`/join` shows the two ways in side by side (backend#9).
+Membership is for people building the network, so `/join` starts from the
+nodes this browser has connected.
 
-- **I was invited** — email and **Your name**, with one plain line: **Joining
-  also signs you up for occasional project updates. You can stop them at any
-  time.** Action **Send code** calls `POST /v1/join`, which answers every
-  address the same way. The code step then says **If {address} is on our list,
-  a code is on its way.** and its action is **Join**, which calls Better Auth's
-  `POST /v1/auth/email-otp/verify-email`; the backend makes the person a member
-  as part of that and signs them in. On success, go to `next` or `/account`.
-- **I've built a node** — joining with a node is not built yet, so this says so
-  and offers **Connect a Node** (`/connect`) and **Ask for an invitation**
-  (the contact address).
+- **No node connected here yet** — **Start by connecting your node**, saying
+  the node stays in the browser and nothing is sent until they join, with
+  **Connect a Node** (`/connect`). No form.
+- **One or more nodes connected** — **Your details** (email, **Your name**, and
+  the plain line **Joining also signs you up for occasional project updates.
+  You can stop them at any time.**, which the backend records as consent) beside
+  **Nodes from this browser**, listing them by name and Meshtastic ID. **Send
+  code** calls `POST /v1/join` with `withNode: true` and answers every address
+  the same way. The code step says **If {address} can join, a code is on its
+  way.**; **Join** calls Better Auth's `POST /v1/auth/email-otp/verify-email`,
+  which makes the person a member and signs them in. Only then do the nodes
+  leave the browser: `POST /v1/me/nodes`, before the page moves on to `next`
+  or `/account`, so the account page already shows them. If that call fails,
+  the nodes are still in the browser and `/connect` offers to add them.
 - **Already a member? Sign in** under both.
+
+"Connected" is what `/connect` already remembers in `localStorage`: every
+device it has identified with a node number. No cookie is needed, because
+nothing has to reach the server until the person joins.
 
 A member who asks to join is sent a sign-in code instead by the backend; the
 page does not know and does not need to.
 
+## Becoming a member from `/connect`
+
+Once a node has connected and identified itself, the page's aside shows a
+prompt:
+
+- **Signed out** — **Become a member**: the node is connected, members keep
+  their nodes and get updates, and this browser remembers them until then.
+  **Become a member** goes to `/join`; **Already a member? Sign in** returns
+  to `/connect` afterwards.
+- **Signed in** — **Add to my account** for the nodes not on it yet, compared
+  against `GET /v1/me/nodes`; **Every node here is on your account.** once
+  they all are. Adding is a deliberate act, never automatic.
+
+## Updates
+
+- **Footer, every page** — the one ask, adapting to the reader. Signed in:
+  nothing. A browser that has connected a node: **Become a member**, linking to
+  `/join`, since joining includes updates. Everyone else: **Get updates**, an
+  email field, the line **Occasional project updates by email. Confirm by the
+  link we send; stop any time.** (recorded as consent) and **Subscribe**, which
+  calls `POST /v1/subscribe` and then says only **Check your inbox to
+  confirm.** The footer follows `/connect` in another tab through the
+  `storage` event.
+- **`/subscribe/confirm?token=…`** — confirms on **Confirm subscription**,
+  never on load, since mail scanners open links first. A used or wrong link:
+  **This link is invalid or has already been used.**
+- **Account** — the updates setting, on or off, without a confirmation email.
+
 ## Account page
 
 - Requires a session. Signed out, it redirects to `/sign-in?next=/account`.
-- Shows **Name**, **Email** and **Role** (`Admin` or `Member`) as read-only
-  values, using the shared field-display components.
+- **Name** is editable, with **Save** (disabled until it changes; `PATCH
+/v1/me`), and **Saved.** once it is. The header and session update at once.
+- **Email** is shown but not editable: **You sign in with this address, so it
+  cannot be changed here.**
+- No role is shown, for now.
+- **Your nodes** — from `GET /v1/me/nodes`, or a pointer to `/connect`.
+- **Updates** — on or off (`PATCH /v1/me/subscription`).
 - Action **Sign out**: calls `POST /v1/auth/sign-out`, clears the cached
   session, and returns to `/`.
-- Nothing is editable in this version.
 
 ## Implementation direction
 

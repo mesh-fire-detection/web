@@ -13,29 +13,39 @@ import { NAV_ROUTES } from '@core/config/routes'
 import { SITE } from '@core/config/site'
 
 /**
- * "Sign in", or the signed-in person's name linking to their account. Nothing
- * until the session check answers, so neither flashes up wrongly on load.
+ * "Join", or an account icon for someone signed in. Nothing until the session
+ * check answers, so neither flashes up wrongly on load. Members who are signed
+ * out reach sign-in from the join page. In the bar the icon stands alone; in
+ * the drawer, where there is room, it carries its name.
  */
 function AccountLink({
     size,
     full = false,
     className,
+    named = false,
 }: {
     size: 'sm' | 'md'
     full?: boolean
     className?: string
+    named?: boolean
 }) {
     const { session } = useSession()
     if (session.status === 'loading') return null
     return session.status === 'signed_in' ? (
-        <ButtonLink to='/account' variant='ghost' size={size} full={full} className={className}>
-            <Text as='span' truncate>
-                {session.user.name}
-            </Text>
+        <ButtonLink
+            to='/account'
+            variant='ghost'
+            size={size}
+            full={full}
+            className={className}
+            label={named ? undefined : 'Account'}
+            iconBefore={<Icon name='person' size={18} />}
+        >
+            {named ? 'Account' : null}
         </ButtonLink>
     ) : (
-        <ButtonLink to='/sign-in' variant='ghost' size={size} full={full} className={className}>
-            Sign in
+        <ButtonLink to='/join' variant='ghost' size={size} full={full} className={className}>
+            Join
         </ButtonLink>
     )
 }
@@ -139,7 +149,7 @@ export function Header() {
                             </ButtonLink>
                         </Row>
                         <Row className='header_drawer_row' wrap={false}>
-                            <AccountLink size='md' full />
+                            <AccountLink size='md' full named />
                         </Row>
                         <Row className='header_drawer_row' wrap={false}>
                             <Text as='span' size='xs' tone='faint' mono uppercase>

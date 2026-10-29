@@ -66,9 +66,8 @@ describe('Sign in', () => {
         await user.click(screen.getByRole('button', { name: 'Sign in' }))
 
         expect(await screen.findByRole('heading', { name: 'Account' })).toBeDefined()
-        expect(screen.getByText('Ada Lovelace')).toBeDefined()
+        expect(screen.getByLabelText<HTMLInputElement>('Name').value).toBe('Ada Lovelace')
         expect(screen.getByText('ada@example.org')).toBeDefined()
-        expect(screen.getByText('Member')).toBeDefined()
 
         expect(sentBodies(api, '/v1/auth/email-otp/send-verification-otp')).toEqual([
             { email: 'ada@example.org', type: 'sign-in' },

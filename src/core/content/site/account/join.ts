@@ -1,17 +1,20 @@
 import type { JoinContent } from '@core/content/types'
 
 export const joinContent = {
-    title: 'Join',
-    lede: 'Members can sign in, keep their nodes and get project updates. Two ways in.',
-    node: {
-        title: "I've built a node",
-        body: 'Joining with a node you built is on its way. Until then, connect it to check it works, and ask us for an invitation.',
+    title: 'Become a member',
+    lede: 'Membership is for the people building the network. Members keep their nodes on an account and get occasional project updates.',
+    noNodes: {
+        title: 'Start by connecting your node',
+        body: 'Connect a node you built. It stays in this browser, and nothing is sent anywhere, until you come back here and join.',
         connect: 'Connect a Node',
-        ask: 'Ask for an invitation',
     },
-    invited: {
-        title: 'I was invited',
-        body: 'Use the address your invitation is for.',
+    nodes: {
+        title: 'Nodes from this browser',
+        body: 'These are added to your account when you join.',
+        unnamed: 'Unnamed node',
+    },
+    form: {
+        title: 'Your details',
         emailLabel: 'Email',
         nameLabel: 'Your name',
         nameInvalid: 'Enter your name.',
@@ -20,9 +23,8 @@ export const joinContent = {
         submit: 'Send code',
     },
     code: {
-        lede: 'If {address} is on our list, a code is on its way.',
-        noEmail:
-            'Nothing after a few minutes? Check spam, or ask whoever invited you which address they used.',
+        lede: 'If {address} can join, a code is on its way.',
+        noEmail: 'Nothing after a few minutes? Check spam, and check the address above.',
         submit: 'Join',
     },
     signIn: { prompt: 'Already a member?', link: 'Sign in' },

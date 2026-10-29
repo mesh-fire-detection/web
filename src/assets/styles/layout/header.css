@@ -12,8 +12,12 @@
     height: var(--header_height);
 }
 
+/*
+ * The links never wrap, so the nav must not shrink below them or it spills
+ * over the actions beside it. The wordmark gives up the space instead.
+ */
 .header_nav {
-    flex: 0 1 auto;
+    flex: none;
 }
 
 .header_actions {
@@ -27,11 +31,6 @@
 .header_toggle {
     display: none;
     padding: var(--s_2);
-}
-
-/* A long name truncates instead of pushing the nav aside. */
-.header_account {
-    max-width: var(--header_account_max);
 }
 
 .header_drawer {
