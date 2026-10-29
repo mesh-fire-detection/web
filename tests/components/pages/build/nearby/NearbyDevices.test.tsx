@@ -7,6 +7,7 @@ import { StrictMode } from 'react'
 import { MemoryRouter } from 'react-router-dom'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
+import { SessionProvider } from '@components/app/SessionProvider'
 import { NearbyDevicesPage } from '@components/pages/build/nearby/NearbyDevices'
 import { emptyDevice } from '@core/nearby/model'
 import { createDeviceMemory } from '@core/nearby/storage/devices'
@@ -17,6 +18,7 @@ import {
 } from '@core/nearby/transport/bluetooth'
 import type { RadioConnection } from '@core/nearby/transport/bluetooth'
 
+import { stubApi } from '../../../../support/api'
 import { linkPacket, mockRadio, radioMessage, telemetryPacket } from '../../../../support/nearby'
 
 vi.mock('@core/nearby/transport/bluetooth', () => ({
@@ -42,10 +44,15 @@ afterEach(() => {
 })
 
 function renderPage() {
+    // The session never answers here, so the membership prompt stays out of
+    // these tests; it has its own, with every session state.
+    stubApi({ 'GET /v1/auth/get-session': 'pending' })
     return render(
         <StrictMode>
             <MemoryRouter>
-                <NearbyDevicesPage />
+                <SessionProvider>
+                    <NearbyDevicesPage />
+                </SessionProvider>
             </MemoryRouter>
         </StrictMode>
     )

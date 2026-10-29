@@ -13,6 +13,8 @@ type RouteShape = {
     readonly nav: boolean
     /** Holds a live device connection, so links open it beside the current page. */
     readonly newTab?: boolean
+    /** Only useful to a signed-in person, so it stays out of the sitemap. */
+    readonly unlisted?: boolean
 }
 
 export const APP_ROUTES = [
@@ -36,6 +38,16 @@ export const APP_ROUTES = [
     { id: 'blog_post', path: '/blog/:slug', label: 'Blog post', nav: false },
     { id: 'privacy', path: '/privacy', label: 'Privacy', nav: false },
     { id: 'terms', path: '/terms', label: 'Terms', nav: false },
+    { id: 'sign_in', path: '/sign-in', label: 'Sign in', nav: false, unlisted: true },
+    { id: 'join', path: '/join', label: 'Become a member', nav: false },
+    {
+        id: 'subscribe_confirm',
+        path: '/subscribe/confirm',
+        label: 'Confirm your updates',
+        nav: false,
+        unlisted: true,
+    },
+    { id: 'account', path: '/account', label: 'Account', nav: false, unlisted: true },
 ] as const satisfies readonly RouteShape[]
 
 type RouteDefinition = (typeof APP_ROUTES)[number]

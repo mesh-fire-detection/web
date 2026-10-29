@@ -26,8 +26,10 @@ export type IconName =
     | 'bluetooth'
     | 'usb'
     | 'flask'
+    | 'person'
 
 const PATHS: Record<IconName, ReactNode> = {
+    person: <path d='M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm-7 8a7 7 0 0 1 14 0' />,
     map: <path d='M9 3 3 5.5v15L9 18l6 3 6-2.5v-15L15 6 9 3Zm0 0v15m6-12v15' />,
     build: (
         <path d='M14.7 6.3a4 4 0 0 1-5.4 5.4L4 17v3h3l5.3-5.3a4 4 0 0 0 5.4-5.4l-2.3 2.3-2.1-.6-.6-2.1 2.3-2.3a4 4 0 0 0-.3 0Z' />

@@ -170,6 +170,135 @@ export type NotFoundContent = {
     readonly buildCta: string
 }
 
+/** What the code step says on a particular page; the rest is `CodeStepContent`. */
+type CodeStepWording = {
+    /**
+     * `{address}` is replaced with the address typed. Worded so it reads true
+     * whether or not a code went out, because the page cannot know.
+     */
+    readonly lede: string
+    readonly noEmail: string
+    readonly submit: string
+}
+
+export type SignInContent = {
+    readonly title: string
+    readonly email: {
+        readonly lede: string
+        readonly label: string
+        readonly submit: string
+    }
+    readonly code: CodeStepWording
+    readonly join: { readonly prompt: string; readonly link: string }
+}
+
+type PromptLink = { readonly prompt: string; readonly link: string }
+
+export type JoinContent = PageHeading & {
+    /** Shown when this browser has connected no node yet. */
+    readonly noNodes: { readonly title: string; readonly body: string; readonly connect: string }
+    readonly nodes: { readonly title: string; readonly body: string; readonly unnamed: string }
+    readonly form: {
+        readonly title: string
+        readonly emailLabel: string
+        readonly nameLabel: string
+        readonly nameInvalid: string
+        /** Recorded by the backend as consent; keep identical to its `JOIN_CONSENT`. */
+        readonly updates: string
+        readonly submit: string
+    }
+    readonly code: CodeStepWording
+    readonly signIn: PromptLink
+}
+
+/** The "become a member" prompt, on `/connect` and in the footer. */
+export type MembershipContent = {
+    readonly connect: {
+        readonly title: string
+        readonly body: string
+        readonly cta: string
+        readonly signIn: PromptLink
+    }
+    readonly signedIn: {
+        readonly title: string
+        readonly add: string
+        readonly added: string
+        readonly allAdded: string
+        readonly failed: string
+    }
+    readonly footer: { readonly title: string; readonly body: string; readonly cta: string }
+}
+
+/** Project updates: the footer form, the confirmation page and the account setting. */
+export type UpdatesContent = {
+    readonly footer: {
+        readonly title: string
+        readonly label: string
+        readonly submit: string
+        /** Recorded by the backend as consent; keep identical to its `FOOTER_CONSENT`. */
+        readonly consent: string
+        readonly sent: string
+    }
+    readonly confirm: {
+        readonly title: string
+        readonly lede: string
+        readonly button: string
+        readonly done: string
+        readonly invalid: string
+        readonly missing: string
+    }
+    readonly account: {
+        readonly title: string
+        readonly on: string
+        readonly off: string
+        /** Recorded by the backend as consent; keep identical to its `ACCOUNT_CONSENT`. */
+        readonly turnOn: string
+        readonly turnOff: string
+    }
+}
+
+/** Shared by every page that takes an emailed code. */
+export type CodeStepContent = {
+    readonly label: string
+    readonly limits: string
+    readonly resend: string
+    /** `{seconds}` is replaced with the time left. */
+    readonly resendIn: string
+    readonly resent: string
+    readonly changeEmail: string
+    readonly invalidCode: string
+    readonly invalidEmail: string
+    /** Keyed by the API's error code, plus our own `rate_limited` and `unreachable`. */
+    readonly errors: {
+        readonly INVALID_OTP: string
+        readonly OTP_EXPIRED: string
+        readonly TOO_MANY_ATTEMPTS: string
+        readonly NOT_INVITED: string
+        readonly rate_limited: string
+        readonly unreachable: string
+        readonly fallback: string
+    }
+}
+
+export type AccountContent = {
+    readonly title: string
+    readonly details: {
+        readonly name: string
+        readonly nameInvalid: string
+        readonly email: string
+        readonly emailFixed: string
+        readonly save: string
+        readonly saved: string
+    }
+    readonly signOut: string
+    readonly nodes: {
+        readonly title: string
+        readonly empty: string
+        readonly unnamed: string
+        readonly connect: string
+    }
+}
+
 type FooterLink = {
     readonly label: string
     readonly to: string

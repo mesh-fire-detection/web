@@ -1,5 +1,7 @@
 import { useRef } from 'react'
 
+import { toNodeReports } from '@components/account/connectedNodes'
+import { MembershipPanel } from '@components/account/MembershipPanel'
 import { Page } from '@components/layout/Page'
 import { DeviceDetails } from '@components/pages/build/nearby/DeviceDetails'
 import { DeviceList } from '@components/pages/build/nearby/DeviceList'
@@ -78,6 +80,7 @@ export function NearbyDevicesPage() {
                             </Callout>
                         </div>
                     ) : null}
+                    <MembershipPanel nodes={toNodeReports(snapshot.devices)} />
                     <Text mono size='xs' tone='faint'>
                         {snapshot.devices.length} added ·{' '}
                         {snapshot.devices.filter((device) => device.state === 'connected').length}{' '}

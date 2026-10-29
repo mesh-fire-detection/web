@@ -9,6 +9,8 @@ export const SITE = {
      * Do not fold in `BASE_PATH` — that is only Vite's asset base.
      */
     url: 'https://meshfiredetection.org',
+    /** The backend production builds talk to. Its CORS allows exactly `url` above. */
+    api: 'https://api.meshfiredetection.org',
     github: 'https://github.com/mesh-fire-detection',
     discussions: 'https://github.com/orgs/mesh-fire-detection/discussions/',
     discord: 'https://discord.gg/bDT8VWyTT',

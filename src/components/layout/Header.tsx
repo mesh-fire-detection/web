@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 
 import { useNavMenu, OVERLAY_NAV_ID, OVERLAY_TOGGLE_ID } from '@components/app/NavMenuProvider'
+import { useSession } from '@components/app/SessionProvider'
 import { UnitsToggle } from '@components/layout/UnitsToggle'
 import { Wordmark } from '@components/layout/Wordmark'
 import { Container, Row, Stack } from '@components/shared/primitives/Layout'
@@ -10,6 +11,44 @@ import { Button, ButtonLink, IconLink, NavLink } from '@components/shared/widget
 import { Icon } from '@components/shared/widgets/Icon'
 import { NAV_ROUTES } from '@core/config/routes'
 import { SITE } from '@core/config/site'
+
+/**
+ * "Join", or an account icon for someone signed in. Nothing until the session
+ * check answers, so neither flashes up wrongly on load. Members who are signed
+ * out reach sign-in from the join page. In the bar the icon stands alone; in
+ * the drawer, where there is room, it carries its name.
+ */
+function AccountLink({
+    size,
+    full = false,
+    className,
+    named = false,
+}: {
+    size: 'sm' | 'md'
+    full?: boolean
+    className?: string
+    named?: boolean
+}) {
+    const { session } = useSession()
+    if (session.status === 'loading') return null
+    return session.status === 'signed_in' ? (
+        <ButtonLink
+            to='/account'
+            variant='ghost'
+            size={size}
+            full={full}
+            className={className}
+            label={named ? undefined : 'Account'}
+            iconBefore={<Icon name='person' size={18} />}
+        >
+            {named ? 'Account' : null}
+        </ButtonLink>
+    ) : (
+        <ButtonLink to='/join' variant='ghost' size={size} full={full} className={className}>
+            Join
+        </ButtonLink>
+    )
+}
 
 export function Header() {
     const { open, openMenu, closeMenu } = useNavMenu()
@@ -47,6 +86,7 @@ export function Header() {
                         {/*<Row className='header_units' gap={0} wrap={false}>*/}
                         {/*    <UnitsToggle />*/}
                         {/*</Row>*/}
+                        <AccountLink size='sm' className='header_account' />
                         <ButtonLink to='/build' size='sm' className='header_cta'>
                             Build a Node
                         </ButtonLink>
@@ -107,6 +147,9 @@ export function Header() {
                             <ButtonLink to='/build' size='md' full>
                                 Build a Node
                             </ButtonLink>
+                        </Row>
+                        <Row className='header_drawer_row' wrap={false}>
+                            <AccountLink size='md' full named />
                         </Row>
                         <Row className='header_drawer_row' wrap={false}>
                             <Text as='span' size='xs' tone='faint' mono uppercase>
