@@ -61,7 +61,17 @@ export const BENCH_NODE = {
     name: 'Bench node',
     hardware: 'RAK4631',
     firmware: '2.7.15',
-    connectedAt: '2026-10-27T18:00:00.000Z',
+    hardwareId: '0a1b2c3d4e5f6a7b',
+    type: null,
+} as const
+
+/** The same node once registered, as `/v1/me/nodes` returns it. */
+export const MY_BENCH_NODE = {
+    id: 'n-0001',
+    meshId: '!12345678',
+    name: BENCH_NODE.name,
+    type: null,
+    details: { hardware: BENCH_NODE.hardware },
 } as const
 
 /** Stores one connected node the way `/connect` remembers it in this browser. */
@@ -78,7 +88,8 @@ export function rememberNode(): void {
                     nodeNum: BENCH_NODE.nodeNum,
                     hardware: BENCH_NODE.hardware,
                     firmware: BENCH_NODE.firmware,
-                    connectedAt: Date.parse(BENCH_NODE.connectedAt),
+                    hardwareId: BENCH_NODE.hardwareId,
+                    connectedAt: Date.parse('2026-10-27T18:00:00.000Z'),
                 },
             ],
             activeId: null,

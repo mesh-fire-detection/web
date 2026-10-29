@@ -17,6 +17,10 @@ Notable changes to the web application are recorded here by version.
 - Coverage calculations are hidden while a numeric input is empty.
 - `/connect` calls what it connects nodes, as the rest of the site does, and
   labels Meshtastic's `!a1b2c3d4` the mesh ID. Saved nodes carry over.
+- Adding nodes to your account registers them, and `/account` lists them with
+  the ID the server gave them. `/connect` keeps each node's hardware ID and
+  sends it with the type its name implies.
+- About and Privacy say node positions are shown to within about a kilometre.
 
 ### Fixed
 

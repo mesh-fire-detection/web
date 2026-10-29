@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
 
 import { formErrorMessage } from '@components/account/flow'
-import { NodeList } from '@components/account/NodeList'
+import { fromMine, NodeList } from '@components/account/NodeList'
 import { useSession } from '@components/app/SessionProvider'
 import { Page } from '@components/layout/Page'
 import { TextField } from '@components/shared/forms/Field'
@@ -17,7 +17,7 @@ import {
     fetchMyNodes,
     fetchMySubscription,
     setMySubscription,
-    type NodeReport,
+    type MyNode,
     type SubscriptionStatus,
 } from '@core/api/people'
 import { accountContent } from '@core/content/site/account/account'
@@ -100,7 +100,7 @@ function YourDetails({ user }: { readonly user: SessionUser }) {
 }
 
 function YourNodes() {
-    const [nodes, setNodes] = useState<readonly NodeReport[] | null>(null)
+    const [nodes, setNodes] = useState<readonly MyNode[] | null>(null)
 
     useEffect(() => {
         let current = true
@@ -125,7 +125,10 @@ function YourNodes() {
                     </Row>
                 </Stack>
             ) : (
-                <NodeList nodes={nodes} unnamed={copy.nodes.unnamed} />
+                <NodeList
+                    nodes={nodes.map((node) => fromMine(node))}
+                    unnamed={copy.nodes.unnamed}
+                />
             )}
         </Stack>
     )

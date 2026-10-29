@@ -4,7 +4,7 @@ import { Navigate, useSearchParams } from 'react-router-dom'
 import { CodeStep } from '@components/account/CodeStep'
 import { useConnectedNodes } from '@components/account/connectedNodes'
 import { formErrorMessage, looksLikeEmail, safeNext } from '@components/account/flow'
-import { NodeList } from '@components/account/NodeList'
+import { fromReport, NodeList } from '@components/account/NodeList'
 import { useSession } from '@components/app/SessionProvider'
 import { Page } from '@components/layout/Page'
 import { TextField } from '@components/shared/forms/Field'
@@ -189,7 +189,10 @@ export function JoinPage() {
                                 <Text size='sm' tone='muted'>
                                     {copy.nodes.body}
                                 </Text>
-                                <NodeList nodes={nodes} unnamed={copy.nodes.unnamed} />
+                                <NodeList
+                                    nodes={nodes.map((node) => fromReport(node))}
+                                    unnamed={copy.nodes.unnamed}
+                                />
                             </Stack>
                         </Box>
                     </Grid>

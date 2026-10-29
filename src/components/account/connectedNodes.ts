@@ -1,14 +1,21 @@
 import { useEffect, useState } from 'react'
 
 import type { NodeReport } from '@core/api/people'
+import { mfdKind } from '@core/nearby/firmware'
 import type { NearbyNode } from '@core/nearby/model'
 import { createNodeMemory } from '@core/nearby/storage/nodes'
 
 type Remembered = Pick<NearbyNode, 'nodeNum' | 'name'> &
-    Partial<Pick<NearbyNode, 'hardware' | 'firmware' | 'connectedAt'>>
+    Partial<Pick<NearbyNode, 'shortName' | 'hardware' | 'hardwareId' | 'firmware'>>
 
 const orNull = (value: string | undefined): string | null =>
     value === undefined || value.trim() === '' ? null : value
+
+/** The type our firmware's naming implies. A bench test board registers without one. */
+function registeredType(node: Remembered): NodeReport['type'] {
+    const kind = mfdKind({ name: node.name, shortName: node.shortName ?? '' })
+    return kind === null || kind === 'test' ? null : kind
+}
 
 /**
  * The nodes this browser has connected and identified, one per node number.
@@ -25,7 +32,8 @@ export function toNodeReports(nodes: readonly Remembered[]): NodeReport[] {
             name: orNull(node.name),
             hardware: orNull(node.hardware),
             firmware: orNull(node.firmware),
-            connectedAt: node.connectedAt == null ? null : new Date(node.connectedAt).toISOString(),
+            hardwareId: orNull(node.hardwareId),
+            type: registeredType(node),
         })
     }
     return reports

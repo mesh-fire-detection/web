@@ -10,6 +10,7 @@ import { JoinPage } from '@components/pages/site/account/Join'
 
 import {
     BENCH_NODE,
+    MY_BENCH_NODE,
     json,
     MEMBER,
     rememberNode,
@@ -69,7 +70,7 @@ describe('Join, with a node this browser connected', () => {
             [SESSION]: json(null),
             [JOIN]: json({ success: true }),
             [VERIFY]: json({ status: true, token: 't', user: MEMBER }),
-            [ADD_NODES]: json({ nodes: [{ ...BENCH_NODE, addedAt: BENCH_NODE.connectedAt }] }),
+            [ADD_NODES]: json({ nodes: [MY_BENCH_NODE] }),
         })
         renderJoin()
 

@@ -71,6 +71,8 @@ export type NearbyNode = {
     readonly shortName: string
     readonly firmware: string
     readonly hardware: string
+    /** Meshtastic's `MyNodeInfo.device_id` as hex: survives a reflash, unlike the node number. */
+    readonly hardwareId: string
     readonly connectedAt: number | null
     readonly recentUntil: number | null
     readonly lastPacketAt: number | null
@@ -108,6 +110,7 @@ export function emptyNode(
         shortName: '',
         firmware: '',
         hardware: '',
+        hardwareId: '',
         connectedAt: null,
         recentUntil: null,
         lastPacketAt: null,

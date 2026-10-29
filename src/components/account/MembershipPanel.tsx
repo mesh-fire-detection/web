@@ -7,18 +7,20 @@ import { Text } from '@components/shared/typography/Text'
 import { Button, ButtonLink, TextLink } from '@components/shared/widgets/Action'
 import { addMyNodes, fetchMyNodes, type NodeReport } from '@core/api/people'
 import { membershipContent } from '@core/content/site/account/membership'
+import { meshId } from '@core/nearby/model'
 
 const copy = membershipContent
 
 /** Signed in: offers to add whichever of these nodes the account does not have yet. */
 function AddToAccount({ nodes }: { readonly nodes: readonly NodeReport[] }) {
-    const [known, setKnown] = useState<ReadonlySet<number> | null>(null)
+    /** Mesh IDs of the nodes the account already has. */
+    const [known, setKnown] = useState<ReadonlySet<string> | null>(null)
     const [state, setState] = useState<'idle' | 'busy' | 'added' | 'failed'>('idle')
 
     useEffect(() => {
         let current = true
         void fetchMyNodes().then((result) => {
-            if (current) setKnown(new Set(result.ok ? result.data.map((n) => n.nodeNum) : []))
+            if (current) setKnown(new Set(result.ok ? result.data.map((n) => n.meshId) : []))
         })
         return () => {
             current = false
@@ -26,7 +28,7 @@ function AddToAccount({ nodes }: { readonly nodes: readonly NodeReport[] }) {
     }, [])
 
     if (known === null) return null
-    const missing = nodes.filter((node) => !known.has(node.nodeNum))
+    const missing = nodes.filter((node) => !known.has(meshId(node.nodeNum)))
 
     return state === 'added' || missing.length === 0 ? (
         <Text role='status' size='sm' tone='live'>
@@ -44,7 +46,7 @@ function AddToAccount({ nodes }: { readonly nodes: readonly NodeReport[] }) {
                                 setState('failed')
                                 return
                             }
-                            setKnown(new Set(result.data.map((n) => n.nodeNum)))
+                            setKnown(new Set(result.data.map((n) => n.meshId)))
                             setState('added')
                         })
                     }}

@@ -6,7 +6,7 @@ const STORAGE_KEY = 'mesh-fire-detection.nearby-devices.v1'
 
 type RememberedNode = Pick<NearbyNode, 'id' | 'bluetoothName' | 'name' | 'nodeNum'> &
     /** Missing in saves from before hardware and firmware were kept. */
-    Partial<Pick<NearbyNode, 'shortName' | 'hardware' | 'firmware' | 'port'>> & {
+    Partial<Pick<NearbyNode, 'shortName' | 'hardware' | 'hardwareId' | 'firmware' | 'port'>> & {
         /** Missing in saves from before USB support, which were all Bluetooth. */
         readonly transport?: Transport
         readonly connectedAt?: number | null
@@ -98,6 +98,7 @@ function isRememberedNode(value: unknown): value is RememberedNode {
         typeof value.name === 'string' &&
         (!('shortName' in value) || typeof value.shortName === 'string') &&
         (!('hardware' in value) || typeof value.hardware === 'string') &&
+        (!('hardwareId' in value) || typeof value.hardwareId === 'string') &&
         (!('firmware' in value) || typeof value.firmware === 'string') &&
         (!('connectedAt' in value) ||
             value.connectedAt === null ||
@@ -157,6 +158,7 @@ export function createNodeMemory(storage: () => Pick<Storage, 'getItem' | 'setIt
                             port,
                             shortName,
                             hardware,
+                            hardwareId,
                             firmware,
                         }) => ({
                             id,
@@ -165,6 +167,7 @@ export function createNodeMemory(storage: () => Pick<Storage, 'getItem' | 'setIt
                             nodeNum,
                             ...(shortName !== undefined && { shortName }),
                             ...(hardware !== undefined && { hardware }),
+                            ...(hardwareId !== undefined && { hardwareId }),
                             ...(firmware !== undefined && { firmware }),
                             ...(transport !== undefined && { transport }),
                             ...(port !== undefined && { port }),
@@ -210,6 +213,7 @@ export function createNodeMemory(storage: () => Pick<Storage, 'getItem' | 'setIt
                         nodeNum,
                         shortName,
                         hardware,
+                        hardwareId,
                         firmware,
                         connectedAt,
                         readings,
@@ -222,6 +226,7 @@ export function createNodeMemory(storage: () => Pick<Storage, 'getItem' | 'setIt
                         nodeNum,
                         shortName,
                         hardware,
+                        hardwareId,
                         firmware,
                         transport,
                         port,
@@ -275,6 +280,7 @@ export function restoreNodes(
             nodeNum: node.nodeNum,
             shortName: node.shortName ?? '',
             hardware: node.hardware ?? '',
+            hardwareId: node.hardwareId ?? '',
             firmware: node.firmware ?? '',
             port: node.port ?? null,
             connectedAt,

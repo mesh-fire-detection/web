@@ -242,6 +242,25 @@ describe('nearby node protocol', () => {
         expect(node.history).toEqual({})
     })
 
+    it('keeps the hardware ID the node reports, which survives a reflash', () => {
+        const myInfo = (deviceId: Uint8Array) =>
+            radioMessage({
+                case: 'myInfo',
+                value: create(Mesh.MyNodeInfoSchema, { myNodeNum: LOCAL, deviceId }),
+            })
+
+        const reported = receiveRadio(
+            localNode(),
+            myInfo(Uint8Array.of(0x0a, 0x1b, 0x2c, 0x3d)),
+            NOW,
+            NONCE
+        )
+        const again = receiveRadio(reported, myInfo(new Uint8Array()), NOW, NONCE)
+
+        expect(reported.hardwareId).toBe('0a1b2c3d')
+        expect(again.hardwareId).toBe('0a1b2c3d')
+    })
+
     it('marks cached node database metrics as cached with no invented measurement time', () => {
         const next = receiveRadio(
             localNode(),

@@ -46,6 +46,7 @@ describe('remembered nearby nodes', () => {
                     nodeNum: 123,
                     shortName: 'SN',
                     hardware: 'RAK4631',
+                    hardwareId: '',
                     firmware: '2.6.11.mfd',
                     connectedAt: null,
                     transport: 'bluetooth',

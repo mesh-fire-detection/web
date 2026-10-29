@@ -12,6 +12,7 @@ import { SubscribeConfirmPage } from '@components/pages/site/account/SubscribeCo
 
 import {
     BENCH_NODE,
+    MY_BENCH_NODE,
     json,
     MEMBER,
     rememberNode,
@@ -119,7 +120,7 @@ describe('the prompt on /connect', () => {
             ...SIGNED_IN,
             'GET /v1/me/nodes': json({ nodes: [] }),
             'POST /v1/me/nodes': json({
-                nodes: [{ ...BENCH_NODE, addedAt: BENCH_NODE.connectedAt }],
+                nodes: [MY_BENCH_NODE],
             }),
         })
         renderWithSession(<MembershipPanel nodes={[BENCH_NODE]} />)
@@ -134,7 +135,7 @@ describe('the prompt on /connect', () => {
         stubApi({
             ...SIGNED_IN,
             'GET /v1/me/nodes': json({
-                nodes: [{ ...BENCH_NODE, addedAt: BENCH_NODE.connectedAt }],
+                nodes: [MY_BENCH_NODE],
             }),
         })
         renderWithSession(<MembershipPanel nodes={[BENCH_NODE]} />)

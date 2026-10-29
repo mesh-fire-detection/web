@@ -1,13 +1,27 @@
 import { apiRequest, type ApiResult } from '@core/api/client'
 
+type NodeType = 'base' | 'cellular' | 'sensor' | 'vision'
+
 /** A node as this browser saw it. Only the number is certain; the rest is what it reported. */
 export type NodeReport = {
     readonly nodeNum: number
     readonly name: string | null
     readonly hardware: string | null
     readonly firmware: string | null
-    /** ISO 8601, when this browser first connected it. */
-    readonly connectedAt: string | null
+    /** Meshtastic's `MyNodeInfo.device_id` as hex; keeps the node's ID if its number changes. */
+    readonly hardwareId: string | null
+    /** From the name our firmware gives a node, when it has one. */
+    readonly type: NodeType | null
+}
+
+/** A registered node the member is on, as much of it as `/account` shows. */
+export type MyNode = {
+    /** Assigned by the server when the node was registered, and never changed. */
+    readonly id: string
+    readonly meshId: string
+    readonly name: string
+    readonly type: NodeType | null
+    readonly details: { readonly hardware: string | null } | null
 }
 
 export type SubscriptionStatus = 'none' | 'unconfirmed' | 'confirmed' | 'unsubscribed'
@@ -38,16 +52,19 @@ export async function setMySubscription(
     return result.ok ? { ok: true, data: result.data.subscription.status } : result
 }
 
-export async function fetchMyNodes(): Promise<ApiResult<readonly NodeReport[]>> {
-    const result = await apiRequest<{ nodes: NodeReport[] }>('/v1/me/nodes')
+export async function fetchMyNodes(): Promise<ApiResult<readonly MyNode[]>> {
+    const result = await apiRequest<{ nodes: MyNode[] }>('/v1/me/nodes')
     return result.ok ? { ok: true, data: result.data.nodes } : result
 }
 
-/** Adds nodes this browser connected to the signed-in member. Repeats are harmless. */
+/**
+ * Adds nodes this browser connected to the signed-in member: a new node is
+ * registered, a known one gains them. Repeats are harmless.
+ */
 export async function addMyNodes(
     nodes: readonly NodeReport[]
-): Promise<ApiResult<readonly NodeReport[]>> {
-    const result = await apiRequest<{ nodes: NodeReport[] }>('/v1/me/nodes', {
+): Promise<ApiResult<readonly MyNode[]>> {
+    const result = await apiRequest<{ nodes: MyNode[] }>('/v1/me/nodes', {
         method: 'POST',
         body: { nodes },
     })

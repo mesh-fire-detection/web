@@ -5,6 +5,9 @@ import { epochTime, isSensorMetric } from '@core/nearby/metrics'
 import { addActivity, addSample, meshId } from '@core/nearby/model'
 import type { NearbyNode, History, Peer, Reading, Sample } from '@core/nearby/model'
 
+const toHex = (bytes: Uint8Array): string =>
+    Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('')
+
 export function configurationRequest(nonce: number): Uint8Array<ArrayBuffer> {
     return new Uint8Array(
         toBinary(
@@ -262,6 +265,12 @@ export function receiveRadio(
                         name: peer?.name ?? node.name,
                         shortName: peer?.shortName ?? node.shortName,
                         hardware: peer && peer.hardware !== '' ? peer.hardware : node.hardware,
+                        hardwareId:
+                            payload.value.deviceId.length > 0
+                                ? toHex(payload.value.deviceId)
+                                : node.nodeNum === num
+                                  ? node.hardwareId
+                                  : '',
                         lastPacketAt:
                             peer?.lastPacketAt ?? (node.nodeNum === num ? node.lastPacketAt : null),
                         // Equal USB boards share a port ID, so another node can take over

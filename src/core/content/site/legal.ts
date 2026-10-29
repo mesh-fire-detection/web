@@ -51,7 +51,7 @@ export const privacyContent = {
             id: 'network-data',
             title: 'Sensor and node data',
             paragraphs: [
-                'Nodes report readings, battery and radio metrics. This is data about equipment and terrain, not about people. Node positions are published on purpose, only on public land or on land whose owner agreed in writing.',
+                'Nodes report readings, battery and radio metrics. This is data about equipment and terrain, not about people. Node positions are shown to within about a kilometre; only the people on a node and the project’s admins see where it really is, unless they choose to show it exactly.',
                 'Vision nodes point at terrain, not at roads, homes or trailheads. If a frame accidentally shows a person, it is not used to identify them and is removed on request.',
             ],
         },

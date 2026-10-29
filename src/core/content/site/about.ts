@@ -91,7 +91,7 @@ export const aboutContent = {
         title: 'What this site collects',
         items: [
             'No analytics, no cookies, no third-party scripts. By default the map draws node geometry on a blank canvas and makes no tile requests.',
-            'Node positions are published deliberately. They are on public land or on land whose owner agreed in writing to the position being public.',
+            'Node positions are shown to within about a kilometre, so a node at someone’s home cannot be found and one on a ridge is not easy to steal. A node is shown exactly only when the people who built it choose that, on public land or where the owner agreed.',
             'Vision nodes point at terrain, not at roads, homes or trailheads. Frames that trigger an alert are kept; the rest are discarded on the node.',
             'Alert subscriptions are opt-in by area, and the list is never shared with an agency that has not been asked for in writing by the subscriber.',
         ],
