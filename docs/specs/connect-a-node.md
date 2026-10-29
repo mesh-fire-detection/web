@@ -3,7 +3,7 @@
 Status: first version implemented at `/connect`. Protocol, session, and
 page behavior are covered by automated tests. The open browser page showed a
 connected RAK4631 with environmental and device telemetry during verification
-on October 3, 2026. Saved device restoration and reconnection of the last active
+on October 3, 2026. Saved node restoration and reconnection of the last active
 node on page load are implemented. Simultaneous connections remain deferred.
 
 ## Purpose
@@ -27,25 +27,25 @@ firmware. Other boards require separate compatibility checks.
 - Helper text: **Choose each device in your browser's Bluetooth or USB dialog.**
 
 Use the site's existing typography, colors, spacing, and interaction primitives.
-Keep the device list visible beside the details on desktop; use a list followed
-by a device details view on narrow screens.
-Show a details panel only after a device is selected. Once any device is added,
-the list keeps its sidebar width so selecting or connecting a device does not
+Keep the node list visible beside the details on desktop; use a list followed
+by a node details view on narrow screens.
+Show a details panel only after a node is selected. Once any node is added,
+the list keeps its sidebar width so selecting or connecting a node does not
 resize it; only the empty state uses the full width. Status text sits on its own
 line and status messages stay short, so connection progress does not reflow cards. Omit both the details placeholder and a separate
-"No active connection" card when saved devices are present.
+"No active connection" card when saved nodes are present.
 
 ## First version
 
-The first version supports adding several devices to the current session and
+The first version supports adding several nodes to the current session and
 inspecting one active Bluetooth connection at a time. Previously inspected
-devices keep their last observed values with timestamps and a disconnected
-label. Switching the active device disconnects the previous one explicitly.
+nodes keep their last observed values with timestamps and a disconnected
+label. Switching the active node disconnects the previous one explicitly.
 
 The intended next milestone is simultaneous monitoring of several individually
 authorized nodes. Enable this only after testing connection limits and stability
 with the actual computer, Bluetooth adapter, browser, and firmware. A list of
-added devices must never imply that all of them are currently connected.
+added nodes must never imply that all of them are currently connected.
 
 The page is available without a project account: browser authorization controls
 access to local hardware. It never sends local observations to the server.
@@ -60,8 +60,8 @@ it.
 
 Included:
 
-- Add a device through the browser's Bluetooth chooser.
-- Connect, disconnect, reconnect, and remove a device from the page.
+- Add a node through the browser's Bluetooth chooser.
+- Connect, disconnect, reconnect, and remove a node from the page.
 - Read identity and supported non-secret configuration.
 - Receive device metrics and sensor telemetry through the Meshtastic client API.
 - Inspect a timestamped activity list and packets received from mesh peers.
@@ -80,7 +80,7 @@ Later additions:
 
 ## Connection flow
 
-1. Open the page. Show the empty state or the current session's device list.
+1. Open the page. Show the empty state or the current session's node list.
 2. Check for a secure context and the required Web Bluetooth API. If unavailable,
    show setup guidance and disable the connection action.
 3. Click **Add device**. Open the browser chooser for compatible Meshtastic devices.
@@ -95,29 +95,29 @@ Later additions:
    offer **Reconnect**.
 
 Canceling the chooser leaves the page unchanged. Repeated selection of the same
-device focuses its existing entry instead of creating a duplicate. Use the
+node focuses its existing entry instead of creating a duplicate. Use the
 browser device identifier for the connection and the reported Meshtastic node
 number for packet attribution; a display name is not a unique identity.
 
 All displayed observations survive reloads in this browser: the last local packet
 time, supported non-secret configuration, mesh peers (including their identity,
 link quality and readings), and activity live in the IndexedDB `observations`
-store, keyed by browser device ID. The device list, public identity, latest local
+store, keyed by browser device ID. The node list, public identity, latest local
 readings, successful connection time and automatic-reconnection preference stay
 in `localStorage`. Full observations are restored before automatic reconnection;
 original timestamps are retained and connection state always starts disconnected.
 Existing saves without observations still restore the fields they contain; missing
 data becomes available after reconnecting. No keys, pairing PINs, raw packets or
-device logs are saved.
+node logs are saved.
 
 On page load, restore saved entries and retrieve previously allowed devices
 through `Bluetooth.getDevices()` when supported. These permissions do not prove
-that a device is powered on or reachable. Attempt to connect only the saved last
-active device, using the normal 30-second connection and initialization timeout.
+that a node is powered on or reachable. Attempt to connect only the saved last
+active node, using the normal 30-second connection and initialization timeout.
 Read identity and readings again; never restore an old connected status. The
-latest local readings and IndexedDB history are shown with their original receipt age. Other saved devices are not probed automatically.
+latest local readings and IndexedDB history are shown with their original receipt age. Other saved nodes are not probed automatically.
 
-After reload or unexpected connection loss, keep a recently connected device in
+After reload or unexpected connection loss, keep a recently connected node in
 its original position above **Previously added** for ten minutes from the last
 successful connection. Restore its selected details panel on reload, with the
 saved readings. Use muted gray styling and **Recently connected**, never a live green
@@ -126,12 +126,12 @@ does not extend the deadline; successful reconnection starts a new ten-minute
 window. Manual disconnect clears this retention. Expiry moves the disconnected
 entry into **Previously added** without deleting its saved identity. Legacy saved
 entries without a connection timestamp are not treated as recent; timestamps in
-the future are not treated as recent either. Connected devices remain visible
+the future are not treated as recent either. Connected nodes remain visible
 while their connection is active, regardless of the ten-minute window.
 
 Keep other disconnected entries in a collapsed **Previously added** section with
 **Reconnect** and **Remove from list** actions; selecting the card shows its details. An unsuccessful
-attempt leaves the entry saved: the device may be temporarily unavailable or
+attempt leaves the entry saved: the node may be temporarily unavailable or
 connected to another app. If `getDevices()` is unsupported, fails, or no longer
 returns the saved device, **Reconnect** opens the chooser. Do not open a chooser
 automatically. Bound the initial allowed-device lookup to five seconds. Browser
@@ -160,12 +160,12 @@ separate browser setting.
 Reading history lives in IndexedDB (database `mesh-fire-detection`, store
 `readings`, database version 2), one record per sample: `nodeNum`, `metric`, `recordedAt` (epoch ms)
 and `value`, keyed by all three except `value`. This mirrors the backend's
-`readings` table (device, metric, recorded_at, value), so the two can be merged
+`readings` table (node, metric, recorded_at, value), so the two can be merged
 or synced later. History belongs to the node number, so a node connected over
 both Bluetooth and USB shares it. Samples older than 100 days are deleted when the
-database opens. In memory a device carries its history after the page loads it
+database opens. In memory a node carries its history after the page loads it
 for that node; each new packet writes only the sample it added or replaced.
-`localStorage` keeps the device list and latest readings; history saved there by
+`localStorage` keeps the node list and latest readings; history saved there by
 earlier versions is moved into IndexedDB on load. The database upgrade adds `observations` without replacing the existing
 `readings` store. Only history samples use the 100-day retention; observation
 snapshots are retained until removal from the list. A private window or blocked
@@ -183,18 +183,18 @@ to switch a console session to the API, then the same configuration request as
 over Bluetooth. Because the firmware leaves API mode after 15 minutes without
 client traffic, a heartbeat (nonce 0, answered only with queue status) is sent
 every five minutes. Unplugging ends the read stream and is treated as connection
-loss. Ports have no stable ID, so a saved USB device is identified by vendor,
+loss. Ports have no stable ID, so a saved USB node is identified by vendor,
 product and its order among identical ports. The card names its transport, and
-the transport is saved with the device.
+the transport is saved with the node.
 
 ## Page contents
 
-### Device list
+### Node list
 
 Each entry shows:
 
-- Reported node name, falling back to the Bluetooth name and then **Unnamed device**.
-- Meshtastic node ID once known, for example `!a1b2c3d4`.
+- Reported node name, falling back to the Bluetooth name and then **Unnamed node**.
+- Mesh ID (Meshtastic's node ID) once known, for example `!a1b2c3d4`.
 - Connection state in text, with a supporting color or icon.
 - Latest reported battery percentage, when available.
 - Time of the last packet received from this node during this session.
@@ -213,31 +213,31 @@ USB works in this browser, one notice with a browser-support link replaces those
 reasons. Connection errors appear in the same place, under the buttons that
 caused them.
 
-Order entries by the most recent successful connection, with newly added devices
+Order entries by the most recent successful connection, with newly added nodes
 first. The saved list keeps this order across reloads.
 
-Above the list, show counts for devices added and devices connected. Saved
-disconnected devices count as added. Do not show an inferred count of all nearby
-devices. Disconnected entries live in **Previously added**, collapsed by default.
+Above the list, show counts for nodes added and nodes connected. Saved
+disconnected nodes count as added. Do not show an inferred count of all nearby
+nodes. Disconnected entries live in **Previously added**, collapsed by default.
 
-### Device details
+### Node details
 
 Lead with what a builder checks first and show each value once. Ages update
 in place; absolute times use the viewer's local time.
 
 | Order | Section         | Contents                                                                                       |
 | ----- | --------------- | ---------------------------------------------------------------------------------------------- |
-| 1     | Header          | Name, connection state, node ID, hardware, firmware, last local packet                         |
+| 1     | Header          | Name, connection state, mesh ID, hardware, firmware, last local packet                         |
 | 2     | Battery         | Percentage, voltage and age                                                                    |
 | 2     | Solar charging  | Battery voltage trend: **Rising**, **Falling**, or **Stable**, with both compared voltages     |
 | 2     | Signal          | Best direct LoRa link: quality, SNR, RSSI and the peer it comes from, plus channel utilization |
-| 3     | Sensor readings | Latest environmental and particle metrics with units, receipt age and device measurement time  |
+| 3     | Sensor readings | Latest environmental and particle metrics with units, receipt age and node measurement time  |
 | 4     | Nearest nodes   | Peers reported by the radio: direct neighbors by SNR, then relayed nodes by hop count          |
 | 5     | Firmware update | Whether the node runs the current release, then how to install it                              |
 | 6     | More details    | Collapsed: short name, connection time, reported configuration, other telemetry, activity      |
 
 The nearest-node list uses aligned tags, a name (hardware or **Unnamed node**
-when absent), last-heard age, and a compact signal badge. Full node IDs are
+when absent), last-heard age, and a compact signal badge. Full mesh IDs are
 available on the tag tooltip instead of repeating the suffix in each row. On
 narrow screens the signal moves below the identity and long names wrap.
 Every row uses the same top and bottom padding, including the first and last.
@@ -334,7 +334,7 @@ tall empty grid. **More details** is a plain disclosure row with a chevron, not
 a card. The connection time in **More details** is labelled
 **Session connected at** while connected and **Last connected** otherwise. Do not reserve space with fixed panel heights.
 
-The node ID's last four hex digits, which Meshtastic uses as the default short
+The mesh ID's last four hex digits, which Meshtastic uses as the default short
 name, are shown as a tag beside the name. The firmware field marks builds of
 our fork (`MFD`) by the commit in the reported version; any other version is
 labelled **Meshtastic**.
@@ -342,8 +342,8 @@ labelled **Meshtastic**.
 Peers do not report firmware, so a node counts as ours by its name: `MFD`
 followed by a kind word (`Sensor`, `Node` or `Base`, `Cellular`, `Vision`,
 `Test`) or a short name `MFDS`, `MFDN`, `MFDB`, `MFDC`, `MFDV`, `MFDT`. The same
-word sets the kind icon at the top right of a device card; `Test` marks a bench
-or debugging node. One click selects a whole node ID for copying.
+word sets the kind icon at the top right of a node card; `Test` marks a bench
+or debugging node. One click selects a whole mesh ID for copying.
 
 Over USB the firmware turns Bluetooth advertising off for the duration of the
 serial session and cannot see the port close, so it would wait 15 minutes before
@@ -389,9 +389,9 @@ already stores readings under the same metric names but is not always running,
 so the browser is the primary source and a server source can be added later in
 the same shape.
 
-Tiles show a fixed clock time, **Measured** when the packet carries a valid device
+Tiles show a fixed clock time, **Measured** when the packet carries a valid node
 time and **Received** otherwise, instead of a ticking age. When no reading has a
-device time, one note says the node's clock is not set. Ages under a minute read
+node time, one note says the node's clock is not set. Ages under a minute read
 **just now**.
 
 Selecting a tile (click, Enter or Space) outlines it in yellow and fills the sensor guide block below with that metric's description, sensor
@@ -411,12 +411,12 @@ individual readings as a fire alert. BME680 IAQ, if exposed, needs its reported
 calibration accuracy alongside it; if accuracy is unavailable, the sensor guide
 says so.
 
-For every reading, retain the sender node ID, browser receipt time, and device
+For every reading, retain the sender mesh ID, browser receipt time, and node
 measurement time when supplied and valid. Show **Measurement time unavailable**
 when the packet provides no usable time. A cached reading returned during
 initialization must not be presented as a newly taken measurement.
 
-Treat device times before January 1, 2000 or after browser receipt as unavailable.
+Treat node times before January 1, 2000 or after browser receipt as unavailable.
 Meshtastic nodes without a set calendar clock can put uptime in the time field;
 this must not appear as a measurement taken in 1970. Browser receipt time is
 independent and remains available. Internal mesh statistics are shown separately
@@ -431,7 +431,7 @@ no packet arrives immediately.
 
 ### Activity and mesh peers
 
-The activity list shows readable events such as **Connected**, **Device information
+The activity list shows readable events such as **Connected**, **Node information
 received**, **Environmental telemetry received**, and **Disconnected**. Packet
 summaries identify both the sender and the directly connected radio.
 
@@ -445,32 +445,32 @@ available over Bluetooth. Display source timestamps when provided.
 
 | State or event                       | What the builder sees                                                                 |
 | ------------------------------------ | ------------------------------------------------------------------------------------- |
-| No devices added                     | **No devices added yet. Power on a node and select Add device.**                      |
+| No nodes added                     | **No nodes added yet. Power on a node and select Add device.**                      |
 | Connecting                           | **Connecting…** with actions protected against duplicate attempts                     |
-| Reading identity                     | **Reading device information…**                                                       |
+| Reading identity                     | **Reading node information…**                                                       |
 | Connected, no telemetry              | **Connected. Waiting for sensor data.**                                               |
 | Connected, telemetry received        | Latest readings with their individual times and ages                                  |
 | Disconnected                         | **Disconnected. Showing previously received data.** and **Reconnect**                 |
 | Connection or initialization timeout | A bounded attempt ends with a retry action                                            |
 | Pairing failed or permission denied  | Explain that browser or system pairing did not complete; offer retry                  |
-| Device unavailable or busy           | Suggest checking power, distance, and another phone or app connection                 |
-| Unsupported service or protocol      | Explain that this device or firmware is not supported; do not show fabricated details |
+| Node unavailable or busy           | Suggest checking power, distance, and another phone or app connection                 |
+| Unsupported service or protocol      | Explain that this node or firmware is not supported; do not show fabricated details |
 | Malformed packet                     | Ignore that packet, record a safe diagnostic summary, and keep valid readings         |
 | Unsupported browser                  | Explain that Web Bluetooth is unavailable and suggest desktop Chrome                  |
 
 Status labels must describe evidence. **Connected** means the Bluetooth session
 is established. **Last packet received** describes browser receipt. **Measurement
-time** describes the device's reported sample time. Avoid a generic **Online**
+time** describes the node's reported sample time. Avoid a generic **Online**
 badge that conflates these states with the backend's network status.
 
 Define and test connection and initialization timeouts during implementation.
 After the initial automatic restoration attempt, retries are user initiated.
 Clean up failed attempts so
-reconnecting cannot create duplicate listeners or mix data between devices.
+reconnecting cannot create duplicate listeners or mix data between nodes.
 
 ## Browser and privacy constraints
 
-Production access requires HTTPS. Adding a device requires a user gesture and
+Production access requires HTTPS. Adding a node requires a user gesture and
 the browser's device chooser; the page cannot enumerate every nearby device.
 The initial verification target is desktop Chrome on macOS. Test other browser
 and OS combinations before claiming support. See the
@@ -518,7 +518,7 @@ Builder pages are grouped under `src/components/pages/build/`, with nearby
 widgets under `build/nearby/` and corresponding copy under
 `src/core/content/build/nearby/`. Transport, decoding, display mappings, and
 session state live under `src/core/nearby/`.
-Validated device identity and observation storage lives in `src/core/nearby/storage/`.
+Validated node identity and observation storage lives in `src/core/nearby/storage/`.
 Initialization runs in an effect and ignores stale discovery results after page
 cleanup, including React StrictMode effect replay.
 
@@ -536,7 +536,7 @@ server data. Any later backend integration needs its own specification update.
 ## Acceptance criteria
 
 - A builder can connect a real RAK4631, identify it, and receive genuine telemetry.
-- Adding and switching between two devices keeps their identities and values separate.
+- Adding and switching between two nodes keeps their identities and values separate.
 - Battery, environmental, and particle values update independently and retain their ages.
 - A missing sensor produces no fabricated readings or claim that the sensor is installed.
 - Mesh peer data is clearly separated and attributed to the original sender.
@@ -544,14 +544,14 @@ server data. Any later backend integration needs its own specification update.
   previous values as historical observations.
 - Canceling pairing, denied permissions, timeouts, and unsupported services leave
   the page usable and allow another attempt.
-- Removing a device, switching devices, and leaving the page release connections
-  and listeners without affecting another device's observations.
+- Removing a node, switching nodes, and leaving the page release connections
+  and listeners without affecting another node's observations.
 - Unsupported browsers receive clear guidance instead of broken controls.
 - Local readings and secrets are not transmitted to the backend or analytics.
 - Reload restores saved identities, reconnects only the last active allowed
-  device, and shows all saved observations with their original ages and no claimed
+  node, and shows all saved observations with their original ages and no claimed
   connection status until a new connection succeeds.
-- Unavailable or unauthorized saved devices remain accessible in **Previously
+- Unavailable or unauthorized saved nodes remain accessible in **Previously
   added**, with manual retry; unsupported restoration does not break pairing.
 - Explicit disconnect disables automatic reconnection; removal survives reload
   even when browser permission remains granted.
@@ -570,7 +570,7 @@ the other session. Record the tested platform and observed connection limit.
 
 The browser page displayed RAK4631 node `!7d258b79`, firmware `2.7.26.7d798c3`,
 with environmental telemetry of approximately 27.34 °C, 39.7% relative humidity,
-and 953.2 hPa, plus voltage and uptime. The device reported radio transmission
+and 953.2 hPa, plus voltage and uptime. The node reported radio transmission
 disabled. Its telemetry time was uptime rather than a set calendar time, which
 motivated the timestamp validation above. This observation verifies reception
 from that node; it does not establish multiple-connection support, delivery to

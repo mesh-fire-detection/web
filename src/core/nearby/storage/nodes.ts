@@ -1,12 +1,12 @@
 import type { MetricHistory } from '@core/nearby/metrics'
-import { emptyDevice, RECENT_CONNECTION_MS, TRANSPORTS } from '@core/nearby/model'
-import type { Device, History, Reading, Sample, Transport } from '@core/nearby/model'
+import { emptyNode, RECENT_CONNECTION_MS, TRANSPORTS } from '@core/nearby/model'
+import type { NearbyNode, History, Reading, Sample, Transport } from '@core/nearby/model'
 
 const STORAGE_KEY = 'mesh-fire-detection.nearby-devices.v1'
 
-type RememberedDevice = Pick<Device, 'id' | 'bluetoothName' | 'name' | 'nodeNum'> &
+type RememberedNode = Pick<NearbyNode, 'id' | 'bluetoothName' | 'name' | 'nodeNum'> &
     /** Missing in saves from before hardware and firmware were kept. */
-    Partial<Pick<Device, 'shortName' | 'hardware' | 'firmware' | 'port'>> & {
+    Partial<Pick<NearbyNode, 'shortName' | 'hardware' | 'firmware' | 'port'>> & {
         /** Missing in saves from before USB support, which were all Bluetooth. */
         readonly transport?: Transport
         readonly connectedAt?: number | null
@@ -19,16 +19,21 @@ type RememberedDevice = Pick<Device, 'id' | 'bluetoothName' | 'name' | 'nodeNum'
         /** The latest local reading per metric, shown again after a reload. */
         readonly readings?: readonly Reading[]
     }
-type RememberedDevices = {
+type RememberedNodes = {
     readonly version: 1
-    readonly devices: readonly RememberedDevice[]
+    readonly nodes: readonly RememberedNode[]
     readonly activeId: string | null
 }
+/**
+ * As saved. The list kept its old name, `devices`, with the storage key: renaming
+ * either would forget every node a browser has saved.
+ */
+type SavedNodes = Omit<RememberedNodes, 'nodes'> & { readonly devices: readonly RememberedNode[] }
 
 /** Widened so an unchecked stored value can be looked up. */
 const STORED_TRANSPORTS: readonly unknown[] = TRANSPORTS
 
-const EMPTY: RememberedDevices = { version: 1, devices: [], activeId: null }
+const EMPTY: RememberedNodes = { version: 1, nodes: [], activeId: null }
 
 function isSample(value: unknown): value is Sample {
     return (
@@ -80,7 +85,7 @@ function isHistory(value: unknown): value is History {
 const copySamples = (samples: readonly Sample[]) =>
     samples.map((sample) => ({ value: sample.value, at: sample.at }))
 
-function isRememberedDevice(value: unknown): value is RememberedDevice {
+function isRememberedNode(value: unknown): value is RememberedNode {
     return (
         typeof value === 'object' &&
         value !== null &&
@@ -115,10 +120,10 @@ function isRememberedDevice(value: unknown): value is RememberedDevice {
     )
 }
 
-export function createDeviceMemory(storage: () => Pick<Storage, 'getItem' | 'setItem'>) {
+export function createNodeMemory(storage: () => Pick<Storage, 'getItem' | 'setItem'>) {
     let previous = ''
     return {
-        read(): RememberedDevices {
+        read(): RememberedNodes {
             try {
                 const value: unknown = JSON.parse(storage().getItem(STORAGE_KEY) ?? 'null')
                 if (
@@ -128,18 +133,17 @@ export function createDeviceMemory(storage: () => Pick<Storage, 'getItem' | 'set
                     value.version !== 1 ||
                     !('devices' in value) ||
                     !Array.isArray(value.devices) ||
-                    !value.devices.every(isRememberedDevice) ||
+                    !value.devices.every(isRememberedNode) ||
                     !('activeId' in value) ||
                     (value.activeId !== null && typeof value.activeId !== 'string')
                 )
                     return EMPTY
-                const devices = value.devices.filter(
-                    (device, index, all) =>
-                        all.findIndex((entry) => entry.id === device.id) === index
+                const nodes = value.devices.filter(
+                    (node, index, all) => all.findIndex((entry) => entry.id === node.id) === index
                 )
                 return {
                     version: 1,
-                    devices: devices.map(
+                    nodes: nodes.map(
                         ({
                             id,
                             bluetoothName,
@@ -187,7 +191,7 @@ export function createDeviceMemory(storage: () => Pick<Storage, 'getItem' | 'set
                             }),
                         })
                     ),
-                    activeId: devices.some((device) => device.id === value.activeId)
+                    activeId: nodes.some((node) => node.id === value.activeId)
                         ? value.activeId
                         : null,
                 }
@@ -195,10 +199,10 @@ export function createDeviceMemory(storage: () => Pick<Storage, 'getItem' | 'set
                 return EMPTY
             }
         },
-        write(devices: readonly Device[], activeId: string | null): void {
-            const value: RememberedDevices = {
+        write(nodes: readonly NearbyNode[], activeId: string | null): void {
+            const value: SavedNodes = {
                 version: 1,
-                devices: devices.map(
+                devices: nodes.map(
                     ({
                         id,
                         bluetoothName,
@@ -239,47 +243,47 @@ export function createDeviceMemory(storage: () => Pick<Storage, 'getItem' | 'set
     }
 }
 
-export type DeviceMemory = ReturnType<typeof createDeviceMemory>
+export type NodeMemory = ReturnType<typeof createNodeMemory>
 
 /**
  * A metric's history as this browser keeps it in IndexedDB: up to 100 days, one
  * sample per five minutes, recorded only while a page is connected. The backend
- * stores readings under the same metric names (`GET /v1/devices/:id/readings`),
- * but only for registered devices heard through an MQTT gateway, keyed by device
+ * stores readings under the same metric names (`GET /v1/nodes/:id/readings`),
+ * but only for registered nodes heard through an MQTT gateway, keyed by node
  * ID rather than node number, behind sign-in, and it may not always run. The page
  * works from this browser alone; a server source returning this same shape can
  * add longer, gap-free history when one is reachable.
  */
-export function browserHistory(device: Pick<Device, 'history'>, metric: string): MetricHistory {
-    return { source: 'browser', samples: device.history[metric] ?? [] }
+export function browserHistory(node: Pick<NearbyNode, 'history'>, metric: string): MetricHistory {
+    return { source: 'browser', samples: node.history[metric] ?? [] }
 }
 
-export function restoreDevices(
-    saved: ReturnType<DeviceMemory['read']>['devices']
-): readonly Device[] {
+export function restoreNodes(
+    saved: ReturnType<NodeMemory['read']>['nodes']
+): readonly NearbyNode[] {
     const now = Date.now()
-    return saved.map((device) => {
-        const connectedAt = device.connectedAt ?? null
+    return saved.map((node) => {
+        const connectedAt = node.connectedAt ?? null
         const recentUntil =
             connectedAt !== null && connectedAt <= now && now < connectedAt + RECENT_CONNECTION_MS
                 ? connectedAt + RECENT_CONNECTION_MS
                 : null
-        const readings = device.readings ?? []
+        const readings = node.readings ?? []
         return {
-            ...emptyDevice(device.id, device.bluetoothName, device.transport ?? 'bluetooth'),
-            name: device.name,
-            nodeNum: device.nodeNum,
-            shortName: device.shortName ?? '',
-            hardware: device.hardware ?? '',
-            firmware: device.firmware ?? '',
-            port: device.port ?? null,
+            ...emptyNode(node.id, node.bluetoothName, node.transport ?? 'bluetooth'),
+            name: node.name,
+            nodeNum: node.nodeNum,
+            shortName: node.shortName ?? '',
+            hardware: node.hardware ?? '',
+            firmware: node.firmware ?? '',
+            port: node.port ?? null,
             connectedAt,
             recentUntil,
             lastPacketAt:
                 readings.length === 0
                     ? null
                     : Math.max(...readings.map((reading) => reading.receivedAt)),
-            history: device.history ?? {},
+            history: node.history ?? {},
             readings: Object.fromEntries(readings.map((reading) => [reading.metric, reading])),
         }
     })

@@ -39,7 +39,7 @@ export const nearbyDetailsContent = {
     sensorsDisabled: 'Connected. Environmental and particle telemetry are disabled on this node.',
     disconnected: 'Disconnected. Showing previously received data.',
     recent: 'Not connected. Stays at the top for 10 minutes after connecting; reconnect for live data.',
-    initializing: 'Device information and readings appear as they arrive.',
+    initializing: 'Node information and readings appear as they arrive.',
     live: 'Readings update as packets arrive.',
     sensors: {
         environment: 'Environment · BME680',
@@ -56,7 +56,7 @@ export const nearbyDetailsContent = {
     clockUnset:
         'The node’s clock is not set, so times show when this browser received each reading.',
     measured: 'Measured',
-    cached: 'cached on the device',
+    cached: 'cached on the node',
     firmware: {
         ours: 'MFD',
         upstream: 'Meshtastic',
@@ -87,7 +87,7 @@ export const nearbyDetailsContent = {
         test: 'Test node',
     },
     labels: {
-        nodeId: 'Node ID',
+        meshId: 'Mesh ID',
         connection: 'Connection',
         hardware: 'Hardware',
         firmware: 'Firmware',

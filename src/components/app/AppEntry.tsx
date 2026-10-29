@@ -9,7 +9,7 @@ import { BlogPage } from '@components/pages/blog/Blog'
 import { BlogPostPage } from '@components/pages/blog/BlogPost'
 import { BuildPage } from '@components/pages/build/Build'
 import { FirmwarePage } from '@components/pages/build/Firmware'
-import { NearbyDevicesPage } from '@components/pages/build/nearby/NearbyDevices'
+import { NearbyNodesPage } from '@components/pages/build/nearby/NearbyNodes'
 import { SatellitePage } from '@components/pages/build/satellite/Satellite'
 import { CoveragePage } from '@components/pages/coverage/Coverage'
 import { HomePage } from '@components/pages/Home'
@@ -42,7 +42,7 @@ const PAGES: Record<RouteId, ComponentType> = {
     blog_post: BlogPostPage,
     privacy: PrivacyPage,
     terms: TermsPage,
-    connect: NearbyDevicesPage,
+    connect: NearbyNodesPage,
     firmware: FirmwarePage,
     satellite: SatellitePage,
     sign_in: SignInPage,

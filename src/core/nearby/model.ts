@@ -56,7 +56,7 @@ export type Peer = {
     readonly readings: Readonly<Record<string, Reading>>
 }
 
-export type Device = {
+export type NearbyNode = {
     readonly id: string
     readonly bluetoothName: string
     readonly transport: Transport
@@ -82,21 +82,21 @@ export type Device = {
 }
 
 export type Snapshot = {
-    readonly devices: readonly Device[]
+    readonly nodes: readonly NearbyNode[]
     readonly selectedId: string | null
     readonly busy: boolean
     readonly error: ConnectionError | null
     readonly announcement: Announcement | null
     readonly restoration: 'checking' | 'unsupported' | 'failed' | null
-    /** The device just removed from the list, while its removal can still be undone. */
-    readonly removed: Device | null
+    /** The node just removed from the list, while its removal can still be undone. */
+    readonly removed: NearbyNode | null
 }
 
-export function emptyDevice(
+export function emptyNode(
     id: string,
     bluetoothName: string,
     transport: Transport = 'bluetooth'
-): Device {
+): NearbyNode {
     return {
         id,
         bluetoothName,
@@ -119,29 +119,30 @@ export function emptyDevice(
     }
 }
 
-export function addActivity(device: Device, message: string, at: number): Device {
-    return { ...device, activity: [...device.activity, { at, message }] }
+export function addActivity(node: NearbyNode, message: string, at: number): NearbyNode {
+    return { ...node, activity: [...node.activity, { at, message }] }
 }
 
 /** USB ports carry no stable ID, so a USB entry is named after its node once known. */
-export function usbDeviceId(num: number): string {
+export function usbNodeId(num: number): string {
     return `usb:node:${String(num)}`
 }
 
-export function nodeId(num: number): string {
+/** Meshtastic calls this the node ID; ours is the registered ID, such as `sen-01`. */
+export function meshId(num: number): string {
     return `!${num.toString(16).padStart(8, '0')}`
 }
 
-export function deviceName(device: Pick<Device, 'name' | 'bluetoothName' | 'nodeNum'>): string {
-    const name = device.name || device.bluetoothName
-    if (device.nodeNum === null) return name
+export function nodeName(node: Pick<NearbyNode, 'name' | 'bluetoothName' | 'nodeNum'>): string {
+    const name = node.name || node.bluetoothName
+    if (node.nodeNum === null) return name
     // Default names end in the ID's last four hex digits, which the node tag already shows.
-    const suffix = nodeId(device.nodeNum).slice(-4)
+    const suffix = meshId(node.nodeNum).slice(-4)
     if (name.toLowerCase() === suffix) return ''
     const trimmed = name.replace(new RegExp(`[\\s_-]+${suffix}$`, 'i'), '')
     return trimmed || name
 }
 
-export function isRecentDevice(device: Device): boolean {
-    return device.state === 'disconnected' && device.recentUntil !== null
+export function isRecentNode(node: NearbyNode): boolean {
+    return node.state === 'disconnected' && node.recentUntil !== null
 }

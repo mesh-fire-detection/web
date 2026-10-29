@@ -120,7 +120,7 @@ nodes this browser has connected.
 - **Already a member? Sign in** under both.
 
 "Connected" is what `/connect` already remembers in `localStorage`: every
-device it has identified with a node number. No cookie is needed, because
+node it has identified with a node number. No cookie is needed, because
 nothing has to reach the server until the person joins.
 
 A member who asks to join is sent a sign-in code instead by the backend; the
@@ -195,7 +195,7 @@ prompt:
 
 ## Later additions
 
-- Pages that need a session: alert rules, alerts, and admin pages for devices,
+- Pages that need a session: alert rules, alerts, and admin pages for nodes,
   gateways and inviting users.
 - **Sign out everywhere**, once someone asks for it.
 - Google sign-in and the Join and Subscribe routes from backend #9 and #29.

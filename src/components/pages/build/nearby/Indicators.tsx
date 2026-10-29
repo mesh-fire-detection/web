@@ -4,14 +4,14 @@ import { Text } from '@components/shared/typography/Text'
 import { Badge, StatusDot, StatusLabel } from '@components/shared/widgets/Badge'
 import type { StatusKind } from '@components/shared/widgets/Badge'
 import { Icon } from '@components/shared/widgets/Icon'
-import { nearbyDetailsContent } from '@core/content/build/nearby/deviceDetails'
-import { nearbyDevicesContent as copy } from '@core/content/build/nearby/nearbyDevices'
+import { nearbyNodesContent as copy } from '@core/content/build/nearby/nearbyNodes'
+import { nearbyDetailsContent } from '@core/content/build/nearby/nodeDetails'
 import { cx } from '@core/format/cx'
 import { parseFirmware } from '@core/nearby/firmware'
 import type { NodeKind } from '@core/nearby/firmware'
 import { age, localTime } from '@core/nearby/metrics'
-import { nodeId } from '@core/nearby/model'
-import type { ConnectionState, Device } from '@core/nearby/model'
+import { meshId } from '@core/nearby/model'
+import type { ConnectionState, NearbyNode } from '@core/nearby/model'
 
 // One shared ticker: only the elements that print an age re-render each second.
 const listeners = new Set<() => void>()
@@ -54,7 +54,7 @@ export function Timestamp({ time }: { readonly time: number }) {
     return <span>{localTime(time)}</span>
 }
 
-export function DeviceStatus({
+export function NodeStatus({
     state,
     recent = false,
 }: {
@@ -93,15 +93,15 @@ export function NodeTag({
                 !ours && 'nearby_node_tag_other',
                 num === null && 'nearby_node_tag_empty'
             )}
-            title={num === null ? undefined : nodeId(num)}
+            title={num === null ? undefined : meshId(num)}
         >
-            {num === null ? '····' : nodeId(num).slice(-4)}
+            {num === null ? '····' : meshId(num).slice(-4)}
         </span>
     )
 }
 
-export function NodeId({ num }: { readonly num: number }) {
-    const id = nodeId(num)
+export function MeshId({ num }: { readonly num: number }) {
+    const id = meshId(num)
     return (
         <span className='nearby_node_id nearby_selectable'>
             <span className='nearby_node_id_prefix'>{id.slice(0, -4)}</span>
@@ -144,27 +144,27 @@ const SENSOR_GROUPS = {
 } as const
 
 export function SensorStatus({
-    device,
+    node,
     group,
 }: {
-    readonly device: Device
+    readonly node: NearbyNode
     readonly group: keyof typeof SENSOR_GROUPS
 }) {
     const current = useNow()
     const labels = nearbyDetailsContent.sensors
     const { prefix, setting } = SENSOR_GROUPS[group]
-    const times = Object.values(device.readings)
+    const times = Object.values(node.readings)
         .filter((reading) => reading.metric.startsWith(prefix))
         .map((reading) => reading.receivedAt)
     const latest = times.length === 0 ? null : Math.max(...times)
     const status = (): readonly [StatusKind, string] => {
-        if (device.configuration[setting] === 'Disabled') return ['neutral', labels.off]
+        if (node.configuration[setting] === 'Disabled') return ['neutral', labels.off]
         if (latest !== null)
-            return device.state === 'connected'
+            return node.state === 'connected'
                 ? ['live', `${labels.reporting} · ${age(latest, current)}`]
                 : ['neutral', `${labels.lastReading} · ${age(latest, current)}`]
-        if (device.state !== 'connected') return ['neutral', labels.offline]
-        return device.connectedAt !== null && current - device.connectedAt > SENSOR_GRACE_MS
+        if (node.state !== 'connected') return ['neutral', labels.offline]
+        return node.connectedAt !== null && current - node.connectedAt > SENSOR_GRACE_MS
             ? ['dead', labels.missing]
             : ['warn', labels.waiting]
     }

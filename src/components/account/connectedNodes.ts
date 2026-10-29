@@ -1,32 +1,31 @@
 import { useEffect, useState } from 'react'
 
 import type { NodeReport } from '@core/api/people'
-import type { Device } from '@core/nearby/model'
-import { createDeviceMemory } from '@core/nearby/storage/devices'
+import type { NearbyNode } from '@core/nearby/model'
+import { createNodeMemory } from '@core/nearby/storage/nodes'
 
-type Remembered = Pick<Device, 'nodeNum' | 'name'> &
-    Partial<Pick<Device, 'hardware' | 'firmware' | 'connectedAt'>>
+type Remembered = Pick<NearbyNode, 'nodeNum' | 'name'> &
+    Partial<Pick<NearbyNode, 'hardware' | 'firmware' | 'connectedAt'>>
 
 const orNull = (value: string | undefined): string | null =>
     value === undefined || value.trim() === '' ? null : value
 
 /**
  * The nodes this browser has connected and identified, one per node number.
- * A device added but never connected has no number and is not a node yet.
+ * A node added but never connected has no number and is not a node yet.
  */
-export function toNodeReports(devices: readonly Remembered[]): NodeReport[] {
+export function toNodeReports(nodes: readonly Remembered[]): NodeReport[] {
     const seen = new Set<number>()
     const reports: NodeReport[] = []
-    for (const device of devices) {
-        if (device.nodeNum === null || seen.has(device.nodeNum)) continue
-        seen.add(device.nodeNum)
+    for (const node of nodes) {
+        if (node.nodeNum === null || seen.has(node.nodeNum)) continue
+        seen.add(node.nodeNum)
         reports.push({
-            nodeNum: device.nodeNum,
-            name: orNull(device.name),
-            hardware: orNull(device.hardware),
-            firmware: orNull(device.firmware),
-            connectedAt:
-                device.connectedAt == null ? null : new Date(device.connectedAt).toISOString(),
+            nodeNum: node.nodeNum,
+            name: orNull(node.name),
+            hardware: orNull(node.hardware),
+            firmware: orNull(node.firmware),
+            connectedAt: node.connectedAt == null ? null : new Date(node.connectedAt).toISOString(),
         })
     }
     return reports
@@ -38,7 +37,7 @@ export function toNodeReports(devices: readonly Remembered[]): NodeReport[] {
  */
 function readConnectedNodes(): NodeReport[] {
     try {
-        return toNodeReports(createDeviceMemory(() => window.localStorage).read().devices)
+        return toNodeReports(createNodeMemory(() => window.localStorage).read().nodes)
     } catch {
         // Private mode or blocked storage: as if nothing had been connected.
         return []

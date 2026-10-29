@@ -17,7 +17,7 @@ import {
     trend,
     voltageTrend,
 } from '@core/nearby/metrics'
-import { deviceName, emptyDevice } from '@core/nearby/model'
+import { nodeName, emptyNode } from '@core/nearby/model'
 import {
     configurationRequest,
     disconnectRequest,
@@ -33,9 +33,9 @@ const LOCAL = 1234
 const PEER = 5678
 const NONCE = 42
 
-function localDevice() {
+function localNode() {
     return receiveRadio(
-        emptyDevice('local', 'Meshtastic'),
+        emptyNode('local', 'Meshtastic'),
         radioMessage({
             case: 'myInfo',
             value: create(Mesh.MyNodeInfoSchema, { myNodeNum: LOCAL }),
@@ -45,14 +45,14 @@ function localDevice() {
     )
 }
 
-describe('nearby device protocol', () => {
+describe('nearby node protocol', () => {
     it.each([
         ['MFD Sensor 8b79', 'MFD Sensor'],
         ['Meshtastic_8B79', 'Meshtastic'],
         ['8b79', ''],
         ['Ridge relay', 'Ridge relay'],
     ])('drops the ID suffix the node tag already shows (%s)', (name, expected) => {
-        expect(deviceName({ name, bluetoothName: '', nodeNum: 0xda_5a_8b_79 })).toBe(expected)
+        expect(nodeName({ name, bluetoothName: '', nodeNum: 0xda_5a_8b_79 })).toBe(expected)
     })
 
     it('encodes a disconnect so the firmware can resume Bluetooth advertising', () => {
@@ -72,20 +72,20 @@ describe('nearby device protocol', () => {
                 case: 'deviceMetrics',
                 value: create(Telemetry.DeviceMetricsSchema, { voltage }),
             })
-        let device = receiveRadio(localDevice(), sample(first), NOW, NONCE)
-        expect(voltageTrend(device)).toBeNull()
-        device = receiveRadio(device, sample(second), NOW + 60_000, NONCE)
-        expect(voltageTrend(device)?.direction).toBe(expected)
+        let node = receiveRadio(localNode(), sample(first), NOW, NONCE)
+        expect(voltageTrend(node)).toBeNull()
+        node = receiveRadio(node, sample(second), NOW + 60_000, NONCE)
+        expect(voltageTrend(node)?.direction).toBe(expected)
         // Samples under five minutes apart replace the newest one.
-        device = receiveRadio(device, sample(3.6), NOW + 120_000, NONCE)
-        expect(device.history['deviceMetrics.voltage'] ?? []).toHaveLength(2)
-        device = receiveRadio(device, sample(3.6), NOW + 6 * 60_000, NONCE)
-        expect(device.history['deviceMetrics.voltage'] ?? []).toHaveLength(3)
+        node = receiveRadio(node, sample(3.6), NOW + 120_000, NONCE)
+        expect(node.history['deviceMetrics.voltage'] ?? []).toHaveLength(2)
+        node = receiveRadio(node, sample(3.6), NOW + 6 * 60_000, NONCE)
+        expect(node.history['deviceMetrics.voltage'] ?? []).toHaveLength(3)
     })
 
     it('excludes cached values, peer voltages, duplicates and older measurements from the voltage trend', () => {
-        let device = receiveRadio(
-            localDevice(),
+        let node = receiveRadio(
+            localNode(),
             radioMessage({
                 case: 'nodeInfo',
                 value: create(Mesh.NodeInfoSchema, {
@@ -105,15 +105,15 @@ describe('nearby device protocol', () => {
                 },
                 time
             )
-        device = receiveRadio(device, sample(PEER, 4.1, NOW / 1000), NOW, NONCE)
-        expect(device.history['deviceMetrics.voltage'] ?? []).toHaveLength(0)
-        device = receiveRadio(device, sample(LOCAL, 3.5, NOW / 1000), NOW + 1000, NONCE)
-        device = receiveRadio(device, sample(LOCAL, 3.5, NOW / 1000), NOW + 2000, NONCE)
-        device = receiveRadio(device, sample(LOCAL, 3.9, NOW / 1000 - 60), NOW + 3000, NONCE)
-        expect(device.history['deviceMetrics.voltage'] ?? []).toHaveLength(1)
-        expect(voltageTrend(device)).toBeNull()
-        device = receiveRadio(device, sample(LOCAL, 3.55, NOW / 1000 + 60), NOW + 60_000, NONCE)
-        expect(voltageTrend(device)?.direction).toBe('rising')
+        node = receiveRadio(node, sample(PEER, 4.1, NOW / 1000), NOW, NONCE)
+        expect(node.history['deviceMetrics.voltage'] ?? []).toHaveLength(0)
+        node = receiveRadio(node, sample(LOCAL, 3.5, NOW / 1000), NOW + 1000, NONCE)
+        node = receiveRadio(node, sample(LOCAL, 3.5, NOW / 1000), NOW + 2000, NONCE)
+        node = receiveRadio(node, sample(LOCAL, 3.9, NOW / 1000 - 60), NOW + 3000, NONCE)
+        expect(node.history['deviceMetrics.voltage'] ?? []).toHaveLength(1)
+        expect(voltageTrend(node)).toBeNull()
+        node = receiveRadio(node, sample(LOCAL, 3.55, NOW / 1000 + 60), NOW + 60_000, NONCE)
+        expect(voltageTrend(node)?.direction).toBe('rising')
     })
     it('keeps a history of local sensor readings, but not of peers, for trends', () => {
         const sample = (sender: number, temperature: number, time: number) =>
@@ -125,13 +125,13 @@ describe('nearby device protocol', () => {
                 },
                 time
             )
-        let device = receiveRadio(localDevice(), sample(LOCAL, 20, NOW / 1000), NOW, NONCE)
-        device = receiveRadio(device, sample(PEER, 35, NOW / 1000), NOW, NONCE)
-        device = receiveRadio(device, sample(LOCAL, 20.4, NOW / 1000 + 600), NOW + 600_000, NONCE)
-        const change = trend(device.history['environmentMetrics.temperature'])
+        let node = receiveRadio(localNode(), sample(LOCAL, 20, NOW / 1000), NOW, NONCE)
+        node = receiveRadio(node, sample(PEER, 35, NOW / 1000), NOW, NONCE)
+        node = receiveRadio(node, sample(LOCAL, 20.4, NOW / 1000 + 600), NOW + 600_000, NONCE)
+        const change = trend(node.history['environmentMetrics.temperature'])
         expect(change?.direction).toBe('rising')
         expect(signedChange('environmentMetrics.temperature', change?.change ?? 0)).toBe('+0.4 °C')
-        expect(device.history['environmentMetrics.temperature']).toHaveLength(2)
+        expect(node.history['environmentMetrics.temperature']).toHaveLength(2)
     })
 
     it('only sends a local configuration read request', () => {
@@ -141,16 +141,16 @@ describe('nearby device protocol', () => {
 
     it('initializes only after identity and a matching completion nonce', () => {
         const complete = radioMessage({ case: 'configCompleteId', value: NONCE })
-        expect(receiveRadio(emptyDevice('local', ''), complete, NOW, NONCE).state).toBe(
+        expect(receiveRadio(emptyNode('local', ''), complete, NOW, NONCE).state).toBe(
             'disconnected'
         )
-        expect(receiveRadio(localDevice(), complete, NOW, NONCE + 1).state).toBe('disconnected')
-        expect(receiveRadio(localDevice(), complete, NOW, NONCE).state).toBe('connected')
+        expect(receiveRadio(localNode(), complete, NOW, NONCE + 1).state).toBe('disconnected')
+        expect(receiveRadio(localNode(), complete, NOW, NONCE).state).toBe('connected')
     })
 
-    it('keeps sensor timestamps independent from device telemetry', () => {
+    it('keeps sensor timestamps independent from node telemetry', () => {
         const sensor = receiveRadio(
-            localDevice(),
+            localNode(),
             telemetryPacket(
                 LOCAL,
                 {
@@ -186,7 +186,7 @@ describe('nearby device protocol', () => {
 
     it('attributes peer telemetry to its sender instead of the Bluetooth node', () => {
         const next = receiveRadio(
-            localDevice(),
+            localNode(),
             telemetryPacket(PEER, {
                 case: 'environmentMetrics',
                 value: create(Telemetry.EnvironmentMetricsSchema, { temperature: 31 }),
@@ -201,8 +201,8 @@ describe('nearby device protocol', () => {
     })
 
     it('retains packets received before the local identity is known', () => {
-        let device = receiveRadio(
-            emptyDevice('local', ''),
+        let node = receiveRadio(
+            emptyNode('local', ''),
             telemetryPacket(LOCAL, {
                 case: 'environmentMetrics',
                 value: create(Telemetry.EnvironmentMetricsSchema, { temperature: 23 }),
@@ -210,9 +210,9 @@ describe('nearby device protocol', () => {
             NOW,
             NONCE
         )
-        expect(device.readings).toEqual({})
-        device = receiveRadio(
-            device,
+        expect(node.readings).toEqual({})
+        node = receiveRadio(
+            node,
             radioMessage({
                 case: 'myInfo',
                 value: create(Mesh.MyNodeInfoSchema, { myNodeNum: LOCAL }),
@@ -220,12 +220,12 @@ describe('nearby device protocol', () => {
             NOW,
             NONCE
         )
-        expect(device.readings['environmentMetrics.temperature']?.sender).toBe(LOCAL)
+        expect(node.readings['environmentMetrics.temperature']?.sender).toBe(LOCAL)
     })
 
     it('drops the history of another node that reported on the same entry', () => {
-        let device = receiveRadio(
-            localDevice(),
+        let node = receiveRadio(
+            localNode(),
             telemetryPacket(LOCAL, {
                 case: 'environmentMetrics',
                 value: create(Telemetry.EnvironmentMetricsSchema, { temperature: 23 }),
@@ -233,18 +233,18 @@ describe('nearby device protocol', () => {
             NOW,
             NONCE
         )
-        expect(device.history['environmentMetrics.temperature']).toHaveLength(1)
+        expect(node.history['environmentMetrics.temperature']).toHaveLength(1)
         const myInfo = (myNodeNum: number) =>
             radioMessage({ case: 'myInfo', value: create(Mesh.MyNodeInfoSchema, { myNodeNum }) })
-        expect(receiveRadio(device, myInfo(LOCAL), NOW, NONCE).history).toBe(device.history)
-        device = receiveRadio(device, myInfo(PEER), NOW, NONCE)
-        expect(device.nodeNum).toBe(PEER)
-        expect(device.history).toEqual({})
+        expect(receiveRadio(node, myInfo(LOCAL), NOW, NONCE).history).toBe(node.history)
+        node = receiveRadio(node, myInfo(PEER), NOW, NONCE)
+        expect(node.nodeNum).toBe(PEER)
+        expect(node.history).toEqual({})
     })
 
     it('marks cached node database metrics as cached with no invented measurement time', () => {
         const next = receiveRadio(
-            localDevice(),
+            localNode(),
             radioMessage({
                 case: 'nodeInfo',
                 value: create(Mesh.NodeInfoSchema, {
@@ -267,12 +267,12 @@ describe('nearby device protocol', () => {
     })
 
     it('ignores malformed packets, invalid senders and non-finite measurements', () => {
-        const device = localDevice()
-        const malformed = receiveRadio(device, new Uint8Array([0xff]), NOW, NONCE)
+        const node = localNode()
+        const malformed = receiveRadio(node, new Uint8Array([0xff]), NOW, NONCE)
         expect(malformed.readings).toEqual({})
         expect(malformed.activity.at(-1)?.message).toBe('Malformed packet ignored')
         const invalid = receiveRadio(
-            device,
+            node,
             telemetryPacket(0, {
                 case: 'environmentMetrics',
                 value: create(Telemetry.EnvironmentMetricsSchema, { temperature: 20 }),
@@ -282,7 +282,7 @@ describe('nearby device protocol', () => {
         )
         expect(invalid.readings).toEqual({})
         const nonFinite = receiveRadio(
-            device,
+            node,
             telemetryPacket(LOCAL, {
                 case: 'environmentMetrics',
                 value: create(Telemetry.EnvironmentMetricsSchema, {
@@ -298,9 +298,9 @@ describe('nearby device protocol', () => {
     })
 
     it('does not retain channel keys, credentials, private keys or firmware logs', () => {
-        let device = localDevice()
-        device = receiveRadio(
-            device,
+        let node = localNode()
+        node = receiveRadio(
+            node,
             radioMessage({
                 case: 'logRecord',
                 value: create(Mesh.LogRecordSchema, { message: 'secret-log' }),
@@ -311,8 +311,8 @@ describe('nearby device protocol', () => {
         const securityConfig = create(Config.ConfigSchema, {
             payloadVariant: { case: 'security', value: { privateKey: new Uint8Array([1, 2, 3]) } },
         })
-        device = receiveRadio(
-            device,
+        node = receiveRadio(
+            node,
             radioMessage({
                 case: 'config',
                 value: securityConfig,
@@ -320,14 +320,14 @@ describe('nearby device protocol', () => {
             NOW,
             NONCE
         )
-        expect(JSON.stringify(device)).not.toContain('secret-log')
-        expect(JSON.stringify(device)).not.toContain('privateKey')
-        expect(device.configuration).toEqual({})
+        expect(JSON.stringify(node)).not.toContain('secret-log')
+        expect(JSON.stringify(node)).not.toContain('privateKey')
+        expect(node.configuration).toEqual({})
     })
 
     it('preserves unknown metrics without assigning guessed units', () => {
         const next = receiveRadio(
-            localDevice(),
+            localNode(),
             telemetryPacket(LOCAL, {
                 case: 'environmentMetrics',
                 value: create(Telemetry.EnvironmentMetricsSchema, { lux: 12, gasResistance: 31 }),
@@ -342,8 +342,8 @@ describe('nearby device protocol', () => {
         expect(epochTime(NOW / 1000 + 1, NOW)).toBeNull()
         expect(epochTime(0, NOW)).toBeNull()
         expect(epochTime(9489, NOW)).toBeNull()
-        const deviceWithoutClock = receiveRadio(
-            localDevice(),
+        const nodeWithoutClock = receiveRadio(
+            localNode(),
             telemetryPacket(
                 LOCAL,
                 {
@@ -355,7 +355,7 @@ describe('nearby device protocol', () => {
             NOW,
             NONCE
         )
-        expect(deviceWithoutClock.readings['environmentMetrics.temperature']).toMatchObject({
+        expect(nodeWithoutClock.readings['environmentMetrics.temperature']).toMatchObject({
             value: 24,
             measuredAt: null,
             receivedAt: NOW,
@@ -365,30 +365,20 @@ describe('nearby device protocol', () => {
     it('records link quality only for packets heard directly over LoRa', () => {
         const RELAYED = 9012
         const MQTT = 3456
-        let device = localDevice()
-        device = receiveRadio(
-            device,
-            linkPacket(PEER, { snr: 6.5, rssi: -92, hops: 0 }),
-            NOW,
-            NONCE
-        )
-        device = receiveRadio(
-            device,
-            linkPacket(RELAYED, { snr: 9, rssi: -60, hops: 2 }),
-            NOW,
-            NONCE
-        )
-        device = receiveRadio(
-            device,
+        let node = localNode()
+        node = receiveRadio(node, linkPacket(PEER, { snr: 6.5, rssi: -92, hops: 0 }), NOW, NONCE)
+        node = receiveRadio(node, linkPacket(RELAYED, { snr: 9, rssi: -60, hops: 2 }), NOW, NONCE)
+        node = receiveRadio(
+            node,
             linkPacket(MQTT, { snr: 12, rssi: -40, hops: 0, viaMqtt: true }),
             NOW,
             NONCE
         )
-        expect(device.peers[PEER]).toMatchObject({ snr: 6.5, rssi: -92, hopsAway: 0 })
-        expect(device.peers[RELAYED]).toMatchObject({ snr: null, rssi: null, hopsAway: 2 })
-        expect(device.peers[MQTT]).toMatchObject({ snr: null, rssi: null, hopsAway: null })
-        expect(nearestPeers(device).map((peer) => peer.num)).toEqual([PEER, RELAYED, MQTT])
-        expect(bestLink(device)?.num).toBe(PEER)
+        expect(node.peers[PEER]).toMatchObject({ snr: 6.5, rssi: -92, hopsAway: 0 })
+        expect(node.peers[RELAYED]).toMatchObject({ snr: null, rssi: null, hopsAway: 2 })
+        expect(node.peers[MQTT]).toMatchObject({ snr: null, rssi: null, hopsAway: null })
+        expect(nearestPeers(node).map((peer) => peer.num)).toEqual([PEER, RELAYED, MQTT])
+        expect(bestLink(node)?.num).toBe(PEER)
         expect([signalQuality(6.5), signalQuality(-10), signalQuality(-18)]).toEqual([
             'good',
             'fair',
@@ -398,15 +388,10 @@ describe('nearby device protocol', () => {
 
     it('ranks direct neighbors by signal before relayed nodes', () => {
         const WEAK = 7777
-        let device = localDevice()
-        device = receiveRadio(
-            device,
-            linkPacket(WEAK, { snr: -12, rssi: -118, hops: 0 }),
-            NOW,
-            NONCE
-        )
-        device = receiveRadio(device, linkPacket(PEER, { snr: 4, rssi: -95, hops: 0 }), NOW, NONCE)
-        expect(nearestPeers(device).map((peer) => peer.num)).toEqual([PEER, WEAK])
+        let node = localNode()
+        node = receiveRadio(node, linkPacket(WEAK, { snr: -12, rssi: -118, hops: 0 }), NOW, NONCE)
+        node = receiveRadio(node, linkPacket(PEER, { snr: 4, rssi: -95, hops: 0 }), NOW, NONCE)
+        expect(nearestPeers(node).map((peer) => peer.num)).toEqual([PEER, WEAK])
     })
 
     it('formats observation times as local wall-clock time', () => {

@@ -7,7 +7,7 @@ import { Pressable } from '@components/shared/primitives/Pressable'
 import { Heading } from '@components/shared/typography/Heading'
 import { Text } from '@components/shared/typography/Text'
 import { Metric } from '@components/shared/widgets/Badge'
-import { nearbyDetailsContent as copy } from '@core/content/build/nearby/deviceDetails'
+import { nearbyDetailsContent as copy } from '@core/content/build/nearby/nodeDetails'
 import { sensorGuideContent as guide } from '@core/content/build/nearby/sensorGuide'
 import { cx } from '@core/format/cx'
 import { plural } from '@core/format/format'
@@ -30,8 +30,8 @@ import {
     voltageTrend,
 } from '@core/nearby/metrics'
 import type { MetricHistory, Rate } from '@core/nearby/metrics'
-import { nodeId } from '@core/nearby/model'
-import type { Device, History, Reading, Sample } from '@core/nearby/model'
+import { meshId } from '@core/nearby/model'
+import type { NearbyNode, History, Reading, Sample } from '@core/nearby/model'
 
 type Tone = 'default' | 'live' | 'warn' | 'dead' | 'muted'
 
@@ -64,17 +64,17 @@ const TREND_ARROW = { rising: '↑', falling: '↓', steady: '→' } as const
 const TREND_TONE = { rising: 'live', falling: 'warn', steady: 'default' } as const
 
 /** Battery, solar charging and LoRa signal: the first things checked on a node. */
-export function Vitals({ device }: { readonly device: Device }) {
-    const battery = device.readings['deviceMetrics.batteryLevel']
-    const voltage = device.readings['deviceMetrics.voltage']
-    const { powered, percent } = batteryCharge(device)
-    const voltageChange = voltageTrend(device)
-    const voltages = device.history['deviceMetrics.voltage'] ?? []
+export function Vitals({ node }: { readonly node: NearbyNode }) {
+    const battery = node.readings['deviceMetrics.batteryLevel']
+    const voltage = node.readings['deviceMetrics.voltage']
+    const { powered, percent } = batteryCharge(node)
+    const voltageChange = voltageTrend(node)
+    const voltages = node.history['deviceMetrics.voltage'] ?? []
     // Without stored history (private window, blocked site data) the latest reading still counts.
     const latestVoltage =
         voltages.at(-1) ?? (voltage ? { value: voltage.value, at: voltage.receivedAt } : undefined)
-    const utilization = device.readings['deviceMetrics.channelUtilization']
-    const link = bestLink(device)
+    const utilization = node.readings['deviceMetrics.channelUtilization']
+    const link = bestLink(node)
     const quality = link?.snr == null ? null : signalQuality(link.snr)
     return (
         <Grid minColumnWidth={140} gap={3} className='nearby_vitals'>
@@ -143,7 +143,7 @@ export function Vitals({ device }: { readonly device: Device }) {
                         {link.rssi === null
                             ? ''
                             : ` · RSSI ${formatNumber(link.rssi, 'dBm')}`} · {copy.bestLink}:{' '}
-                        {link.name || link.shortName || nodeId(link.num)}
+                        {link.name || link.shortName || meshId(link.num)}
                     </>
                 )}
                 <div>

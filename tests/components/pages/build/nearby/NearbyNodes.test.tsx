@@ -8,9 +8,9 @@ import { MemoryRouter } from 'react-router-dom'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { SessionProvider } from '@components/app/SessionProvider'
-import { NearbyDevicesPage } from '@components/pages/build/nearby/NearbyDevices'
-import { emptyDevice } from '@core/nearby/model'
-import { createDeviceMemory } from '@core/nearby/storage/devices'
+import { NearbyNodesPage } from '@components/pages/build/nearby/NearbyNodes'
+import { emptyNode } from '@core/nearby/model'
+import { createNodeMemory } from '@core/nearby/storage/nodes'
 import {
     bluetoothSupport,
     chooseBluetoothDevice,
@@ -51,7 +51,7 @@ function renderPage() {
         <StrictMode>
             <MemoryRouter>
                 <SessionProvider>
-                    <NearbyDevicesPage />
+                    <NearbyNodesPage />
                 </SessionProvider>
             </MemoryRouter>
         </StrictMode>
@@ -62,8 +62,8 @@ describe('Connect a Node page', () => {
     it('starts with an honest empty state and does not open the chooser on load', () => {
         renderPage()
         expect(screen.getByRole('heading', { name: 'Connect a Node' })).toBeDefined()
-        expect(screen.getByText('No devices added yet')).toBeDefined()
-        expect(screen.queryByRole('heading', { name: 'Device details' })).toBeNull()
+        expect(screen.getByText('No nodes added yet')).toBeDefined()
+        expect(screen.queryByRole('heading', { name: 'Node details' })).toBeNull()
         expect(screen.queryByText(/^[\d.]+ °C$/)).toBeNull()
         expect(chooseBluetoothDevice).not.toHaveBeenCalled()
     })
@@ -88,8 +88,8 @@ describe('Connect a Node page', () => {
         const scrollIntoView = vi.fn()
         Element.prototype.scrollIntoView = scrollIntoView
         const radio = mockRadio(123)
-        createDeviceMemory(() => window.localStorage).write(
-            [{ ...emptyDevice(radio.connection.id, radio.connection.name), transport: 'usb' }],
+        createNodeMemory(() => window.localStorage).write(
+            [{ ...emptyNode(radio.connection.id, radio.connection.name), transport: 'usb' }],
             null
         )
         vi.mocked(knownBluetoothDevices).mockResolvedValue(null)
@@ -144,8 +144,8 @@ describe('Connect a Node page', () => {
 
     it('reconnects once under StrictMode and restores no old readings', async () => {
         const radio = mockRadio(123)
-        const memory = createDeviceMemory(() => window.localStorage)
-        memory.write([emptyDevice(radio.connection.id, radio.connection.name)], radio.connection.id)
+        const memory = createNodeMemory(() => window.localStorage)
+        memory.write([emptyNode(radio.connection.id, radio.connection.name)], radio.connection.id)
         vi.mocked(knownBluetoothDevices).mockResolvedValue([radio.connection])
         renderPage()
         await waitFor(() => {
@@ -190,10 +190,10 @@ describe('Connect a Node page', () => {
     it('shows saved identity, last packet and voltage after a reload without stored history', async () => {
         const radio = mockRadio(123)
         const now = Date.now()
-        createDeviceMemory(() => window.localStorage).write(
+        createNodeMemory(() => window.localStorage).write(
             [
                 {
-                    ...emptyDevice(radio.connection.id, radio.connection.name),
+                    ...emptyNode(radio.connection.id, radio.connection.name),
                     nodeNum: 123,
                     hardware: 'RAK4631',
                     connectedAt: now,
@@ -224,14 +224,14 @@ describe('Connect a Node page', () => {
         expect(card?.textContent).not.toContain('Last packet —')
     })
 
-    it('shows saved-device reconnect actions without an empty details panel when getDevices is missing', async () => {
+    it('shows saved-node reconnect actions without an empty details panel when getDevices is missing', async () => {
         const radio = mockRadio(123)
         const other = mockRadio(456)
-        const memory = createDeviceMemory(() => window.localStorage)
+        const memory = createNodeMemory(() => window.localStorage)
         memory.write(
             [
-                emptyDevice(radio.connection.id, radio.connection.name),
-                emptyDevice(other.connection.id, other.connection.name),
+                emptyNode(radio.connection.id, radio.connection.name),
+                emptyNode(other.connection.id, other.connection.name),
             ],
             radio.connection.id
         )
@@ -247,7 +247,7 @@ describe('Connect a Node page', () => {
         expect(toggle.getAttribute('aria-expanded')).toBe('true')
         expect(screen.getAllByRole('button', { name: /Reconnect:/ })).toHaveLength(2)
         expect(screen.queryByText('No active connection')).toBeNull()
-        expect(screen.queryByText('Device details')).toBeNull()
+        expect(screen.queryByText('Node details')).toBeNull()
         expect(chooseBluetoothDevice).not.toHaveBeenCalled()
         const user = userEvent.setup()
         toggle.focus()
@@ -262,7 +262,7 @@ describe('Connect a Node page', () => {
         await waitFor(() => {
             expect(screen.getByText('2 added · 1 connected')).toBeDefined()
         })
-        // The hint stays beside the device that still needs a manual reconnect.
+        // The hint stays beside the node that still needs a manual reconnect.
         expect(screen.getAllByRole('button', { name: /Reconnect:/ })).toHaveLength(1)
         expect(
             screen.getByText(/This browser requires you to select the device again/)
@@ -270,7 +270,7 @@ describe('Connect a Node page', () => {
         expect(chooseBluetoothDevice).toHaveBeenCalledOnce()
     })
 
-    it('shows the connection status once, in the device list', async () => {
+    it('shows the connection status once, in the node list', async () => {
         const connection: RadioConnection = {
             id: 'bluetooth-pending',
             name: 'Meshtastic_pending',
@@ -290,7 +290,7 @@ describe('Connect a Node page', () => {
         renderPage()
         fireEvent.click(screen.getByRole('button', { name: 'Add Bluetooth device' }))
         await waitFor(() => {
-            expect(screen.getAllByText('Reading device info…')).toHaveLength(1)
+            expect(screen.getAllByText('Reading node info…')).toHaveLength(1)
         })
     })
 

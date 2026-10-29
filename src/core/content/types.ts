@@ -405,14 +405,14 @@ export type BuildContent = PageHeading & {
     readonly sourceCta: string
 }
 
-export type NearbyDevicesContent = PageHeading & {
+export type NearbyNodesContent = PageHeading & {
     readonly add: Readonly<Record<'bluetooth' | 'usb', string>>
     readonly transports: Readonly<Record<'bluetooth' | 'usb', string>>
     readonly helper: readonly string[]
     readonly recentStatus: string
     readonly emptyTitle: string
     readonly emptyBody: string
-    readonly devicesTitle: string
+    readonly nodesTitle: string
     readonly unnamed: string
     readonly errorTitle: string
     readonly battery: string
@@ -695,7 +695,7 @@ export type NearbyDetailsContent = {
     }
     readonly kinds: Readonly<Record<'base' | 'cellular' | 'sensor' | 'vision' | 'test', string>>
     readonly labels: {
-        readonly nodeId: string
+        readonly meshId: string
         readonly connection: string
         readonly hardware: string
         readonly firmware: string

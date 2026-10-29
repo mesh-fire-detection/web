@@ -15,6 +15,8 @@ Notable changes to the web application are recorded here by version.
 - Satellite controls use shared UI kit components, and the contribution rules
   require shared UI contracts for interface work.
 - Coverage calculations are hidden while a numeric input is empty.
+- `/connect` calls what it connects nodes, as the rest of the site does, and
+  labels Meshtastic's `!a1b2c3d4` the mesh ID. Saved nodes carry over.
 
 ### Fixed
 

@@ -17,9 +17,9 @@ describe('route table', () => {
         expect(NAV_ROUTES.length).toBe(APP_ROUTES.filter((route) => route.nav).length)
     })
 
-    it('opens the device connection page in a new tab, with or without a hash', () => {
+    it('opens the node connection page in a new tab, with or without a hash', () => {
         expect(opensInNewTab('/connect')).toBe(true)
-        expect(opensInNewTab('/connect#devices')).toBe(true)
+        expect(opensInNewTab('/connect#nodes')).toBe(true)
         expect(opensInNewTab('/build')).toBe(false)
         expect(opensInNewTab('/build#firmware')).toBe(false)
     })

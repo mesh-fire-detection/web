@@ -11,7 +11,7 @@ type RouteShape = {
     readonly path: `/${string}`
     readonly label: string
     readonly nav: boolean
-    /** Holds a live device connection, so links open it beside the current page. */
+    /** Holds a live node connection, so links open it beside the current page. */
     readonly newTab?: boolean
     /** Only useful to a signed-in person, so it stays out of the sitemap. */
     readonly unlisted?: boolean

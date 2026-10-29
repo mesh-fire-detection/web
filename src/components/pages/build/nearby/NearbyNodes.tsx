@@ -1,125 +1,157 @@
-import { useState } from 'react'
+import { useRef } from 'react'
 
-import { Age, NodeTag } from '@components/pages/build/nearby/Indicators'
-import { Stack } from '@components/shared/primitives/Layout'
+import { toNodeReports } from '@components/account/connectedNodes'
+import { MembershipPanel } from '@components/account/MembershipPanel'
+import { Page } from '@components/layout/Page'
+import { NodeDetails } from '@components/pages/build/nearby/NodeDetails'
+import { NodeList } from '@components/pages/build/nearby/NodeList'
+import { useNearbyNodes } from '@components/pages/build/nearby/useNearbyNodes'
+import { ExternalLink } from '@components/shared/navigation/ExternalLink'
+import { Row, Section, Stack } from '@components/shared/primitives/Layout'
+import { Heading } from '@components/shared/typography/Heading'
 import { Text } from '@components/shared/typography/Text'
 import { Button } from '@components/shared/widgets/Action'
-import { Badge } from '@components/shared/widgets/Badge'
+import { Callout } from '@components/shared/widgets/Callout'
 import { Icon } from '@components/shared/widgets/Icon'
-import { nearbyDetailsContent as copy } from '@core/content/build/nearby/deviceDetails'
-import { isMfdNode } from '@core/nearby/firmware'
-import {
-    formatNumber,
-    isSensorMetric,
-    metricLabel,
-    nearestPeers,
-    readingValue,
-    SIGNAL_TONE,
-    signalQuality,
-} from '@core/nearby/metrics'
-import { deviceName } from '@core/nearby/model'
-import type { Device, Peer } from '@core/nearby/model'
+import { nearbyNodesContent as copy } from '@core/content/build/nearby/nearbyNodes'
+import { cx } from '@core/format/cx'
+import { nodeName, TRANSPORTS } from '@core/nearby/model'
 
-const VISIBLE = 5
-
-function Link({ peer }: { readonly peer: Peer }) {
-    if (peer.hopsAway === 0 && peer.snr !== null) {
-        const quality = signalQuality(peer.snr)
-        return (
-            <Text as='span' size='xs' tone={SIGNAL_TONE[quality]}>
-                {copy.quality[quality]} · {formatNumber(peer.snr, 'dB')}
-                {peer.rssi === null ? '' : ` · ${formatNumber(peer.rssi, 'dBm')}`}
-            </Text>
-        )
-    }
-    const route =
-        peer.hopsAway === null
-            ? copy.routeUnknown
-            : peer.hopsAway === 0
-              ? copy.direct
-              : `${String(peer.hopsAway)} ${peer.hopsAway === 1 ? copy.hop : copy.hops}`
-    return (
-        <Text as='span' size='xs' tone='muted'>
-            {route}
-        </Text>
-    )
+/** In the one-column layout the details sit below every card, out of view. */
+function revealDetails(workspace: HTMLElement | null, details: HTMLElement | null) {
+    if (!workspace || !details) return
+    const stacked =
+        details.getBoundingClientRect().left - workspace.getBoundingClientRect().left < 1
+    if (stacked) details.scrollIntoView({ block: 'start' })
 }
 
-function PeerRow({ peer }: { readonly peer: Peer }) {
-    const heard = peer.lastPacketAt ?? peer.lastHeardAt
-    const name = deviceName({
-        name: peer.name || peer.shortName.trim(),
-        bluetoothName: '',
-        nodeNum: peer.num,
-    })
-    const battery = peer.readings['deviceMetrics.batteryLevel']
-    const values = [
-        ...(battery ? [`${metricLabel(battery.metric)} ${readingValue(battery)}`] : []),
-        ...Object.values(peer.readings)
-            .filter((reading) => isSensorMetric(reading.metric))
-            .map((reading) => `${metricLabel(reading.metric)} ${readingValue(reading)}`),
-    ]
+export function NearbyNodesPage() {
+    const { session, snapshot, support } = useNearbyNodes()
+    const workspaceRef = useRef<HTMLDivElement>(null)
+    const detailsRef = useRef<HTMLDivElement>(null)
+    const selected = snapshot.nodes.find((node) => node.id === snapshot.selectedId)
+    const noSupport = TRANSPORTS.every((transport) => support[transport] !== 'available')
     return (
-        <div className='nearby_peer'>
-            <NodeTag num={peer.num} ours={isMfdNode(peer)} size='sm' />
-            <Text size='sm' weight={600} className='nearby_peer_name'>
-                {name || peer.hardware || copy.unnamedNode}
-            </Text>
-            <Text size='2xs' tone='faint' className='nearby_peer_meta'>
-                {name ? peer.hardware : ''}
-                {heard !== null && name && peer.hardware ? ' · ' : null}
-                {heard === null ? null : (
-                    <span>
-                        {copy.lastHeard} <Age time={heard} />
-                    </span>
-                )}
-            </Text>
-            <div className='nearby_peer_link'>
-                <Badge kind='neutral' size='xs' mono={false} uppercase={false}>
-                    <Icon name='radio' size={14} />
-                    <Link peer={peer} />
-                </Badge>
-            </div>
-            {values.length > 0 ? (
-                <Text size='xs' tone='muted' className='nearby_peer_readings'>
-                    {values.join(' · ')}
-                </Text>
-            ) : null}
-        </div>
-    )
-}
-
-export function NearbyNodes({ device }: { readonly device: Device }) {
-    const [expanded, setExpanded] = useState(false)
-    const peers = nearestPeers(device)
-    return (
-        <Stack gap={3}>
-            <Text size='xs' tone='faint'>
-                {copy.peersNote}
-            </Text>
-            {peers.length === 0 ? (
-                <Text size='sm' tone='faint'>
-                    {copy.noPeers}
-                </Text>
-            ) : (
-                <div className='nearby_peers'>
-                    {(expanded ? peers : peers.slice(0, VISIBLE)).map((peer) => (
-                        <PeerRow key={peer.num} peer={peer} />
-                    ))}
-                </div>
-            )}
-            {peers.length > VISIBLE ? (
-                <Button
-                    size='sm'
-                    variant='ghost'
-                    ariaExpanded={expanded}
-                    onClick={() => {
-                        setExpanded(!expanded)
-                    }}
-                >
-                    {expanded ? copy.showFewer : `${copy.showAll} (${String(peers.length)})`}
-                </Button>
-            ) : null}
-        </Stack>
+        <Page
+            title={copy.title}
+            eyebrow={copy.eyebrow}
+            lede={copy.lede}
+            aside={
+                <Stack gap={3}>
+                    <Row gap={3} align='start'>
+                        {TRANSPORTS.map((transport) => {
+                            const availability = support[transport]
+                            return (
+                                <div key={transport} className='nearby_add'>
+                                    <Button
+                                        variant={transport}
+                                        iconBefore={<Icon name={transport} />}
+                                        label={copy.add[transport]}
+                                        disabled={availability !== 'available' || snapshot.busy}
+                                        onClick={() => {
+                                            void session.add(transport)
+                                        }}
+                                    >
+                                        {copy.transports[transport]}
+                                    </Button>
+                                    {availability === 'available' || noSupport ? null : (
+                                        <Text size='xs' tone='faint'>
+                                            {copy.support[availability]}
+                                        </Text>
+                                    )}
+                                </div>
+                            )
+                        })}
+                    </Row>
+                    {noSupport ? (
+                        <Callout title={copy.noSupport.title} tone='warn'>
+                            {support.bluetooth === 'insecure'
+                                ? copy.noSupport.insecure
+                                : copy.noSupport.unsupported}{' '}
+                            <ExternalLink href={copy.noSupport.href}>
+                                {copy.noSupport.link}
+                            </ExternalLink>
+                        </Callout>
+                    ) : null}
+                    {snapshot.error ? (
+                        <div role='alert'>
+                            <Callout title={copy.errorTitle} tone='warn'>
+                                {copy.errors[snapshot.error]}
+                            </Callout>
+                        </div>
+                    ) : null}
+                    <MembershipPanel nodes={toNodeReports(snapshot.nodes)} />
+                    <Text mono size='xs' tone='faint'>
+                        {snapshot.nodes.length} added ·{' '}
+                        {snapshot.nodes.filter((node) => node.state === 'connected').length}{' '}
+                        connected
+                    </Text>
+                    <Stack gap={1}>
+                        {copy.helper.map((line) => (
+                            <Text key={line} size='sm' tone='muted'>
+                                {line}
+                            </Text>
+                        ))}
+                    </Stack>
+                </Stack>
+            }
+        >
+            <Section space='sm' bordered>
+                <Stack gap={5}>
+                    <div role='status' aria-live='polite' className='nearby_announcement'>
+                        {snapshot.announcement === null
+                            ? null
+                            : copy.announcements[snapshot.announcement]}
+                    </div>
+                    <Heading level={2} size='lg'>
+                        {copy.nodesTitle}
+                    </Heading>
+                    {snapshot.removed ? (
+                        <Row gap={3} wrap={false}>
+                            <Text size='sm' tone='muted' truncate>
+                                {copy.announcements.removed} ·{' '}
+                                {nodeName(snapshot.removed) || copy.unnamed}
+                            </Text>
+                            <Button
+                                size='sm'
+                                variant='secondary'
+                                onClick={() => {
+                                    session.undoRemove()
+                                }}
+                            >
+                                {copy.actions.undo}
+                            </Button>
+                        </Row>
+                    ) : null}
+                    <div
+                        ref={workspaceRef}
+                        className={cx(
+                            'nearby_workspace',
+                            snapshot.nodes.length === 0 && 'nearby_workspace_empty'
+                        )}
+                    >
+                        <NodeList
+                            snapshot={snapshot}
+                            session={session}
+                            canConnect={{
+                                bluetooth: support.bluetooth === 'available',
+                                usb: support.usb === 'available',
+                            }}
+                            onSelect={(id) => {
+                                session.select(id)
+                                requestAnimationFrame(() => {
+                                    revealDetails(workspaceRef.current, detailsRef.current)
+                                })
+                            }}
+                        />
+                        {selected ? (
+                            <div ref={detailsRef} className='nearby_details'>
+                                <NodeDetails node={selected} />
+                            </div>
+                        ) : null}
+                    </div>
+                </Stack>
+            </Section>
+        </Page>
     )
 }

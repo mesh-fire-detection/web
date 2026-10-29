@@ -4,9 +4,9 @@ import { IDBFactory } from 'fake-indexeddb'
 import 'fake-indexeddb/auto'
 import { describe, expect, it, vi } from 'vitest'
 
-import { emptyDevice } from '@core/nearby/model'
+import { emptyNode } from '@core/nearby/model'
 import { createNearbySession } from '@core/nearby/session'
-import { createDeviceMemory } from '@core/nearby/storage/devices'
+import { createNodeMemory } from '@core/nearby/storage/nodes'
 import { parseObservation } from '@core/nearby/storage/observations'
 import { createReadingStore } from '@core/nearby/storage/readings'
 
@@ -17,7 +17,7 @@ describe('saved observations', () => {
         const factory = new IDBFactory()
         const store = createReadingStore(() => factory)
         let saved: string | null = null
-        const memory = createDeviceMemory(() => ({
+        const memory = createNodeMemory(() => ({
             getItem: () => saved,
             setItem: (_key, value) => {
                 saved = value
@@ -64,7 +64,7 @@ describe('saved observations', () => {
                 value: create(Telemetry.EnvironmentMetricsSchema, { temperature: -5 }),
             })
         )
-        const expected = original.getSnapshot().devices[0]
+        const expected = original.getSnapshot().nodes[0]
         expect(expected).toBeDefined()
         await vi.waitFor(async () => {
             const stored = await store.loadObservation(radio.connection.id)
@@ -78,7 +78,7 @@ describe('saved observations', () => {
             })
             await restored.restore()
             await vi.waitFor(() => {
-                expect(restored.getSnapshot().devices[0]).toEqual({
+                expect(restored.getSnapshot().nodes[0]).toEqual({
                     ...expected,
                     state: 'disconnected',
                 })
@@ -91,7 +91,7 @@ describe('saved observations', () => {
             known: () => Promise.resolve([radio.connection]),
         })
         await reconnected.restore()
-        expect(reconnected.getSnapshot().devices[0]).toMatchObject({
+        expect(reconnected.getSnapshot().nodes[0]).toMatchObject({
             state: 'connected',
             configuration: expected?.configuration,
             peers: expected?.peers,
@@ -130,7 +130,7 @@ describe('saved observations', () => {
             })
         })
         const store = createReadingStore(() => factory)
-        await store.saveObservation(emptyDevice('radio', ''))
+        await store.saveObservation(emptyNode('radio', ''))
         expect(await store.load(123)).toEqual({ temperature: [{ at: now, value: -5 }] })
         expect(await store.loadObservation('radio')).not.toBeNull()
     })
@@ -139,7 +139,7 @@ describe('saved observations', () => {
         expect(parseObservation({ id: 'radio', peers: { bad: {} } })).toBeNull()
         const store = createReadingStore(() => new IDBFactory())
         await store.saveObservation({
-            ...emptyDevice('radio', ''),
+            ...emptyNode('radio', ''),
             configuration: { 'LoRa region': 'US', secret: 'private-key' },
         })
         const saved = await store.loadObservation('radio')
@@ -150,7 +150,7 @@ describe('saved observations', () => {
 
     it('keeps storage failures harmless', async () => {
         const store = createReadingStore(() => {})
-        await store.saveObservation(emptyDevice('radio', ''))
+        await store.saveObservation(emptyNode('radio', ''))
         expect(await store.loadObservation('radio')).toBeNull()
         await expect(store.removeObservation('radio')).resolves.toBeUndefined()
     })
@@ -165,13 +165,13 @@ describe('saved observations', () => {
         })
         const store = createReadingStore(() => factory)
         let saved: string | null = null
-        const memory = createDeviceMemory(() => ({
+        const memory = createNodeMemory(() => ({
             getItem: () => saved,
             setItem: (_key, value) => {
                 saved = value
             },
         }))
-        memory.write([emptyDevice('radio', '')], null)
+        memory.write([emptyNode('radio', '')], null)
         const session = createNearbySession(() => Promise.resolve(null), {
             memory,
             readings: store,
@@ -179,7 +179,7 @@ describe('saved observations', () => {
         try {
             await session.restore()
             expect(session.getSnapshot().busy).toBe(false)
-            expect(session.getSnapshot().devices).toHaveLength(1)
+            expect(session.getSnapshot().nodes).toHaveLength(1)
         } finally {
             session.dispose()
             existing.close()
