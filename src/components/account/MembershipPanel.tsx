@@ -69,7 +69,8 @@ function AddToAccount({ nodes }: { readonly nodes: readonly NodeReport[] }) {
  * out, it invites the person to become a member; the browser keeps the nodes,
  * so the invitation is still here, and in the footer, if they come back later.
  * Signed in, it adds the nodes to their account — a deliberate act, since
- * nothing about a node leaves the browser without one (web#4).
+ * nothing about a node leaves the browser without one (web#4). After it, what
+ * the browser saved is backed up automatically (`nodeBackup`).
  */
 export function MembershipPanel({ nodes }: { readonly nodes: readonly NodeReport[] }) {
     const { session } = useSession()
@@ -80,6 +81,9 @@ export function MembershipPanel({ nodes }: { readonly nodes: readonly NodeReport
                     <Heading level={2} size='sm'>
                         {copy.signedIn.title}
                     </Heading>
+                    <Text size='sm' tone='muted'>
+                        {copy.signedIn.backup}
+                    </Text>
                     <AddToAccount nodes={nodes} />
                 </Stack>
             ) : (

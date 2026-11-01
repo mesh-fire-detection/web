@@ -73,13 +73,25 @@ export const nodeContent = {
     more: {
         open: 'More details',
         other: 'Other reported telemetry',
-        fromBrowser:
-            'From this browser’s last connection to the node. The server does not keep these.',
-        notConnected:
-            'Settings and activity appear here once this node has been connected from this browser.',
+        fromServer:
+            'What a browser recorded while connected to this node, kept on the server for its owners.',
+        fromBrowser: 'From this browser. The packet-by-packet activity log stays here.',
+        notConnected: 'This browser has not connected to this node.',
         shortName: 'Short name',
+        settingsAsOf: 'Settings as of',
         lastConnected: 'Last connected',
+        lastBackedUp: 'Last backed up',
+        notBackedUp: 'Not yet',
         notReported: 'Not reported',
+        events: 'Connections and faults',
+        noEvents: 'None recorded yet.',
+        eventsFailed: 'These could not be loaded.',
+        eventKinds: {
+            connected: 'Connected',
+            disconnected: 'Disconnected',
+            restarted: 'Node restarted',
+            malformed: 'Malformed packet ignored',
+        },
         activity: 'Activity',
         noActivity: 'No activity recorded yet.',
     },
@@ -87,7 +99,7 @@ export const nodeContent = {
         loading: 'Loading readings…',
         failed: 'Readings could not be loaded.',
         sensors: 'Sensor readings',
-        range: 'From the last 7 days of readings on the server.',
+        range: 'From the last 7 days of readings on the server, including what browsers have backed up.',
     },
     edit: {
         open: 'Edit node',

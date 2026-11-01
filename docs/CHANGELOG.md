@@ -12,6 +12,8 @@ Notable changes to the web application are recorded here by version.
 - `/nodes`, the list of registered nodes for signed-in people, with filters
   kept in the URL, and `/nodes/:id`, where the people on a node see its
   details and edit it. Sign-in says why when a members-only page sent you.
+- Nodes on your account are backed up: `/account` and `/nodes/:id` copy readings,
+  connections, faults and settings saved by `/connect` to the server.
 
 ### Changed
 

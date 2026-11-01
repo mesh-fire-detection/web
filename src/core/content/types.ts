@@ -227,6 +227,7 @@ export type MembershipContent = {
         readonly added: string
         readonly allAdded: string
         readonly failed: string
+        readonly backup: string
     }
     readonly footer: { readonly title: string; readonly body: string; readonly cta: string }
 }
@@ -376,14 +377,21 @@ export type NodeContent = {
     readonly more: Words<
         | 'open'
         | 'other'
+        | 'fromServer'
         | 'fromBrowser'
         | 'notConnected'
         | 'shortName'
+        | 'settingsAsOf'
         | 'lastConnected'
+        | 'lastBackedUp'
+        | 'notBackedUp'
         | 'notReported'
+        | 'events'
+        | 'noEvents'
+        | 'eventsFailed'
         | 'activity'
         | 'noActivity'
-    >
+    > & { readonly eventKinds: Words<'connected' | 'disconnected' | 'restarted' | 'malformed'> }
     readonly readings: Words<'loading' | 'failed' | 'sensors' | 'range'>
     readonly edit: Words<
         | 'open'

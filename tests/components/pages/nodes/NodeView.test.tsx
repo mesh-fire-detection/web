@@ -132,9 +132,28 @@ describe('Node view', () => {
 
         expect(screen.getByText('Other reported telemetry')).toBeDefined()
         expect(screen.getByText(/60 s/u)).toBeDefined()
-        expect(
-            screen.getByText(/once this node has been connected from this browser/u)
-        ).toBeDefined()
+        expect(screen.getByText('This browser has not connected to this node.')).toBeDefined()
+        expect(screen.queryByText('Connections and faults')).toBeNull()
+    })
+
+    it('shows the people on a node what browsers recorded, kept on the server', async () => {
+        const user = userEvent.setup()
+        stubApi({
+            [SESSION]: SIGNED_IN,
+            'GET /v1/nodes/n-0001': json({ node: BENCH }),
+            'GET /v1/nodes/n-0001/readings': NO_READINGS,
+            'GET /v1/nodes/n-0001/metrics': NO_METRICS,
+            'GET /v1/nodes/n-0001/events': json({
+                events: [{ kind: 'restarted', at: minutesAgo(5) }],
+            }),
+        })
+        renderAt('/nodes/n-0001')
+
+        await user.click(await screen.findByRole('button', { name: 'More details' }))
+
+        expect(screen.getByText('BNCH')).toBeDefined()
+        expect(screen.getByText('Client')).toBeDefined()
+        expect(await screen.findByText('Node restarted')).toBeDefined()
     })
 
     it('says what the network knows, and links to the map and to Connect', async () => {

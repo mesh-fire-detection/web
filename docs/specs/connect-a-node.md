@@ -48,7 +48,9 @@ with the actual computer, Bluetooth adapter, browser, and firmware. A list of
 added nodes must never imply that all of them are currently connected.
 
 The page is available without a project account: browser authorization controls
-access to local hardware. It never sends local observations to the server.
+access to local hardware. The page itself never sends local observations to the
+server. Once a node is on the person's account, `/account` and `/nodes/:id` copy
+what this page saved (`docs/specs/nodes.md`, "Backing up what a browser saved").
 
 Once a node has connected and identified itself, the page offers membership
 (`docs/specs/sign-in.md`, "Becoming a member from `/connect`"). Signed out, it

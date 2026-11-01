@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
 
 import { formErrorMessage, signInToSee } from '@components/account/flow'
+import { backUpConnectedNodes } from '@components/account/nodeBackup'
 import { fromMine, NodeList } from '@components/account/NodeList'
 import { useSession } from '@components/app/SessionProvider'
 import { Page } from '@components/layout/Page'
@@ -107,6 +108,7 @@ function YourNodes() {
         void fetchMyNodes().then((result) => {
             if (current) setNodes(result.ok ? result.data : [])
         })
+        void backUpConnectedNodes()
         return () => {
             current = false
         }

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 
+import { backUpConnectedNodes } from '@components/account/nodeBackup'
 import { FirmwareUpdate } from '@components/build/FirmwareUpdate'
 import { SensorStatus } from '@components/pages/build/nearby/Indicators'
 import {
@@ -24,6 +25,19 @@ const copy = nodeContent.readings
 export function NodeTelemetry({ node }: { readonly node: Node }) {
     const [nearby, setNearby] = useState<NearbyNode | 'failed' | null>(null)
     const [activeMetric, setActiveMetric] = useState<string>(EXPECTED_SENSOR_METRICS[0])
+    /** Counts the backups that brought something new, so the view reloads to show it. */
+    const [backups, setBackups] = useState(0)
+
+    useEffect(() => {
+        if (!node.mine) return
+        let current = true
+        void backUpConnectedNodes().then((stored) => {
+            if (current && stored > 0) setBackups((count) => count + 1)
+        })
+        return () => {
+            current = false
+        }
+    }, [node.mine])
 
     useEffect(() => {
         let current = true
@@ -40,7 +54,7 @@ export function NodeTelemetry({ node }: { readonly node: Node }) {
         return () => {
             current = false
         }
-    }, [node])
+    }, [node, backups])
 
     if (nearby === null || nearby === 'failed') {
         return (
@@ -95,7 +109,7 @@ export function NodeTelemetry({ node }: { readonly node: Node }) {
                     <FirmwareUpdate firmware={nearby.firmware} />
                 </Box>
             ) : null}
-            <MoreDetails node={nearby} other={other} />
+            <MoreDetails node={node} nearby={nearby} other={other} refresh={backups} />
         </Stack>
     )
 }

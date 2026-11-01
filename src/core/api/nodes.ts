@@ -36,6 +36,10 @@ export type Node = {
         readonly hardware: string | null
         readonly hardwareId: string | null
         readonly note: string | null
+        /** What the node said when a browser last connected to it. */
+        readonly shortName: string | null
+        readonly settings: Readonly<Record<string, string>> | null
+        readonly settingsReportedAt: string | null
         /** Display names, for the people on the node and admins. */
         readonly owners: readonly {
             readonly name: string
@@ -81,6 +85,35 @@ export type DeviceMetrics = {
     readonly recordedAt: string
 }
 
+export type NodeEventKind = 'connected' | 'disconnected' | 'restarted' | 'malformed'
+
+export type NodeEvent = {
+    readonly kind: NodeEventKind
+    readonly at: string
+}
+
+/** What a browser kept from `/connect`, sent for a node on the person's account. */
+export type NodeUpload = {
+    readonly readings?: readonly {
+        readonly metric: string
+        readonly value: number
+        /** The sensor's time in whole seconds, or when the browser received it. */
+        readonly at: string
+    }[]
+    readonly events?: readonly NodeEvent[]
+    readonly connection?: {
+        readonly shortName: string | null
+        readonly settings: Readonly<Record<string, string>>
+        readonly at: string
+    }
+}
+
+export type UploadResult = {
+    readonly readings: number
+    readonly events: number
+    readonly skipped: number
+}
+
 export async function fetchNodes(): Promise<ApiResult<readonly Node[]>> {
     const result = await apiRequest<{ nodes: Node[] }>('/v1/nodes')
     return result.ok ? { ok: true, data: result.data.nodes } : result
@@ -98,6 +131,22 @@ export async function updateNode(id: string, changes: NodeChanges): Promise<ApiR
         body: changes,
     })
     return result.ok ? { ok: true, data: result.data.node } : result
+}
+
+/** Sending the same thing twice stores it once. */
+export function uploadNodeData(id: string, body: NodeUpload): Promise<ApiResult<UploadResult>> {
+    return apiRequest<UploadResult>(`/v1/nodes/${encodeURIComponent(id)}/upload`, {
+        method: 'POST',
+        body,
+    })
+}
+
+/** Newest first; `not_found` for anyone but the node's people and admins. */
+export async function fetchNodeEvents(id: string): Promise<ApiResult<readonly NodeEvent[]>> {
+    const result = await apiRequest<{ events: NodeEvent[] }>(
+        `/v1/nodes/${encodeURIComponent(id)}/events`
+    )
+    return result.ok ? { ok: true, data: result.data.events } : result
 }
 
 const DAY_MS = 24 * 60 * 60 * 1000

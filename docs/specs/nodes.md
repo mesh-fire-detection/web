@@ -59,7 +59,9 @@ under the facts.
   itself is shown apart, in **Details**.
 - **More details**, closed until asked for, as on `/connect`: other telemetry
   from the server, then the short name, last connection, settings and activity
-  this browser saved, if it has connected the node. The server keeps none of those.
+  this browser saved, if it has connected the node. Connections, restarts, faults,
+  the short name and settings come from the server for the node's people; the
+  packet-by-packet activity log only ever exists in the browser.
 - **Owners**, for the people on the node and admins: display names and when each
   added the node. Anyone who connects a node can add it to their account, so an
   owner here means someone who has reached the node, not someone verified.
@@ -81,3 +83,23 @@ under the facts.
 - Hiding a node (backend#12, later).
 - Admin controls for the mesh ID and enabling.
 - Units: the edit form takes metres whatever the unit setting.
+
+## Backing up what a browser saved
+
+Opening `/account` or your own node's page copies what `/connect` saved in this
+browser to the server, automatically, for nodes on your account. Adding a node to
+an account is the deliberate act; nothing about a node outside your account is
+sent, and `/connect` itself sends nothing. The browser keeps its copy.
+
+- **Sent:** saved readings, connections, restarts, malformed packets, the short
+  name and settings from the newest connection. Most nodes without a set clock
+  have only the time this browser received a reading, and those are sent too; the
+  server skips a reading it already has (`backend/docs/SPEC.md`).
+- **Not sent:** the activity log's per-packet lines; connection names and ports;
+  unit choice; anything from `/satellite`.
+- **Limits:** one visit makes at most 20 requests of up to 2,000 readings each, and
+  a longer history finishes on later visits. A cursor per node and metric in
+  `localStorage` (`mfd:node-backup:v1`) says how far it got. If the cursor is lost,
+  the next visit sends everything again and the server skips the repeats.
+- **Never live:** uploads raise no alerts and do not mark a node as heard. Anyone on
+  a node can upload for it, so each row records who sent it.

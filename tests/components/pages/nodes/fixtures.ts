@@ -48,6 +48,9 @@ export const BENCH: Node = {
         hardware: 'RAK4631',
         hardwareId: '0a1b2c3d4e5f6a7b',
         note: 'On the shelf above the bench.',
+        shortName: 'BNCH',
+        settings: { 'Meshtastic role': 'Client' },
+        settingsReportedAt: '2026-10-30T12:00:00.000Z',
         owners: [
             { name: 'Ada Lovelace', addedAt: '2026-10-29T12:00:00.000Z', you: true },
             { name: 'Grace Hopper', addedAt: '2026-10-30T12:00:00.000Z', you: false },

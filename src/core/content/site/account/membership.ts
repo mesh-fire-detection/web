@@ -13,6 +13,7 @@ export const membershipContent = {
         added: 'Added to your account.',
         allAdded: 'Every node here is on your account.',
         failed: "Couldn't add them right now. Try again in a moment.",
+        backup: 'Once a node is on your account, the readings, settings and connection history this browser saved are backed up to it automatically.',
     },
     footer: {
         title: 'Become a member',
