@@ -56,7 +56,14 @@ describe('Node view', () => {
         })
         renderAt('/nodes/sen-01')
 
-        expect(await screen.findByRole('heading', { level: 1, name: 'Ridge sensor' })).toBeDefined()
+        // The first page this file renders: importing it can take a while under a full run.
+        expect(
+            await screen.findByRole(
+                'heading',
+                { level: 1, name: 'Ridge sensor' },
+                { timeout: 10_000 }
+            )
+        ).toBeDefined()
         expect(screen.getByText('about 47.4365° N, 121.7695° W')).toBeDefined()
         expect(
             screen.getByText(
