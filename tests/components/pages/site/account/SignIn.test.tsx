@@ -42,6 +42,19 @@ async function reachCodeStep(user: ReturnType<typeof userEvent.setup>) {
 }
 
 describe('Sign in', () => {
+    it('says why when a members-only page sent the person here, and only then', async () => {
+        stubApi({ [SESSION]: json(null) })
+        renderAt('/sign-in?next=%2Fnodes&why=members')
+        expect(
+            await screen.findByText('That page is for members. Sign in to see it.')
+        ).toBeDefined()
+        cleanup()
+
+        renderAt('/sign-in?next=%2Fconnect')
+        await screen.findByLabelText('Email')
+        expect(screen.queryByText('That page is for members. Sign in to see it.')).toBeNull()
+    })
+
     it('signs in with an emailed code and lands on the account page', async () => {
         const user = userEvent.setup()
         const api = stubApi({

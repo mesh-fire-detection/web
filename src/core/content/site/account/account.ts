@@ -16,5 +16,6 @@ export const accountContent = {
         empty: 'No nodes yet. Connect one, then add it to your account from that page.',
         unnamed: 'Unnamed node',
         connect: 'Connect a Node',
+        all: 'See every node',
     },
 } as const satisfies AccountContent

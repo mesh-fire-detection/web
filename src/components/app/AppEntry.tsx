@@ -14,6 +14,8 @@ import { SatellitePage } from '@components/pages/build/satellite/Satellite'
 import { CoveragePage } from '@components/pages/coverage/Coverage'
 import { HomePage } from '@components/pages/Home'
 import { MapPage } from '@components/pages/Map'
+import { NodesPage } from '@components/pages/nodes/Nodes'
+import { NodePage } from '@components/pages/nodes/NodeView'
 import { OpenProblemsPage } from '@components/pages/problems/OpenProblems'
 import { AboutPage } from '@components/pages/site/About'
 import { AccountPage } from '@components/pages/site/account/Account'
@@ -49,6 +51,8 @@ const PAGES: Record<RouteId, ComponentType> = {
     join: JoinPage,
     subscribe_confirm: SubscribeConfirmPage,
     account: AccountPage,
+    nodes: NodesPage,
+    node: NodePage,
 }
 
 const AppEntry = () => {

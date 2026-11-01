@@ -9,6 +9,9 @@ Notable changes to the web application are recorded here by version.
 - Satellite receiver page with connection, receiver controls, packet history,
   tracking, and range results.
 - UI kit gallery at `/design` with interactive component examples.
+- `/nodes`, the list of registered nodes for signed-in people, with filters
+  kept in the URL, and `/nodes/:id`, where the people on a node see its
+  details and edit it. Sign-in says why when a members-only page sent you.
 
 ### Changed
 

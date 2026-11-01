@@ -17,6 +17,10 @@ export const safeNext = (next: string | null): string =>
         ? next
         : '/account'
 
+/** Where a members-only page sends a signed-out visitor: sign in, told why, then back. */
+export const signInToSee = (path: string): string =>
+    `/sign-in?${new URLSearchParams({ next: path, why: 'members' }).toString()}`
+
 /** People paste codes from email with spaces in them. */
 export const normaliseCode = (raw: string): string => raw.replaceAll(/\s/gu, '')
 

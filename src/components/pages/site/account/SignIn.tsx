@@ -63,6 +63,9 @@ export function SignInPage() {
                             }}
                         >
                             <Stack gap={4}>
+                                {params.get('why') === 'members' ? (
+                                    <Text weight={600}>{copy.membersOnly}</Text>
+                                ) : null}
                                 <Text tone='muted'>{copy.email.lede}</Text>
                                 <TextField
                                     autoComplete='email'

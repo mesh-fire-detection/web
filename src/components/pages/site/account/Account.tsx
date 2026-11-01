@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
 
-import { formErrorMessage } from '@components/account/flow'
+import { formErrorMessage, signInToSee } from '@components/account/flow'
 import { fromMine, NodeList } from '@components/account/NodeList'
 import { useSession } from '@components/app/SessionProvider'
 import { Page } from '@components/layout/Page'
@@ -130,6 +130,9 @@ function YourNodes() {
                     unnamed={copy.nodes.unnamed}
                 />
             )}
+            <Row>
+                <TextLink to='/nodes'>{copy.nodes.all}</TextLink>
+            </Row>
         </Stack>
     )
 }
@@ -182,7 +185,7 @@ export function AccountPage() {
     const { session, signOut } = useSession()
     const navigate = useNavigate()
 
-    if (session.status === 'signed_out') return <Navigate replace to='/sign-in?next=/account' />
+    if (session.status === 'signed_out') return <Navigate replace to={signInToSee('/account')} />
     if (session.status === 'loading') return <Page title={copy.title}>{null}</Page>
 
     const { user } = session

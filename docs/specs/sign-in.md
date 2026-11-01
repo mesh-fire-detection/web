@@ -67,7 +67,9 @@ retypes it.
     daily allowance everyone shares.
 
 3. On success, go to where the person was headed (a `next` query parameter,
-   same-site paths only), otherwise `/account`.
+   same-site paths only), otherwise `/account`. A members-only page that sent
+   the person here adds `why=members`, and the email step opens with **That
+   page is for members. Sign in to see it.**
 
 Visiting `/sign-in` while signed in goes straight to `/account`.
 
@@ -156,13 +158,15 @@ prompt:
 
 ## Account page
 
-- Requires a session. Signed out, it redirects to `/sign-in?next=/account`.
+- Requires a session. Signed out, it redirects to sign in with
+  `next=/account&why=members`, so the sign-in page says why.
 - **Name** is editable, with **Save** (disabled until it changes; `PATCH
 /v1/me`), and **Saved.** once it is. The header and session update at once.
 - **Email** is shown but not editable: **You sign in with this address, so it
   cannot be changed here.**
 - No role is shown, for now.
-- **Your nodes** — from `GET /v1/me/nodes`, or a pointer to `/connect`.
+- **Your nodes** — from `GET /v1/me/nodes`, or a pointer to `/connect`; then
+  **See every node**, to `/nodes`.
 - **Updates** — on or off (`PATCH /v1/me/subscription`).
 - Action **Sign out**: calls `POST /v1/auth/sign-out`, clears the cached
   session, and returns to `/`.

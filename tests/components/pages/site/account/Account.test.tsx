@@ -45,7 +45,7 @@ describe('Account', () => {
         renderAt('/account')
 
         const where = await screen.findByTestId('where')
-        expect(where.textContent).toBe('/sign-in?next=/account')
+        expect(where.textContent).toBe('/sign-in?next=%2Faccount&why=members')
     })
 
     it('signs out, returns home, and the header offers Join again', async () => {

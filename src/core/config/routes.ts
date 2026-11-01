@@ -48,6 +48,8 @@ export const APP_ROUTES = [
         unlisted: true,
     },
     { id: 'account', path: '/account', label: 'Account', nav: false, unlisted: true },
+    { id: 'nodes', path: '/nodes', label: 'Nodes', nav: false, unlisted: true },
+    { id: 'node', path: '/nodes/:id', label: 'Node', nav: false, unlisted: true },
 ] as const satisfies readonly RouteShape[]
 
 type RouteDefinition = (typeof APP_ROUTES)[number]

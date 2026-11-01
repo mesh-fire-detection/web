@@ -1,6 +1,5 @@
 import { apiRequest, type ApiResult } from '@core/api/client'
-
-type NodeType = 'base' | 'cellular' | 'sensor' | 'vision'
+import type { NodeType } from '@core/api/nodes'
 
 /** A node as this browser saw it. Only the number is certain; the rest is what it reported. */
 export type NodeReport = {

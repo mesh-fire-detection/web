@@ -18,6 +18,7 @@ export const nearbyDetailsContent = {
     voltageOver: 'over',
     trendWaiting: 'Trend: next reading',
     voltageSaved: 'readings kept in this browser',
+    voltageSavedServer: 'readings on the server',
     voltageWaiting: 'Needs a second voltage reading to show a trend.',
     voltageNone: 'No voltage reported yet.',
     signalMissing: 'No direct LoRa neighbour heard yet.',
