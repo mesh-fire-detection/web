@@ -1,9 +1,9 @@
 import { describe, expect, it, vi } from 'vitest'
 
-import { emptyDevice } from '@core/nearby/model'
-import { createDeviceMemory } from '@core/nearby/storage/devices'
+import { emptyNode } from '@core/nearby/model'
+import { createNodeMemory } from '@core/nearby/storage/nodes'
 
-describe('remembered nearby devices', () => {
+describe('remembered nearby nodes', () => {
     it('persists identity and latest readings, but not configuration or history, and avoids repeated writes', () => {
         let serialized = ''
         const storage = {
@@ -12,9 +12,9 @@ describe('remembered nearby devices', () => {
                 serialized = value
             }),
         }
-        const memory = createDeviceMemory(() => storage)
-        const device = {
-            ...emptyDevice('radio', 'Bluetooth name'),
+        const memory = createNodeMemory(() => storage)
+        const node = {
+            ...emptyNode('radio', 'Bluetooth name'),
             name: 'Sensor node',
             nodeNum: 123,
             shortName: 'SN',
@@ -33,8 +33,8 @@ describe('remembered nearby devices', () => {
                 },
             },
         }
-        memory.write([device], 'radio')
-        memory.write([{ ...device, state: 'connected' }], 'radio')
+        memory.write([node], 'radio')
+        memory.write([{ ...node, state: 'connected' }], 'radio')
         expect(storage.setItem).toHaveBeenCalledOnce()
         expect(JSON.parse(serialized)).toEqual({
             version: 1,
@@ -46,18 +46,19 @@ describe('remembered nearby devices', () => {
                     nodeNum: 123,
                     shortName: 'SN',
                     hardware: 'RAK4631',
+                    hardwareId: '',
                     firmware: '2.6.11.mfd',
                     connectedAt: null,
                     transport: 'bluetooth',
                     port: null,
-                    readings: [device.readings.temperature],
+                    readings: [node.readings.temperature],
                 },
             ],
             activeId: 'radio',
         })
         expect(memory.read().activeId).toBe('radio')
-        expect(memory.read().devices[0]?.readings).toEqual([device.readings.temperature])
-        expect(memory.read().devices[0]).toMatchObject({
+        expect(memory.read().nodes[0]?.readings).toEqual([node.readings.temperature])
+        expect(memory.read().nodes[0]).toMatchObject({
             shortName: 'SN',
             hardware: 'RAK4631',
             firmware: '2.6.11.mfd',
@@ -70,8 +71,8 @@ describe('remembered nearby devices', () => {
             devices: [{ id: 'radio', bluetoothName: '', name: '', nodeNum: null, hardware: 4631 }],
             activeId: null,
         })
-        const memory = createDeviceMemory(() => ({ getItem: () => serialized, setItem: vi.fn() }))
-        expect(memory.read().devices).toEqual([])
+        const memory = createNodeMemory(() => ({ getItem: () => serialized, setItem: vi.fn() }))
+        expect(memory.read().nodes).toEqual([])
     })
 
     it.each([
@@ -84,31 +85,30 @@ describe('remembered nearby devices', () => {
             activeId: null,
         }),
     ])('ignores invalid stored data: %s', (serialized) => {
-        const memory = createDeviceMemory(() => ({ getItem: () => serialized, setItem: vi.fn() }))
-        expect(memory.read()).toEqual({ version: 1, devices: [], activeId: null })
+        const memory = createNodeMemory(() => ({ getItem: () => serialized, setItem: vi.fn() }))
+        expect(memory.read()).toEqual({ version: 1, nodes: [], activeId: null })
     })
 
     it('drops duplicate IDs, unknown fields and an active ID outside the saved list', () => {
-        const device = { id: 'radio', bluetoothName: '', name: '', nodeNum: null, secret: 'key' }
-        const memory = createDeviceMemory(() => ({
-            getItem: () =>
-                JSON.stringify({ version: 1, devices: [device, device], activeId: 'other' }),
+        const node = { id: 'radio', bluetoothName: '', name: '', nodeNum: null, secret: 'key' }
+        const memory = createNodeMemory(() => ({
+            getItem: () => JSON.stringify({ version: 1, devices: [node, node], activeId: 'other' }),
             setItem: vi.fn(),
         }))
         expect(memory.read()).toEqual({
             version: 1,
-            devices: [{ id: 'radio', bluetoothName: '', name: '', nodeNum: null }],
+            nodes: [{ id: 'radio', bluetoothName: '', name: '', nodeNum: null }],
             activeId: null,
         })
     })
 
     it('tolerates blocked browser storage', () => {
-        const memory = createDeviceMemory(() => {
+        const memory = createNodeMemory(() => {
             throw new DOMException('Storage blocked', 'SecurityError')
         })
-        expect(memory.read().devices).toEqual([])
+        expect(memory.read().nodes).toEqual([])
         expect(() => {
-            memory.write([emptyDevice('radio', '')], 'radio')
+            memory.write([emptyNode('radio', '')], 'radio')
         }).not.toThrow()
     })
 
@@ -126,8 +126,8 @@ describe('remembered nearby devices', () => {
             ],
             activeId: null,
         })
-        const memory = createDeviceMemory(() => ({ getItem: () => saved, setItem: vi.fn() }))
-        expect(memory.read().devices[0]?.history).toEqual({
+        const memory = createNodeMemory(() => ({ getItem: () => saved, setItem: vi.fn() }))
+        expect(memory.read().nodes[0]?.history).toEqual({
             'deviceMetrics.voltage': [{ value: 3.8, at: 1000 }],
         })
     })
@@ -139,7 +139,7 @@ describe('remembered nearby devices', () => {
                 { value: 0, at: 2000 },
             ],
         }
-        const memory = createDeviceMemory(() => ({
+        const memory = createNodeMemory(() => ({
             getItem: () =>
                 JSON.stringify({
                     version: 1,
@@ -148,6 +148,6 @@ describe('remembered nearby devices', () => {
                 }),
             setItem: vi.fn(),
         }))
-        expect(memory.read().devices[0]?.history).toEqual(history)
+        expect(memory.read().nodes[0]?.history).toEqual(history)
     })
 })

@@ -163,9 +163,9 @@ text selection, and textarea resizing. Focus remains visible. Avoid blanket
   Design invite acceptance and sign-in first. Public self-service registration,
   password recovery, and email verification need explicit product/API support
   before their screens are implemented.
-- The public network feed and the administrative device list have different
+- The public network feed and the administrative node list have different
   access and data contracts. A public node browser must use public fields;
-  device management uses the authenticated admin API. Hiding a control is not
+  node management uses the authenticated admin API. Hiding a control is not
   authorization.
 - UI kit components own presentation and interaction contracts. Authentication,
   API calls, permissions, node health thresholds, and alert evaluation belong
@@ -200,7 +200,7 @@ text selection, and textarea resizing. Focus remains visible. Avoid blanket
 - The backend's account flow is invite-based. Build invite acceptance and sign-in
   when the web app has its API/session integration. Public self-registration,
   password recovery, and email verification need product and backend support.
-- The map list currently uses the public sample dataset. Admin device management
+- The map list currently uses the public sample dataset. Admin node management
   needs authenticated API integration and permission-aware feature UI. The kit
   does not define node health or telemetry rules.
 - `Pagination` waits for an endpoint with a paging contract. The current node
@@ -262,7 +262,7 @@ an actual workflow.
 
 1. Connect the invite and sign-in screens to the agreed backend session API.
 2. Decide whether the node page stays a public network browser or gains an
-   authenticated admin device-management view; build the corresponding feature
+   authenticated admin node-management view; build the corresponding feature
    components on top of the table and form kit.
 3. Add paging, active-filter chips, or overlays only when the API and workflow
    need those interactions.

@@ -1,20 +1,20 @@
-import type { NearbyDevicesContent } from '@core/content/types'
+import type { NearbyNodesContent } from '@core/content/types'
 
-export const nearbyDevicesContent = {
+export const nearbyNodesContent = {
     title: 'Connect a Node',
     eyebrow: 'Build · Check your nodes',
     lede: 'Connect nodes over Bluetooth or USB to check their identity, settings, and sensor readings before deployment.',
     add: { bluetooth: 'Add Bluetooth device', usb: 'Add USB device' },
     transports: { bluetooth: 'Bluetooth', usb: 'USB' },
     helper: [
-        'Choose each device in your browser’s Bluetooth or USB dialog. One device is connected at a time.',
+        'Choose each device in your browser’s Bluetooth or USB dialog. One node is connected at a time.',
         'A USB session turns the node’s Bluetooth advertising off. Disconnect USB first so the node can appear in the browser’s Bluetooth list again.',
     ],
     recentStatus: 'Recently connected',
-    emptyTitle: 'No devices added yet',
+    emptyTitle: 'No nodes added yet',
     emptyBody: 'Power on a node, or plug it in over USB, and choose Bluetooth or USB above.',
-    devicesTitle: 'Your devices',
-    unnamed: 'Unnamed device',
+    nodesTitle: 'Your nodes',
+    unnamed: 'Unnamed node',
     errorTitle: 'Connection failed',
     battery: 'Battery',
     externalPower: 'external power',
@@ -22,7 +22,7 @@ export const nearbyDevicesContent = {
     notReported: 'Not reported',
     previousTitle: 'Previously added',
     previousBody:
-        'Reconnect a saved device to receive current data. Select a device to see what was received in this page session.',
+        'Reconnect a saved node to receive current data. Select a node to see what was received in this page session.',
     restoration: {
         checking: 'Checking previously allowed devices…',
         unsupported:
@@ -64,15 +64,15 @@ export const nearbyDevicesContent = {
         permission:
             'Browser or system permission was not granted. Check Bluetooth or USB permissions and try again.',
         unsupported:
-            'The device does not offer the Meshtastic connection. Check the device and its firmware, then try again.',
+            'The node does not offer the Meshtastic connection. Check the node and its firmware, then try again.',
         timeout:
-            'The device did not finish connecting within 30 seconds. Check power, distance, and whether another app is connected, then try again.',
+            'The node did not finish connecting within 30 seconds. Check power, distance, and whether another app is connected, then try again.',
         connection:
-            'Could not connect to the device. Check power, distance or the cable, and whether another phone or app is connected, then try again.',
+            'Could not connect to the node. Check power, distance or the cable, and whether another phone or app is connected, then try again.',
     },
     hints: {
         connected: 'Receiving live data.',
-        connecting: 'Keep the device powered and nearby.',
+        connecting: 'Keep the node powered and nearby.',
         initializing: 'Loading identity and settings.',
         recent: 'Not connected. Reconnect for live data.',
         disconnected: 'Saved. Reconnect for live data.',
@@ -80,7 +80,7 @@ export const nearbyDevicesContent = {
     states: {
         disconnected: 'Disconnected',
         connecting: 'Connecting…',
-        initializing: 'Reading device info…',
+        initializing: 'Reading node info…',
         connected: 'Connected',
     },
     actions: {
@@ -90,4 +90,4 @@ export const nearbyDevicesContent = {
         remove: 'Remove from list',
         undo: 'Undo',
     },
-} as const satisfies NearbyDevicesContent
+} as const satisfies NearbyNodesContent

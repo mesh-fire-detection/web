@@ -1,4 +1,4 @@
-import { useId, useState, type ReactNode } from 'react'
+import { useId, useState, type ReactNode, type Ref } from 'react'
 
 import { Row, Stack } from '@components/shared/primitives/Layout'
 import { Pressable } from '@components/shared/primitives/Pressable'
@@ -98,6 +98,7 @@ export function TextField({
     error,
     required = false,
     disabled = false,
+    inputRef,
 }: {
     label: string
     value: string
@@ -112,6 +113,8 @@ export function TextField({
     error?: string | undefined
     required?: boolean | undefined
     disabled?: boolean | undefined
+    /** For a flow that moves focus to this field when it appears. */
+    inputRef?: Ref<HTMLInputElement> | undefined
 }) {
     const id = useId()
     return (
@@ -124,6 +127,7 @@ export function TextField({
             required={required}
         >
             <input
+                ref={inputRef}
                 aria-describedby={describedBy(id, description, error)}
                 aria-invalid={error ? true : undefined}
                 autoComplete={autoComplete}

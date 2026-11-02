@@ -61,7 +61,7 @@
     color: var(--fire);
 }
 
-/* Nearby device inspection uses the same surfaces and controls as Build. */
+/* Nearby node inspection uses the same surfaces and controls as Build. */
 .nearby_announcement {
     position: absolute;
     width: 1px;
@@ -128,7 +128,7 @@
     scroll-margin-top: calc(var(--header_height) + var(--s_4));
 }
 
-/* The device name stretches over the whole card, so any part of it selects the device. */
+/* The node name stretches over the whole card, so any part of it selects the node. */
 .nearby_card {
     position: relative;
 }
@@ -182,7 +182,7 @@
     background-image: linear-gradient(var(--live_wash), var(--live_wash));
 }
 
-.nearby_device_actions {
+.nearby_node_actions {
     z-index: 1;
     position: relative;
 }
@@ -227,7 +227,7 @@
 }
 
 /* One click selects the whole ID for copying. Card IDs sit above the card's
-   select-the-device overlay so the click reaches them. */
+   select-the-node overlay so the click reaches them. */
 .nearby_selectable {
     cursor: text;
     user-select: all;

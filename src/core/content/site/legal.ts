@@ -7,10 +7,10 @@ export const privacyContent = {
     title: 'Privacy Policy',
     eyebrow: 'Legal',
     lede: 'What the website and the network service collect, why, where it is stored and how to have it removed. Written to be read, not skimmed past.',
-    updatedOn: '2026-09-17',
+    updatedOn: '2026-10-31',
     summary: {
         title: 'The short version',
-        body: 'The public website sets no cookies and runs no analytics. Personal data exists only for people with an invited account on the network service: an email address, a name, a password hash and session records.',
+        body: 'The public website runs no analytics, and the only cookie is the one that keeps a member signed in. Personal data exists only for people who join or ask for project updates: an email address, a name, session records, and what they choose to add to their account.',
     },
     sections: [
         {
@@ -24,34 +24,36 @@ export const privacyContent = {
             id: 'website',
             title: `The public website (${SITE.url.replace('https://', '')})`,
             paragraphs: [
-                'The site is a static page. It has no analytics, no advertising, no tracking pixels, no cookies and no third-party scripts.',
+                'The site is a static page. It has no analytics, no advertising, no tracking pixels and no third-party scripts. It sets a cookie only when you sign in.',
                 'It is served by GitHub Pages. GitHub receives every request, including your IP address and browser details, and processes them under its own privacy statement. We do not receive these logs.',
             ],
             items: [
                 'Your choice of metric or imperial units is kept in your browser’s local storage so it survives a reload. It never leaves your device, and clearing site data removes it.',
                 'By default the map draws node geometry on a blank canvas and requests no map tiles. If a basemap is ever enabled, the tile provider will see your IP address, and this policy will name that provider first.',
+                'Nodes you connect on the Connect page are remembered in your browser, along with their readings and settings. Nothing about them leaves your device until you add them to an account.',
                 'Links to GitHub and email take you to those services, which have their own policies.',
             ],
         },
         {
             id: 'accounts',
-            title: 'Network service accounts',
+            title: 'Accounts and project updates',
             paragraphs: [
-                'The network service (the API and its dashboard) has no open sign-up. Accounts exist only for people an administrator has invited. For them we store:',
+                'You can become a member by connecting a node you built or by being invited, and anyone can ask for project updates. For them we store:',
             ],
             items: [
-                'Email address and name, to identify you and to send the invitation.',
-                'A password hash. The password itself is never stored.',
+                'Email address and name, to identify you and to send sign-in codes. We use Resend to deliver email, so it receives your address and the message.',
+                'For project updates: whether you agreed, when, from where, and the words you agreed to. You can turn updates off at any time.',
                 'Session records: a session token, its expiry, and the IP address and browser user agent that opened it, to keep you signed in and to spot misuse.',
                 'A strictly necessary session cookie, set only after you sign in. It is not used for tracking.',
-                'Your role, who invited you, and the alert rules you create.',
+                'Your role, who invited you, the nodes on your account, and the alert rules you create. The other people on a node, and the project’s admins, can see your name on it.',
             ],
         },
         {
             id: 'network-data',
             title: 'Sensor and node data',
             paragraphs: [
-                'Nodes report readings, battery and radio metrics. This is data about equipment and terrain, not about people. Node positions are published on purpose, only on public land or on land whose owner agreed in writing.',
+                'Nodes report readings, battery and radio metrics. This is data about equipment and terrain, not about people. Node positions are shown to within about a kilometre; only the people on a node and the project’s admins see where it really is, unless they choose to show it exactly.',
+                'Once a node is on your account, what the Connect page saved about it in your browser is copied to the service when you open your account or the node’s page: sensor readings, connections, restarts and faults, its short name and its radio settings, recorded against your account. The readings can be seen by other signed-in members, like any node’s readings. The packet-by-packet activity log stays in your browser, as do satellite station locations and orbit data.',
                 'Vision nodes point at terrain, not at roads, homes or trailheads. If a frame accidentally shows a person, it is not used to identify them and is removed on request.',
             ],
         },
@@ -59,15 +61,15 @@ export const privacyContent = {
             id: 'basis',
             title: 'Why we are allowed to process it',
             paragraphs: [
-                'Account data is processed to provide the service you were invited to use (performing that arrangement). Session and security data is processed in our legitimate interest in keeping the service secure. We do not sell data, profile users or use it for advertising.',
+                'Account data is processed to provide the service you joined (performing that arrangement), and project updates are sent only with your consent. Session and security data is processed in our legitimate interest in keeping the service secure. We do not sell data, profile users or use it for advertising.',
             ],
         },
         {
             id: 'storage',
             title: 'Where it is stored and for how long',
             items: [
-                'The service runs on a single virtual server hosted by Hetzner. Traffic to the API passes through Cloudflare.',
-                'The database is continuously backed up to encrypted object storage (Cloudflare R2 or Backblaze B2).',
+                'The service runs on a single virtual server hosted by DigitalOcean. Traffic to the API passes through Cloudflare.',
+                'A copy of the database is kept on that server before each software update.',
                 'Account data is kept while your account exists and deleted when it is closed; backups roll over after that.',
                 'Sensor and node data is kept indefinitely, because a long record is the point of the project.',
             ],
@@ -100,7 +102,7 @@ export const termsContent = {
     title: 'Terms of Use',
     eyebrow: 'Legal',
     lede: 'The conditions for using this website, the network map and the network service. The most important one comes first.',
-    updatedOn: '2026-09-17',
+    updatedOn: '2026-10-31',
     summary: {
         title: 'This is not an emergency service',
         body: 'Nothing here is monitored around the clock, and a missing alert does not mean there is no fire. If you see fire or smoke, call your local emergency number (911, 112 or equivalent) and follow official evacuation orders.',
@@ -163,7 +165,7 @@ export const termsContent = {
             id: 'accounts',
             title: 'Network service accounts',
             items: [
-                'Accounts are by invitation only. Keep your password to yourself; you are responsible for activity on your account.',
+                'You join with a node you connected or by invitation. Sign-in codes go to your email, so keep that inbox secure; you are responsible for activity on your account.',
                 'Do not attempt to access data or functions your role does not allow, disrupt the service, or submit false node data.',
                 'We may suspend or remove an account that breaks these terms or endangers the service.',
                 'The public map feed may be reused; please credit the project and do not present it as an official warning source.',

@@ -18,8 +18,12 @@
     fill: var(--live);
 }
 
+/* Truncates last, after the tagline, when the header is short of room. */
 .wordmark_name {
+    overflow: hidden;
     letter-spacing: -0.015em;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .wordmark_tagline {

@@ -1,20 +1,20 @@
 import { useId, useState } from 'react'
 
-import { Age, DeviceStatus, NodeKindIcon, NodeTag } from '@components/pages/build/nearby/Indicators'
+import { Age, NodeStatus, NodeKindIcon, NodeTag } from '@components/pages/build/nearby/Indicators'
 import { Box, Row, Stack } from '@components/shared/primitives/Layout'
 import { Pressable } from '@components/shared/primitives/Pressable'
 import { Heading } from '@components/shared/typography/Heading'
 import { Text } from '@components/shared/typography/Text'
 import { Button } from '@components/shared/widgets/Action'
-import { nearbyDevicesContent as copy } from '@core/content/build/nearby/nearbyDevices'
+import { nearbyNodesContent as copy } from '@core/content/build/nearby/nearbyNodes'
 import { cx } from '@core/format/cx'
 import { isMfdNode, mfdKind } from '@core/nearby/firmware'
 import { batteryCharge, batteryTone, readingValue } from '@core/nearby/metrics'
-import { deviceName, isRecentDevice } from '@core/nearby/model'
-import type { Device, Snapshot, Transport } from '@core/nearby/model'
+import { nodeName, isRecentNode } from '@core/nearby/model'
+import type { NearbyNode, Snapshot, Transport } from '@core/nearby/model'
 import type { NearbySession } from '@core/nearby/session'
 
-export function DeviceList({
+export function NodeList({
     snapshot,
     session,
     canConnect,
@@ -27,11 +27,11 @@ export function DeviceList({
 }) {
     const [previousOpen, setPreviousOpen] = useState<boolean | null>(null)
     const previousId = useId()
-    const active = snapshot.devices.filter(
-        (device) => device.state !== 'disconnected' || isRecentDevice(device)
+    const active = snapshot.nodes.filter(
+        (node) => node.state !== 'disconnected' || isRecentNode(node)
     )
-    const previous = snapshot.devices.filter(
-        (device) => device.state === 'disconnected' && !isRecentDevice(device)
+    const previous = snapshot.nodes.filter(
+        (node) => node.state === 'disconnected' && !isRecentNode(node)
     )
     const previousVisible =
         previousOpen ??
@@ -39,7 +39,7 @@ export function DeviceList({
             (snapshot.restoration === 'unsupported' || snapshot.restoration === 'failed'))
     return (
         <Stack gap={4}>
-            {snapshot.devices.length === 0 ? (
+            {snapshot.nodes.length === 0 ? (
                 <Box tone='surface' padding={5} radius='md'>
                     <Stack gap={2}>
                         <Heading level={3} size='sm'>
@@ -51,10 +51,10 @@ export function DeviceList({
                     </Stack>
                 </Box>
             ) : (
-                active.map((device) => (
-                    <DeviceEntry
-                        key={device.id}
-                        device={device}
+                active.map((node) => (
+                    <NodeEntry
+                        key={node.id}
+                        node={node}
                         snapshot={snapshot}
                         session={session}
                         canConnect={canConnect}
@@ -82,10 +82,10 @@ export function DeviceList({
                                         ? copy.restoration[snapshot.restoration]
                                         : copy.previousBody}
                                 </Text>
-                                {previous.map((device) => (
-                                    <DeviceEntry
-                                        key={device.id}
-                                        device={device}
+                                {previous.map((node) => (
+                                    <NodeEntry
+                                        key={node.id}
+                                        node={node}
                                         snapshot={snapshot}
                                         session={session}
                                         canConnect={canConnect}
@@ -119,31 +119,31 @@ function BatteryPercent({
     )
 }
 
-function DeviceEntry({
-    device,
+function NodeEntry({
+    node,
     snapshot,
     session,
     canConnect,
     onSelect,
 }: {
-    readonly device: Device
+    readonly node: NearbyNode
     readonly snapshot: Snapshot
     readonly session: NearbySession
     readonly canConnect: Readonly<Record<Transport, boolean>>
     readonly onSelect: (id: string) => void
 }) {
-    const selected = snapshot.selectedId === device.id
-    const name = deviceName(device) || copy.unnamed
-    const battery = device.readings['deviceMetrics.batteryLevel']
-    const { powered, percent } = batteryCharge(device)
-    const active = device.state !== 'disconnected'
-    const recent = isRecentDevice(device)
+    const selected = snapshot.selectedId === node.id
+    const name = nodeName(node) || copy.unnamed
+    const battery = node.readings['deviceMetrics.batteryLevel']
+    const { powered, percent } = batteryCharge(node)
+    const active = node.state !== 'disconnected'
+    const recent = isRecentNode(node)
     const hint =
-        !active && !canConnect[device.transport]
-            ? copy.unavailable[device.transport]
+        !active && !canConnect[node.transport]
+            ? copy.unavailable[node.transport]
             : recent
               ? copy.hints.recent
-              : copy.hints[device.state]
+              : copy.hints[node.state]
     return (
         <Box
             tone='surface'
@@ -152,20 +152,20 @@ function DeviceEntry({
             className={cx(
                 'nearby_card',
                 selected && 'nearby_selected',
-                device.state === 'connected' && 'nearby_connected',
+                node.state === 'connected' && 'nearby_connected',
                 recent && 'nearby_recent'
             )}
         >
             <Stack gap={3}>
                 <Row gap={3} wrap={false}>
-                    <NodeTag num={device.nodeNum} ours={isMfdNode(device)} />
+                    <NodeTag num={node.nodeNum} ours={isMfdNode(node)} />
                     <Stack gap={1} grow minWidth0>
                         <Pressable
                             className='bare nearby_select'
                             pressed={selected}
                             accessibleLabel={`${copy.actions.view}: ${name}`}
                             onActivate={() => {
-                                onSelect(device.id)
+                                onSelect(node.id)
                             }}
                         >
                             <Heading
@@ -177,13 +177,13 @@ function DeviceEntry({
                                 {name}
                             </Heading>
                         </Pressable>
-                        <DeviceStatus state={device.state} recent={recent} />
+                        <NodeStatus state={node.state} recent={recent} />
                     </Stack>
-                    <NodeKindIcon kind={mfdKind(device)} />
+                    <NodeKindIcon kind={mfdKind(node)} />
                 </Row>
                 <Stack gap={1}>
                     <Text mono size='xs' tone='faint' truncate>
-                        {copy.transports[device.transport]} · {copy.battery}{' '}
+                        {copy.transports[node.transport]} · {copy.battery}{' '}
                         {percent === null ? (
                             battery ? (
                                 readingValue(battery)
@@ -197,22 +197,22 @@ function DeviceEntry({
                     </Text>
                     <Text mono size='xs' tone='faint' truncate>
                         {copy.lastPacket}{' '}
-                        {device.lastPacketAt === null ? '—' : <Age time={device.lastPacketAt} />}
+                        {node.lastPacketAt === null ? '—' : <Age time={node.lastPacketAt} />}
                     </Text>
                     <Text size='xs' tone='faint' truncate>
                         {hint}
                     </Text>
                 </Stack>
-                <Row gap={2} wrap={false} className='nearby_device_actions'>
+                <Row gap={2} wrap={false} className='nearby_node_actions'>
                     <Button
                         size='sm'
                         variant='secondary'
                         full
-                        disabled={!active && (snapshot.busy || !canConnect[device.transport])}
+                        disabled={!active && (snapshot.busy || !canConnect[node.transport])}
                         label={`${active ? copy.actions.disconnect : copy.actions.connect}: ${name}`}
                         onClick={() => {
-                            if (active) void session.disconnect(device.id)
-                            else void session.connect(device.id)
+                            if (active) void session.disconnect(node.id)
+                            else void session.connect(node.id)
                         }}
                     >
                         {active ? copy.actions.disconnect : copy.actions.connect}
@@ -224,7 +224,7 @@ function DeviceEntry({
                         disabled={snapshot.busy}
                         label={`${copy.actions.remove}: ${name}`}
                         onClick={() => {
-                            session.remove(device.id)
+                            session.remove(node.id)
                         }}
                     >
                         {copy.actions.remove}

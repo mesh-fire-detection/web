@@ -2,8 +2,11 @@ import { create, fromBinary, toBinary } from '@bufbuild/protobuf'
 import { Admin, Config, Mesh, Portnums, Telemetry } from '@meshtastic/protobufs'
 
 import { epochTime, isSensorMetric } from '@core/nearby/metrics'
-import { addActivity, addSample, nodeId } from '@core/nearby/model'
-import type { Device, History, Peer, Reading, Sample } from '@core/nearby/model'
+import { addActivity, addSample, meshId } from '@core/nearby/model'
+import type { NearbyNode, History, Peer, Reading, Sample } from '@core/nearby/model'
+
+const toHex = (bytes: Uint8Array): string =>
+    Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('')
 
 export function configurationRequest(nonce: number): Uint8Array<ArrayBuffer> {
     return new Uint8Array(
@@ -121,24 +124,24 @@ function peerInfo(info: Mesh.NodeInfo, previous: Peer | undefined, at: number): 
     }
 }
 
-function applyNodeInfo(device: Device, info: Mesh.NodeInfo, at: number): Device {
+function applyNodeInfo(node: NearbyNode, info: Mesh.NodeInfo, at: number): NearbyNode {
     if (!validNode(info.num)) throw new Error('Invalid node number')
-    const peer = peerInfo(info, device.peers[info.num], at)
-    const updated = { ...device, peers: { ...device.peers, [info.num]: peer } }
-    return info.num === device.nodeNum
+    const peer = peerInfo(info, node.peers[info.num], at)
+    const updated = { ...node, peers: { ...node.peers, [info.num]: peer } }
+    return info.num === node.nodeNum
         ? {
               ...updated,
-              name: info.user?.longName ?? device.name,
-              shortName: info.user?.shortName ?? device.shortName,
+              name: info.user?.longName ?? node.name,
+              shortName: info.user?.shortName ?? node.shortName,
               hardware: info.user
                   ? enumLabel(Mesh.HardwareModel, info.user.hwModel)
-                  : device.hardware,
-              readings: { ...peer.readings, ...device.readings },
+                  : node.hardware,
+              readings: { ...peer.readings, ...node.readings },
           }
         : updated
 }
 
-function applyConfiguration(device: Device, config: Config.Config): Device {
+function applyConfiguration(node: NearbyNode, config: Config.Config): NearbyNode {
     const payload = config.payloadVariant
     let fields: Record<string, string> = {}
     if (payload.case === 'device') {
@@ -154,7 +157,7 @@ function applyConfiguration(device: Device, config: Config.Config): Device {
             'Radio transmission': payload.value.txEnabled ? 'Enabled' : 'Disabled',
         }
     }
-    return { ...device, configuration: { ...device.configuration, ...fields } }
+    return { ...node, configuration: { ...node.configuration, ...fields } }
 }
 
 /** Battery voltage and sensor metrics keep a history for their trends. */
@@ -173,10 +176,10 @@ function recordHistory(history: History, readings: Readonly<Record<string, Readi
     return next
 }
 
-function applyPacket(device: Device, packet: Mesh.MeshPacket, at: number): Device {
+function applyPacket(node: NearbyNode, packet: Mesh.MeshPacket, at: number): NearbyNode {
     if (!validNode(packet.from)) throw new Error('Invalid sender')
     const sender = packet.from
-    const local = sender === device.nodeNum
+    const local = sender === node.nodeNum
     const payload = packet.payloadVariant
     let readings: Readonly<Record<string, Reading>> = {}
     let summary = 'Packet received'
@@ -203,20 +206,20 @@ function applyPacket(device: Device, packet: Mesh.MeshPacket, at: number): Devic
         payload.value.portnum === Portnums.PortNum.NODEINFO_APP
     ) {
         const user = fromBinary(Mesh.UserSchema, payload.value.payload)
-        device = applyNodeInfo(device, create(Mesh.NodeInfoSchema, { num: sender, user }), at)
+        node = applyNodeInfo(node, create(Mesh.NodeInfoSchema, { num: sender, user }), at)
     }
-    const previous = device.peers[sender]
+    const previous = node.peers[sender]
     const hops =
         local || packet.viaMqtt || packet.hopStart === 0 || packet.hopLimit > packet.hopStart
             ? null
             : packet.hopStart - packet.hopLimit
-    const updated: Device = {
-        ...device,
-        lastPacketAt: local ? at : device.lastPacketAt,
-        readings: local ? { ...device.readings, ...readings } : device.readings,
-        history: local ? recordHistory(device.history, readings) : device.history,
+    const updated: NearbyNode = {
+        ...node,
+        lastPacketAt: local ? at : node.lastPacketAt,
+        readings: local ? { ...node.readings, ...readings } : node.readings,
+        history: local ? recordHistory(node.history, readings) : node.history,
         peers: {
-            ...device.peers,
+            ...node.peers,
             [sender]: {
                 num: sender,
                 name: previous?.name ?? '',
@@ -238,10 +241,15 @@ function applyPacket(device: Device, packet: Mesh.MeshPacket, at: number): Devic
             },
         },
     }
-    return addActivity(updated, `${summary} · sender ${nodeId(sender)}`, at)
+    return addActivity(updated, `${summary} · sender ${meshId(sender)}`, at)
 }
 
-export function receiveRadio(device: Device, bytes: Uint8Array, at: number, nonce: number): Device {
+export function receiveRadio(
+    node: NearbyNode,
+    bytes: Uint8Array,
+    at: number,
+    nonce: number
+): NearbyNode {
     try {
         const payload = fromBinary(Mesh.FromRadioSchema, bytes).payloadVariant
         switch (payload.case) {
@@ -249,56 +257,61 @@ export function receiveRadio(device: Device, bytes: Uint8Array, at: number, nonc
                 if (!validNode(payload.value.myNodeNum))
                     throw new Error('Invalid local node number')
                 const num = payload.value.myNodeNum
-                const peer = device.peers[num]
+                const peer = node.peers[num]
                 return addActivity(
                     {
-                        ...device,
+                        ...node,
                         nodeNum: num,
-                        name: peer?.name ?? device.name,
-                        shortName: peer?.shortName ?? device.shortName,
-                        hardware: peer && peer.hardware !== '' ? peer.hardware : device.hardware,
+                        name: peer?.name ?? node.name,
+                        shortName: peer?.shortName ?? node.shortName,
+                        hardware: peer && peer.hardware !== '' ? peer.hardware : node.hardware,
+                        hardwareId:
+                            payload.value.deviceId.length > 0
+                                ? toHex(payload.value.deviceId)
+                                : node.nodeNum === num
+                                  ? node.hardwareId
+                                  : '',
                         lastPacketAt:
-                            peer?.lastPacketAt ??
-                            (device.nodeNum === num ? device.lastPacketAt : null),
+                            peer?.lastPacketAt ?? (node.nodeNum === num ? node.lastPacketAt : null),
                         // Equal USB boards share a port ID, so another node can take over
                         // this entry; its history must not carry over to the new number.
-                        history: device.nodeNum === num ? device.history : {},
+                        history: node.nodeNum === num ? node.history : {},
                         readings: {
                             ...peer?.readings,
                             ...Object.fromEntries(
-                                Object.entries(device.readings).filter(
+                                Object.entries(node.readings).filter(
                                     ([, reading]) => reading.sender === num
                                 )
                             ),
                         },
                     },
-                    'Device identity received',
+                    'Node identity received',
                     at
                 )
             }
             case 'nodeInfo': {
-                return applyNodeInfo(device, payload.value, at)
+                return applyNodeInfo(node, payload.value, at)
             }
             case 'metadata': {
                 return {
-                    ...device,
+                    ...node,
                     firmware: payload.value.firmwareVersion,
                     hardware: enumLabel(Mesh.HardwareModel, payload.value.hwModel),
                 }
             }
             case 'config': {
-                return applyConfiguration(device, payload.value)
+                return applyConfiguration(node, payload.value)
             }
             case 'moduleConfig': {
                 const variant = payload.value.payloadVariant
-                if (variant.case !== 'telemetry') return device
+                if (variant.case !== 'telemetry') return node
                 const telemetry = variant.value
                 const interval = (value: number) =>
                     value === 0 ? 'Firmware default' : `${String(value)} s`
                 return {
-                    ...device,
+                    ...node,
                     configuration: {
-                        ...device.configuration,
+                        ...node.configuration,
                         'Device telemetry interval': interval(telemetry.deviceUpdateInterval),
                         'Environmental telemetry': telemetry.environmentMeasurementEnabled
                             ? 'Enabled'
@@ -310,15 +323,15 @@ export function receiveRadio(device: Device, bytes: Uint8Array, at: number, nonc
                 }
             }
             case 'configCompleteId': {
-                return payload.value === nonce && device.nodeNum !== null
-                    ? addActivity({ ...device, state: 'connected' }, 'Connected', at)
-                    : device
+                return payload.value === nonce && node.nodeNum !== null
+                    ? addActivity({ ...node, state: 'connected' }, 'Connected', at)
+                    : node
             }
             case 'packet': {
-                return applyPacket(device, payload.value, at)
+                return applyPacket(node, payload.value, at)
             }
             case 'rebooted': {
-                return addActivity({ ...device, state: 'disconnected' }, 'Device restarted', at)
+                return addActivity({ ...node, state: 'disconnected' }, 'Node restarted', at)
             }
             case undefined:
             case 'xmodemPacket':
@@ -331,11 +344,11 @@ export function receiveRadio(device: Device, bytes: Uint8Array, at: number, nonc
             case 'deviceuiConfig':
             case 'lockdownStatus':
             case 'regionPresets': {
-                // Secret-bearing configuration, channel keys and device logs are intentionally ignored.
-                return device
+                // Secret-bearing configuration, channel keys and node logs are intentionally ignored.
+                return node
             }
         }
     } catch {
-        return addActivity(device, 'Malformed packet ignored', at)
+        return addActivity(node, 'Malformed packet ignored', at)
     }
 }

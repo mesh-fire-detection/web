@@ -1,5 +1,6 @@
 import { useState } from 'react'
 
+import { FooterSignup } from '@components/account/FooterSignup'
 import { NodeCounter } from '@components/layout/NodeCounter'
 import { Container, Divider, Grid, Row, Stack } from '@components/shared/primitives/Layout'
 import { Text } from '@components/shared/typography/Text'
@@ -33,6 +34,7 @@ export function Footer() {
                                 </Stack>
                             </Stack>
                         ))}
+                        <FooterSignup />
                     </Grid>
 
                     <Divider space={0} />

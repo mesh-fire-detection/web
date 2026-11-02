@@ -5,7 +5,7 @@ import type { Observation } from '@core/nearby/storage/observations'
 
 /*
  * Reading history kept in IndexedDB, one record per sample, shaped like the
- * backend's `readings` table (device, metric, recorded_at, value) so the two can
+ * backend's `readings` table (node, metric, recorded_at, value) so the two can
  * be merged or synced later. Records are keyed by node number, not by Bluetooth
  * or USB connection, so a node reached both ways shares one history.
  */
@@ -146,11 +146,11 @@ export function createReadingStore(factory: () => IDBFactory | undefined) {
                 return null
             }
         },
-        async saveObservation(device: Observation): Promise<void> {
+        async saveObservation(node: Observation): Promise<void> {
             try {
                 const db = await connect()
                 const transaction = db.transaction(OBSERVATIONS, 'readwrite')
-                transaction.objectStore(OBSERVATIONS).put(observation(device))
+                transaction.objectStore(OBSERVATIONS).put(observation(node))
                 await completed(transaction)
             } catch {
                 // Blocked storage must not prevent a manual connection.
@@ -163,7 +163,7 @@ export function createReadingStore(factory: () => IDBFactory | undefined) {
                 transaction.objectStore(OBSERVATIONS).delete(id)
                 await completed(transaction)
             } catch {
-                // The saved device list still prevents restoration of removed entries.
+                // The saved node list still prevents restoration of removed entries.
             }
         },
         /** A node's history by metric, oldest first; empty when storage is blocked. */

@@ -114,9 +114,18 @@ export function ButtonLink({
     iconBefore,
     iconAfter,
     className,
-}: ActionBase & { to: string }) {
+    label,
+}: ActionBase & {
+    to: string
+    /** Required in practice when the only child is an icon. */
+    label?: string | undefined
+}) {
     return (
-        <NavHit className={actionClass(variant, size, full, className)} to={to}>
+        <NavHit
+            accessibleLabel={label}
+            className={actionClass(variant, size, full, className)}
+            to={to}
+        >
             {iconBefore}
             {children}
             {iconAfter}

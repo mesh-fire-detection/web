@@ -9,13 +9,19 @@ import { BlogPage } from '@components/pages/blog/Blog'
 import { BlogPostPage } from '@components/pages/blog/BlogPost'
 import { BuildPage } from '@components/pages/build/Build'
 import { FirmwarePage } from '@components/pages/build/Firmware'
-import { NearbyDevicesPage } from '@components/pages/build/nearby/NearbyDevices'
+import { NearbyNodesPage } from '@components/pages/build/nearby/NearbyNodes'
 import { SatellitePage } from '@components/pages/build/satellite/Satellite'
 import { CoveragePage } from '@components/pages/coverage/Coverage'
 import { HomePage } from '@components/pages/Home'
 import { MapPage } from '@components/pages/Map'
+import { NodesPage } from '@components/pages/nodes/Nodes'
+import { NodePage } from '@components/pages/nodes/NodeView'
 import { OpenProblemsPage } from '@components/pages/problems/OpenProblems'
 import { AboutPage } from '@components/pages/site/About'
+import { AccountPage } from '@components/pages/site/account/Account'
+import { JoinPage } from '@components/pages/site/account/Join'
+import { SignInPage } from '@components/pages/site/account/SignIn'
+import { SubscribeConfirmPage } from '@components/pages/site/account/SubscribeConfirm'
 import { DesignPage } from '@components/pages/site/Design'
 import { PrivacyPage, TermsPage } from '@components/pages/site/Legal'
 import { NotFoundPage } from '@components/pages/site/NotFound'
@@ -38,9 +44,15 @@ const PAGES: Record<RouteId, ComponentType> = {
     blog_post: BlogPostPage,
     privacy: PrivacyPage,
     terms: TermsPage,
-    connect: NearbyDevicesPage,
+    connect: NearbyNodesPage,
     firmware: FirmwarePage,
     satellite: SatellitePage,
+    sign_in: SignInPage,
+    join: JoinPage,
+    subscribe_confirm: SubscribeConfirmPage,
+    account: AccountPage,
+    nodes: NodesPage,
+    node: NodePage,
 }
 
 const AppEntry = () => {

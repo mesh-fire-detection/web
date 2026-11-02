@@ -170,6 +170,257 @@ export type NotFoundContent = {
     readonly buildCta: string
 }
 
+/** What the code step says on a particular page; the rest is `CodeStepContent`. */
+type CodeStepWording = {
+    /**
+     * `{address}` is replaced with the address typed. Worded so it reads true
+     * whether or not a code went out, because the page cannot know.
+     */
+    readonly lede: string
+    readonly noEmail: string
+    readonly submit: string
+}
+
+export type SignInContent = {
+    readonly title: string
+    /** Shown when a members-only page sent the person here. */
+    readonly membersOnly: string
+    readonly email: {
+        readonly lede: string
+        readonly label: string
+        readonly submit: string
+    }
+    readonly code: CodeStepWording
+    readonly join: { readonly prompt: string; readonly link: string }
+}
+
+type PromptLink = { readonly prompt: string; readonly link: string }
+
+export type JoinContent = PageHeading & {
+    /** Shown when this browser has connected no node yet. */
+    readonly noNodes: { readonly title: string; readonly body: string; readonly connect: string }
+    readonly nodes: { readonly title: string; readonly body: string; readonly unnamed: string }
+    readonly form: {
+        readonly title: string
+        readonly emailLabel: string
+        readonly nameLabel: string
+        readonly nameInvalid: string
+        /** Recorded by the backend as consent; keep identical to its `JOIN_CONSENT`. */
+        readonly updates: string
+        readonly submit: string
+    }
+    readonly code: CodeStepWording
+    readonly signIn: PromptLink
+}
+
+/** The "become a member" prompt, on `/connect` and in the footer. */
+export type MembershipContent = {
+    readonly connect: {
+        readonly title: string
+        readonly body: string
+        readonly cta: string
+        readonly signIn: PromptLink
+    }
+    readonly signedIn: {
+        readonly title: string
+        readonly add: string
+        readonly added: string
+        readonly allAdded: string
+        readonly failed: string
+        readonly backup: string
+    }
+    readonly footer: { readonly title: string; readonly body: string; readonly cta: string }
+}
+
+/** Project updates: the footer form, the confirmation page and the account setting. */
+export type UpdatesContent = {
+    readonly footer: {
+        readonly title: string
+        readonly label: string
+        readonly submit: string
+        /** Recorded by the backend as consent; keep identical to its `FOOTER_CONSENT`. */
+        readonly consent: string
+        readonly sent: string
+    }
+    readonly confirm: {
+        readonly title: string
+        readonly lede: string
+        readonly button: string
+        readonly done: string
+        readonly invalid: string
+        readonly missing: string
+    }
+    readonly account: {
+        readonly title: string
+        readonly on: string
+        readonly off: string
+        /** Recorded by the backend as consent; keep identical to its `ACCOUNT_CONSENT`. */
+        readonly turnOn: string
+        readonly turnOff: string
+    }
+}
+
+/** Shared by every page that takes an emailed code. */
+export type CodeStepContent = {
+    readonly label: string
+    readonly limits: string
+    readonly resend: string
+    /** `{seconds}` is replaced with the time left. */
+    readonly resendIn: string
+    readonly resent: string
+    readonly changeEmail: string
+    readonly invalidCode: string
+    readonly invalidEmail: string
+    /** Keyed by the API's error code, plus our own `rate_limited` and `unreachable`. */
+    readonly errors: {
+        readonly INVALID_OTP: string
+        readonly OTP_EXPIRED: string
+        readonly TOO_MANY_ATTEMPTS: string
+        readonly NOT_INVITED: string
+        readonly rate_limited: string
+        readonly unreachable: string
+        readonly fallback: string
+    }
+}
+
+export type AccountContent = {
+    readonly title: string
+    readonly details: {
+        readonly name: string
+        readonly nameInvalid: string
+        readonly email: string
+        readonly emailFixed: string
+        readonly save: string
+        readonly saved: string
+    }
+    readonly signOut: string
+    readonly nodes: {
+        readonly title: string
+        readonly empty: string
+        readonly unnamed: string
+        readonly connect: string
+        readonly all: string
+    }
+}
+
+type Words<Key extends string> = Readonly<Record<Key, string>>
+type Notice = Words<'title' | 'body'>
+
+/** `/nodes`: the list of registered nodes, behind the session. */
+export type NodesContent = PageHeading & {
+    readonly loading: string
+    readonly failed: Notice
+    readonly filters: Words<
+        | 'label'
+        | 'show'
+        | 'all'
+        | 'mine'
+        | 'type'
+        | 'anyType'
+        | 'status'
+        | 'anyStatus'
+        | 'search'
+        | 'searchDescription'
+        | 'searchPlaceholder'
+        | 'submit'
+    >
+    readonly types: Words<'base' | 'cellular' | 'sensor' | 'vision'>
+    readonly statuses: Words<'online' | 'degraded' | 'offline'>
+    readonly table: Words<'caption' | 'node' | 'type' | 'status' | 'battery' | 'heard'>
+    readonly viewOnMap: string
+    readonly yours: string
+    readonly disabled: string
+    readonly noPosition: string
+    readonly approximately: string
+    readonly empty: {
+        readonly none: Notice
+        readonly noneMine: Notice
+        readonly noResults: Notice
+        readonly connect: string
+        readonly clear: string
+    }
+}
+
+/** `/nodes/:id`: one node, and editing it for the people on it. */
+export type NodeContent = {
+    readonly title: string
+    readonly back: string
+    readonly loading: string
+    readonly notFound: Notice
+    readonly failed: Notice
+    readonly yours: string
+    readonly disabled: string
+    readonly unset: string
+    readonly use: Readonly<Record<'field' | 'quiet' | 'unused', Words<'label' | 'body'>>>
+    readonly connectedHere: string
+    readonly openConnect: string
+    readonly viewOnMap: string
+    readonly identity: Words<
+        'meshId' | 'type' | 'hardware' | 'firmware' | 'build' | 'heard' | 'status'
+    >
+    readonly record: Words<'title' | 'lede' | 'position' | 'elevation' | 'antenna' | 'deployed'>
+    readonly approximate: string
+    readonly details: Words<
+        | 'title'
+        | 'lede'
+        | 'position'
+        | 'elevation'
+        | 'shown'
+        | 'shownExact'
+        | 'shownApproximate'
+        | 'hardwareId'
+        | 'note'
+        | 'reported'
+        | 'registered'
+    >
+    readonly owners: Words<'title' | 'lede' | 'you' | 'added' | 'none'>
+    readonly more: Words<
+        | 'open'
+        | 'other'
+        | 'fromServer'
+        | 'fromBrowser'
+        | 'notConnected'
+        | 'shortName'
+        | 'settingsAsOf'
+        | 'lastConnected'
+        | 'lastBackedUp'
+        | 'notBackedUp'
+        | 'notReported'
+        | 'events'
+        | 'noEvents'
+        | 'eventsFailed'
+        | 'activity'
+        | 'noActivity'
+    > & { readonly eventKinds: Words<'connected' | 'disconnected' | 'restarted' | 'malformed'> }
+    readonly readings: Words<'loading' | 'failed' | 'sensors' | 'range'>
+    readonly edit: Words<
+        | 'open'
+        | 'title'
+        | 'name'
+        | 'type'
+        | 'notSet'
+        | 'latitude'
+        | 'longitude'
+        | 'recordTitle'
+        | 'recordLede'
+        | 'positionHint'
+        | 'elevation'
+        | 'antenna'
+        | 'deployed'
+        | 'deployedHint'
+        | 'note'
+        | 'exactPosition'
+        | 'exactHint'
+        | 'save'
+        | 'cancel'
+        | 'saved'
+    > & {
+        readonly invalid: Words<'name' | 'number' | 'latitude' | 'longitude' | 'pair' | 'date'>
+        /** Keyed by the API's error code, plus our own `rate_limited` and `unreachable`. */
+        readonly errors: Words<'bad_request' | 'rate_limited' | 'unreachable' | 'fallback'>
+    }
+}
+
 type FooterLink = {
     readonly label: string
     readonly to: string
@@ -276,14 +527,14 @@ export type BuildContent = PageHeading & {
     readonly sourceCta: string
 }
 
-export type NearbyDevicesContent = PageHeading & {
+export type NearbyNodesContent = PageHeading & {
     readonly add: Readonly<Record<'bluetooth' | 'usb', string>>
     readonly transports: Readonly<Record<'bluetooth' | 'usb', string>>
     readonly helper: readonly string[]
     readonly recentStatus: string
     readonly emptyTitle: string
     readonly emptyBody: string
-    readonly devicesTitle: string
+    readonly nodesTitle: string
     readonly unnamed: string
     readonly errorTitle: string
     readonly battery: string
@@ -505,6 +756,7 @@ export type NearbyDetailsContent = {
     readonly voltageOver: string
     readonly trendWaiting: string
     readonly voltageSaved: string
+    readonly voltageSavedServer: string
     readonly voltageWaiting: string
     readonly voltageNone: string
     readonly signalMissing: string
@@ -566,7 +818,7 @@ export type NearbyDetailsContent = {
     }
     readonly kinds: Readonly<Record<'base' | 'cellular' | 'sensor' | 'vision' | 'test', string>>
     readonly labels: {
-        readonly nodeId: string
+        readonly meshId: string
         readonly connection: string
         readonly hardware: string
         readonly firmware: string

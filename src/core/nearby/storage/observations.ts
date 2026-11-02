@@ -1,8 +1,8 @@
-import type { Device, Peer, Reading } from '@core/nearby/model'
+import type { NearbyNode, Peer, Reading } from '@core/nearby/model'
 
 /** Only display data; connection state and history have their own lifecycles. */
 export type Observation = Pick<
-    Device,
+    NearbyNode,
     'id' | 'nodeNum' | 'lastPacketAt' | 'configuration' | 'peers' | 'activity'
 >
 
@@ -24,7 +24,7 @@ const number = (value: unknown): value is number =>
     typeof value === 'number' && Number.isFinite(value)
 const time = (value: unknown): value is number | null =>
     value === null || (number(value) && Number.isSafeInteger(value) && value >= 0)
-const node = (value: unknown): value is number =>
+const isNodeNum = (value: unknown): value is number =>
     number(value) && Number.isSafeInteger(value) && value > 0 && value <= 0xff_ff_ff_ff
 
 function reading(value: unknown): value is Reading {
@@ -32,7 +32,7 @@ function reading(value: unknown): value is Reading {
         record(value) &&
         typeof value['metric'] === 'string' &&
         number(value['value']) &&
-        node(value['sender']) &&
+        isNodeNum(value['sender']) &&
         value['receivedAt'] !== null &&
         time(value['receivedAt']) &&
         time(value['measuredAt']) &&
@@ -43,7 +43,7 @@ function reading(value: unknown): value is Reading {
 function peer(value: unknown): value is Peer {
     return (
         record(value) &&
-        node(value['num']) &&
+        isNodeNum(value['num']) &&
         typeof value['name'] === 'string' &&
         typeof value['shortName'] === 'string' &&
         typeof value['hardware'] === 'string' &&
@@ -58,16 +58,16 @@ function peer(value: unknown): value is Peer {
 }
 
 /** Strip unknown fields, including any future secret-bearing configuration. */
-export function observation(device: Observation): Observation {
+export function observation(node: Observation): Observation {
     return {
-        id: device.id,
-        nodeNum: device.nodeNum,
-        lastPacketAt: device.lastPacketAt,
+        id: node.id,
+        nodeNum: node.nodeNum,
+        lastPacketAt: node.lastPacketAt,
         configuration: Object.fromEntries(
-            Object.entries(device.configuration).filter(([key]) => CONFIGURATION.has(key))
+            Object.entries(node.configuration).filter(([key]) => CONFIGURATION.has(key))
         ),
         peers: Object.fromEntries(
-            Object.values(device.peers).map((entry) => [
+            Object.values(node.peers).map((entry) => [
                 entry.num,
                 {
                     num: entry.num,
@@ -95,14 +95,14 @@ export function observation(device: Observation): Observation {
                 },
             ])
         ),
-        activity: device.activity.map(({ at, message }) => ({ at, message })),
+        activity: node.activity.map(({ at, message }) => ({ at, message })),
     }
 }
 
 export function parseObservation(value: unknown): Observation | null {
     return !record(value) ||
         typeof value['id'] !== 'string' ||
-        !(value['nodeNum'] === null || node(value['nodeNum'])) ||
+        !(value['nodeNum'] === null || isNodeNum(value['nodeNum'])) ||
         !time(value['lastPacketAt']) ||
         !record(value['configuration']) ||
         Object.values(value['configuration']).some((entry) => typeof entry !== 'string') ||

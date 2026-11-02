@@ -10,8 +10,11 @@ import {
     OVERLAY_TOGGLE_ID,
     useNavMenu,
 } from '@components/app/NavMenuProvider'
+import { SessionProvider } from '@components/app/SessionProvider'
 import { UnitsProvider } from '@components/app/UnitsProvider'
 import { Header } from '@components/layout/Header'
+
+import { json, stubApi } from '../support/api'
 
 const OpenDrawer = () => {
     const { openMenu } = useNavMenu()
@@ -25,18 +28,23 @@ const OpenDrawer = () => {
 describe('Header drawer', () => {
     it('traps Tab across the close toggle and the drawer panel', async () => {
         const user = userEvent.setup()
+        stubApi({ 'GET /v1/auth/get-session': json(null) })
 
         render(
             <MemoryRouter>
-                <UnitsProvider>
-                    <NavMenuProvider>
-                        <OpenDrawer />
-                        <Header />
-                        <a href='/outside'>Outside</a>
-                    </NavMenuProvider>
-                </UnitsProvider>
+                <SessionProvider>
+                    <UnitsProvider>
+                        <NavMenuProvider>
+                            <OpenDrawer />
+                            <Header />
+                            <a href='/outside'>Outside</a>
+                        </NavMenuProvider>
+                    </UnitsProvider>
+                </SessionProvider>
             </MemoryRouter>
         )
+        // Settle the session first, so the drawer has its final set of links.
+        await screen.findByRole('link', { name: 'Join' })
 
         await user.click(screen.getByRole('button', { name: 'Force open' }))
 

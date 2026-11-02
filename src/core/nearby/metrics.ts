@@ -1,4 +1,4 @@
-import type { Device, Peer, Reading, Sample } from '@core/nearby/model'
+import type { NearbyNode, Peer, Reading, Sample } from '@core/nearby/model'
 
 const METRICS: Readonly<Record<string, readonly [string, string]>> = {
     'deviceMetrics.batteryLevel': ['Battery', '%'],
@@ -149,8 +149,8 @@ export function metricStats(samples: readonly Sample[]): MetricStats | null {
     }
 }
 
-export function voltageTrend(device: Pick<Device, 'history'>): Trend | null {
-    return trend(device.history['deviceMetrics.voltage'])
+export function voltageTrend(node: Pick<NearbyNode, 'history'>): Trend | null {
+    return trend(node.history['deviceMetrics.voltage'])
 }
 
 /**
@@ -202,13 +202,13 @@ export function batteryFromVoltage(volts: number): number | null {
  * The charge to show: the reported percentage, or on external power (reported as
  * 101) the one estimated from voltage. Null when neither is known.
  */
-export function batteryCharge(device: Pick<Device, 'readings'>): {
+export function batteryCharge(node: Pick<NearbyNode, 'readings'>): {
     readonly powered: boolean
     readonly percent: number | null
 } {
-    const battery = device.readings['deviceMetrics.batteryLevel']
+    const battery = node.readings['deviceMetrics.batteryLevel']
     if (battery === undefined) return { powered: false, percent: null }
-    const voltage = device.readings['deviceMetrics.voltage']
+    const voltage = node.readings['deviceMetrics.voltage']
     return battery.value <= 100
         ? { powered: false, percent: battery.value }
         : { powered: true, percent: voltage ? batteryFromVoltage(voltage.value) : null }
@@ -269,10 +269,10 @@ export function signalQuality(snr: number): SignalQuality {
 }
 
 /** Direct neighbors by link quality first, then relayed nodes by hop count. */
-export function nearestPeers(device: Device): readonly Peer[] {
+export function nearestPeers(node: NearbyNode): readonly Peer[] {
     const rank = (peer: Peer) => peer.hopsAway ?? Infinity
-    return Object.values(device.peers)
-        .filter((peer) => peer.num !== device.nodeNum)
+    return Object.values(node.peers)
+        .filter((peer) => peer.num !== node.nodeNum)
         .toSorted(
             (left, right) =>
                 rank(left) - rank(right) ||
@@ -282,7 +282,7 @@ export function nearestPeers(device: Device): readonly Peer[] {
         )
 }
 
-/** The strongest direct LoRa link this device has heard. */
-export function bestLink(device: Device): Peer | undefined {
-    return nearestPeers(device).find((peer) => peer.hopsAway === 0 && peer.snr !== null)
+/** The strongest direct LoRa link this node has heard. */
+export function bestLink(node: NearbyNode): Peer | undefined {
+    return nearestPeers(node).find((peer) => peer.hopsAway === 0 && peer.snr !== null)
 }

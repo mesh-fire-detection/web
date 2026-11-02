@@ -7,7 +7,7 @@ import { Pressable } from '@components/shared/primitives/Pressable'
 import { Heading } from '@components/shared/typography/Heading'
 import { Text } from '@components/shared/typography/Text'
 import { Metric } from '@components/shared/widgets/Badge'
-import { nearbyDetailsContent as copy } from '@core/content/build/nearby/deviceDetails'
+import { nearbyDetailsContent as copy } from '@core/content/build/nearby/nodeDetails'
 import { sensorGuideContent as guide } from '@core/content/build/nearby/sensorGuide'
 import { cx } from '@core/format/cx'
 import { plural } from '@core/format/format'
@@ -30,8 +30,8 @@ import {
     voltageTrend,
 } from '@core/nearby/metrics'
 import type { MetricHistory, Rate } from '@core/nearby/metrics'
-import { nodeId } from '@core/nearby/model'
-import type { Device, History, Reading, Sample } from '@core/nearby/model'
+import { meshId } from '@core/nearby/model'
+import type { NearbyNode, History, Reading, Sample } from '@core/nearby/model'
 
 type Tone = 'default' | 'live' | 'warn' | 'dead' | 'muted'
 
@@ -63,18 +63,27 @@ function Tile({
 const TREND_ARROW = { rising: '↑', falling: '↓', steady: '→' } as const
 const TREND_TONE = { rising: 'live', falling: 'warn', steady: 'default' } as const
 
-/** Battery, solar charging and LoRa signal: the first things checked on a node. */
-export function Vitals({ device }: { readonly device: Device }) {
-    const battery = device.readings['deviceMetrics.batteryLevel']
-    const voltage = device.readings['deviceMetrics.voltage']
-    const { powered, percent } = batteryCharge(device)
-    const voltageChange = voltageTrend(device)
-    const voltages = device.history['deviceMetrics.voltage'] ?? []
+/**
+ * Battery, solar charging and LoRa signal: the first things checked on a node.
+ * The server keeps no neighbours per node, so its view leaves the signal out.
+ */
+export function Vitals({
+    node,
+    source = 'browser',
+}: {
+    readonly node: NearbyNode
+    readonly source?: MetricHistory['source']
+}) {
+    const battery = node.readings['deviceMetrics.batteryLevel']
+    const voltage = node.readings['deviceMetrics.voltage']
+    const { powered, percent } = batteryCharge(node)
+    const voltageChange = voltageTrend(node)
+    const voltages = node.history['deviceMetrics.voltage'] ?? []
     // Without stored history (private window, blocked site data) the latest reading still counts.
     const latestVoltage =
         voltages.at(-1) ?? (voltage ? { value: voltage.value, at: voltage.receivedAt } : undefined)
-    const utilization = device.readings['deviceMetrics.channelUtilization']
-    const link = bestLink(device)
+    const utilization = node.readings['deviceMetrics.channelUtilization']
+    const link = bestLink(node)
     const quality = link?.snr == null ? null : signalQuality(link.snr)
     return (
         <Grid minColumnWidth={140} gap={3} className='nearby_vitals'>
@@ -121,7 +130,8 @@ export function Vitals({ device }: { readonly device: Device }) {
                         {formatNumber(voltageChange.latest.value, 'V')} {copy.voltageOver}{' '}
                         {duration(voltageChange.latest.at - voltageChange.reference.at)}
                         <div>
-                            {voltages.length} {copy.voltageSaved}
+                            {voltages.length}{' '}
+                            {source === 'browser' ? copy.voltageSaved : copy.voltageSavedServer}
                         </div>
                     </>
                 ) : latestVoltage ? (
@@ -130,26 +140,28 @@ export function Vitals({ device }: { readonly device: Device }) {
                     copy.voltageNone
                 )}
             </Tile>
-            <Tile
-                label={copy.signal}
-                value={quality ? copy.quality[quality] : '—'}
-                tone={quality === null ? 'muted' : SIGNAL_TONE[quality]}
-            >
-                {link?.snr == null ? (
-                    copy.signalMissing
-                ) : (
-                    <>
-                        SNR {formatNumber(link.snr, 'dB')}
-                        {link.rssi === null
-                            ? ''
-                            : ` · RSSI ${formatNumber(link.rssi, 'dBm')}`} · {copy.bestLink}:{' '}
-                        {link.name || link.shortName || nodeId(link.num)}
-                    </>
-                )}
-                <div>
-                    {copy.channelUse} {utilization ? readingValue(utilization) : '—'}
-                </div>
-            </Tile>
+            {source === 'browser' ? (
+                <Tile
+                    label={copy.signal}
+                    value={quality ? copy.quality[quality] : '—'}
+                    tone={quality === null ? 'muted' : SIGNAL_TONE[quality]}
+                >
+                    {link?.snr == null ? (
+                        copy.signalMissing
+                    ) : (
+                        <>
+                            SNR {formatNumber(link.snr, 'dB')}
+                            {link.rssi === null
+                                ? ''
+                                : ` · RSSI ${formatNumber(link.rssi, 'dBm')}`}{' '}
+                            · {copy.bestLink}: {link.name || link.shortName || meshId(link.num)}
+                        </>
+                    )}
+                    <div>
+                        {copy.channelUse} {utilization ? readingValue(utilization) : '—'}
+                    </div>
+                </Tile>
+            ) : null}
         </Grid>
     )
 }

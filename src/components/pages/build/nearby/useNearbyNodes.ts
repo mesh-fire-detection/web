@@ -2,7 +2,7 @@ import { useEffect, useState, useSyncExternalStore } from 'react'
 
 import type { Transport } from '@core/nearby/model'
 import { createNearbySession } from '@core/nearby/session'
-import { createDeviceMemory } from '@core/nearby/storage/devices'
+import { createNodeMemory } from '@core/nearby/storage/nodes'
 import { createReadingStore } from '@core/nearby/storage/readings'
 import {
     bluetoothSupport,
@@ -41,16 +41,16 @@ async function knownUsb(): Promise<readonly RadioConnection[] | null> {
     return serialSupport() === 'available' ? knownSerialDevices(await serialMessages()) : null
 }
 
-/** Previously allowed devices of both kinds; null only when neither browser API can list them. */
+/** Previously allowed nodes of both kinds; null only when neither browser API can list them. */
 async function known(): Promise<readonly RadioConnection[] | null> {
     const [bluetooth, usb] = await Promise.all([knownBluetooth(), knownUsb()])
     return bluetooth === null && usb === null ? null : [...(bluetooth ?? []), ...(usb ?? [])]
 }
 
-export function useNearbyDevices() {
+export function useNearbyNodes() {
     const [session] = useState(() =>
         createNearbySession(choose, {
-            memory: createDeviceMemory(() => window.localStorage),
+            memory: createNodeMemory(() => window.localStorage),
             readings: createReadingStore(() => window.indexedDB),
             known,
         })
