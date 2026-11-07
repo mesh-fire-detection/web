@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 
+import { startGoogle } from '@core/api/auth'
 import { codeStepContent } from '@core/content/site/account/codeStep'
 
 const copy = codeStepContent
@@ -65,3 +66,47 @@ export function useCooldown(): { readonly remaining: number; readonly restart: (
 
     return { remaining, restart }
 }
+
+/**
+ * Signing in with Google from this page. `start` asks the API where Google is
+ * and leaves for it; `error` is the API's code when it could not, which a page
+ * words itself (`PROVIDER_NOT_FOUND` means the backend has no Google client).
+ * `done` and `refused` are paths on this site, where Google sends the person
+ * back signed in or turned away.
+ */
+export function useGoogle(options: {
+    readonly done: string
+    readonly refused: string
+    readonly withNode?: boolean
+}): {
+    readonly busy: boolean
+    readonly error: string | undefined
+    readonly start: () => Promise<void>
+} {
+    const [busy, setBusy] = useState(false)
+    const [error, setError] = useState<string | undefined>()
+
+    const start = async () => {
+        setError(undefined)
+        setBusy(true)
+        const { origin } = window.location
+        const result = await startGoogle({
+            done: `${origin}${options.done}`,
+            refused: `${origin}${options.refused}`,
+            withNode: options.withNode === true,
+        })
+        if (result.ok) {
+            // Stays busy: the page is about to be replaced by Google's.
+            window.location.assign(result.data)
+            return
+        }
+        setBusy(false)
+        setError(result.error)
+    }
+
+    return { busy, error, start }
+}
+
+/** What to say when Google could not be started. */
+export const googleErrorMessage = (error: string, unavailable: string): string =>
+    error === 'PROVIDER_NOT_FOUND' ? unavailable : formErrorMessage(error)

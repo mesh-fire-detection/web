@@ -1,15 +1,21 @@
-import { useState } from 'react'
-import { Navigate, useSearchParams } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { Navigate, useNavigate, useSearchParams } from 'react-router-dom'
 
 import { CodeStep } from '@components/account/CodeStep'
 import { useConnectedNodes } from '@components/account/connectedNodes'
-import { formErrorMessage, looksLikeEmail, safeNext } from '@components/account/flow'
+import {
+    formErrorMessage,
+    googleErrorMessage,
+    looksLikeEmail,
+    safeNext,
+    useGoogle,
+} from '@components/account/flow'
 import { fromReport, NodeList } from '@components/account/NodeList'
 import { useSession } from '@components/app/SessionProvider'
 import { Page } from '@components/layout/Page'
 import { TextField } from '@components/shared/forms/Field'
 import { Form, FormActions } from '@components/shared/forms/Form'
-import { Box, Grid, Row, Section, Stack } from '@components/shared/primitives/Layout'
+import { Box, Divider, Grid, Row, Section, Stack } from '@components/shared/primitives/Layout'
 import { Heading } from '@components/shared/typography/Heading'
 import { Text } from '@components/shared/typography/Text'
 import { Button, ButtonLink, TextLink } from '@components/shared/widgets/Action'
@@ -38,12 +44,34 @@ function SignInPrompt() {
  * this browser connected on `/connect` (backend#9). Until a node has been
  * connected here, the page sends them there. The nodes stay in the browser
  * until the code is verified, and are added to the new account straight after.
+ * Joining with Google comes back here signed in, with `?via=google`, and the
+ * nodes are added the same way before moving on.
  */
 export function JoinPage() {
     const { session, signedIn } = useSession()
+    const navigate = useNavigate()
     const [params] = useSearchParams()
     const next = safeNext(params.get('next'))
     const nodes = useConnectedNodes()
+    const viaGoogle = params.get('via') === 'google'
+    const signedInNow = session.status === 'signed_in'
+    // Google sends a refused join back here with `?error=`.
+    const google = useGoogle({
+        done: `/join?${new URLSearchParams({ via: 'google', next }).toString()}`,
+        refused: '/join',
+        withNode: true,
+    })
+
+    useEffect(() => {
+        if (!signedInNow || !viaGoogle) return
+        const done = () => {
+            void navigate(next, { replace: true })
+        }
+        // As after a join code: if adding fails, the nodes are still in the
+        // browser and /connect offers to add them.
+        if (nodes.length === 0) done()
+        else void addMyNodes(nodes).finally(done)
+    }, [signedInNow, viaGoogle, nodes, navigate, next])
 
     const [step, setStep] = useState<'details' | 'code'>('details')
     const [email, setEmail] = useState('')
@@ -53,7 +81,16 @@ export function JoinPage() {
     const [nameError, setNameError] = useState<string | undefined>()
     const [formError, setFormError] = useState<string | undefined>()
 
-    if (session.status === 'signed_in') return <Navigate replace to={next} />
+    if (signedInNow && viaGoogle) {
+        return (
+            <Page title={copy.title}>
+                <Section width='narrow'>
+                    <Text tone='muted'>{copy.google.adding}</Text>
+                </Section>
+            </Page>
+        )
+    }
+    if (signedInNow) return <Navigate replace to={next} />
 
     if (nodes.length === 0) {
         return (
@@ -79,6 +116,12 @@ export function JoinPage() {
     }
 
     const address = email.trim()
+    const googleError =
+        google.error === undefined
+            ? params.has('error')
+                ? copy.google.refused
+                : undefined
+            : googleErrorMessage(google.error, copy.google.unavailable)
 
     const submitDetails = async () => {
         setEmailError(undefined)
@@ -108,6 +151,28 @@ export function JoinPage() {
                                 <Heading level={2} size='md'>
                                     {copy.form.title}
                                 </Heading>
+                                {step === 'details' ? (
+                                    <Stack gap={3}>
+                                        <Button
+                                            full
+                                            loading={google.busy}
+                                            onClick={() => {
+                                                void google.start()
+                                            }}
+                                            variant='secondary'
+                                        >
+                                            {copy.google.cta}
+                                        </Button>
+                                        {googleError === undefined ? null : (
+                                            <Text role='alert' size='sm' tone='dead'>
+                                                {googleError}
+                                            </Text>
+                                        )}
+                                    </Stack>
+                                ) : null}
+                                {step === 'details' ? (
+                                    <Divider label={copy.google.or} space={0} />
+                                ) : null}
                                 {step === 'details' ? (
                                     <Form
                                         ariaLabel={copy.form.title}

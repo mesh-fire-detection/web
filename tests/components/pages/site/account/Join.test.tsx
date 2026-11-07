@@ -2,7 +2,7 @@
 import { cleanup, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { SessionProvider } from '@components/app/SessionProvider'
 import { AccountPage } from '@components/pages/site/account/Account'
@@ -28,9 +28,9 @@ const JOIN = 'POST /v1/join'
 const VERIFY = 'POST /v1/auth/email-otp/verify-email'
 const ADD_NODES = 'POST /v1/me/nodes'
 
-function renderJoin() {
+function renderJoin(path = '/join') {
     render(
-        <MemoryRouter initialEntries={['/join']}>
+        <MemoryRouter initialEntries={[path]}>
             <SessionProvider>
                 <Routes>
                     <Route element={<JoinPage />} path='/join' />
@@ -148,4 +148,64 @@ it('sends someone already signed in straight to their account', async () => {
     renderJoin()
 
     expect(await screen.findByRole('heading', { name: 'Account' })).toBeDefined()
+})
+
+describe('Join with Google', () => {
+    const SOCIAL = 'POST /v1/auth/sign-in/social'
+    const realLocation = window.location
+
+    afterEach(() => {
+        Object.defineProperty(window, 'location', { configurable: true, value: realLocation })
+    })
+
+    it('says it is joining with a node, and comes back to this page', async () => {
+        const user = userEvent.setup()
+        const assign = vi.fn()
+        Object.defineProperty(window, 'location', {
+            configurable: true,
+            value: { origin: 'https://meshfiredetection.org', assign },
+        })
+        rememberNode()
+        const api = stubApi({
+            [SESSION]: json(null),
+            [SOCIAL]: json({ url: 'https://accounts.google.com/o/oauth2/v2/auth?x=1' }),
+        })
+        renderJoin()
+
+        await user.click(await screen.findByRole('button', { name: 'Join with Google' }))
+
+        expect(sentBodies(api, '/v1/auth/sign-in/social')).toEqual([
+            {
+                provider: 'google',
+                callbackURL: 'https://meshfiredetection.org/join?via=google&next=%2Faccount',
+                errorCallbackURL: 'https://meshfiredetection.org/join',
+                additionalData: { withNode: true },
+            },
+        ])
+        expect(assign).toHaveBeenCalledWith('https://accounts.google.com/o/oauth2/v2/auth?x=1')
+    })
+
+    it('adds the nodes from this browser once Google has signed the new member in', async () => {
+        rememberNode()
+        const api = stubApi({
+            [SESSION]: json({ user: MEMBER, session: {} }),
+            [ADD_NODES]: json({ nodes: [MY_BENCH_NODE] }),
+        })
+        renderJoin('/join?via=google&next=%2Faccount')
+
+        expect(await screen.findByRole('heading', { name: 'Account' })).toBeDefined()
+        expect(sentBodies(api, '/v1/me/nodes')).toEqual([{ nodes: [BENCH_NODE] }])
+    })
+
+    it('says the same thing whatever Google was refused for', async () => {
+        rememberNode()
+        stubApi({ [SESSION]: json(null) })
+        renderJoin('/join?error=not_admitted')
+
+        expect(
+            await screen.findByText(
+                "Google couldn't be used to join with that account. Join with your email instead."
+            )
+        ).toBeDefined()
+    })
 })

@@ -51,6 +51,30 @@ export async function joinWithCode(email: string, code: string): Promise<ApiResu
     return result.ok ? { ok: true, data: result.data.user } : result
 }
 
+/**
+ * Starts signing in with Google. The API answers with Google's address, which
+ * the caller then opens. Google sends the person back to `done` once signed
+ * in, or to `refused` with `?error=` when the backend turned them away; both
+ * are full URLs on this site. Joining with a node says so, as `requestJoin`
+ * does, and Google then lets someone eligible become a member.
+ */
+export async function startGoogle(options: {
+    readonly done: string
+    readonly refused: string
+    readonly withNode?: boolean
+}): Promise<ApiResult<string>> {
+    const result = await apiRequest<{ url: string }>(`${AUTH}/sign-in/social`, {
+        method: 'POST',
+        body: {
+            provider: 'google',
+            callbackURL: options.done,
+            errorCallbackURL: options.refused,
+            ...(options.withNode === true && { additionalData: { withNode: true } }),
+        },
+    })
+    return result.ok ? { ok: true, data: result.data.url } : result
+}
+
 /** `null` means nobody is signed in; the API answers that with a `200` and an empty session. */
 export async function fetchSession(): Promise<ApiResult<SessionUser | null>> {
     const result = await apiRequest<{ user: SessionUser } | null>(`${AUTH}/get-session`)
