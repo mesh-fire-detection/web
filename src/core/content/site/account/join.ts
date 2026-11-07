@@ -27,5 +27,12 @@ export const joinContent = {
         noEmail: 'Nothing after a few minutes? Check spam, and check the address above.',
         submit: 'Join',
     },
+    google: {
+        or: 'or',
+        cta: 'Join with Google',
+        refused: "Google couldn't be used to join with that account. Join with your email instead.",
+        unavailable: "Google isn't available right now. Join with your email instead.",
+        adding: 'Adding the nodes from this browser to your account…',
+    },
     signIn: { prompt: 'Already a member?', link: 'Sign in' },
 } as const satisfies JoinContent

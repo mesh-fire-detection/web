@@ -395,6 +395,22 @@
     border-top: 1px solid var(--line);
 }
 
+.divider_labelled {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    gap: var(--s_3);
+    color: var(--text_3);
+    font-size: var(--fs_sm);
+}
+
+.divider_labelled::before,
+.divider_labelled::after {
+    flex: 1;
+    border-top: 1px solid var(--line);
+    content: '';
+}
+
 .divider_0 {
     margin-block: 0;
 }

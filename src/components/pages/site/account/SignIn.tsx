@@ -2,12 +2,18 @@ import { useState } from 'react'
 import { Navigate, useNavigate, useSearchParams } from 'react-router-dom'
 
 import { CodeStep } from '@components/account/CodeStep'
-import { formErrorMessage, looksLikeEmail, safeNext } from '@components/account/flow'
+import {
+    formErrorMessage,
+    googleErrorMessage,
+    looksLikeEmail,
+    safeNext,
+    useGoogle,
+} from '@components/account/flow'
 import { useSession } from '@components/app/SessionProvider'
 import { Page } from '@components/layout/Page'
 import { TextField } from '@components/shared/forms/Field'
 import { Form, FormActions } from '@components/shared/forms/Form'
-import { Row, Section, Stack } from '@components/shared/primitives/Layout'
+import { Divider, Row, Section, Stack } from '@components/shared/primitives/Layout'
 import { Text } from '@components/shared/typography/Text'
 import { Button, TextLink } from '@components/shared/widgets/Action'
 import { requestCode, signInWithCode } from '@core/api/auth'
@@ -27,8 +33,17 @@ export function SignInPage() {
     const [busy, setBusy] = useState(false)
     const [fieldError, setFieldError] = useState<string | undefined>()
     const [formError, setFormError] = useState<string | undefined>()
+    // Google sends a refused sign-in back here with `?error=`.
+    const google = useGoogle({ done: next, refused: '/sign-in' })
 
     if (session.status === 'signed_in') return <Navigate replace to={next} />
+
+    const googleError =
+        google.error === undefined
+            ? params.has('error')
+                ? copy.google.refused
+                : undefined
+            : googleErrorMessage(google.error, copy.google.unavailable)
 
     const address = email.trim()
 
@@ -53,6 +68,29 @@ export function SignInPage() {
         <Page title={copy.title}>
             <Section width='narrow'>
                 <Stack gap={5}>
+                    {step === 'email' && params.get('why') === 'members' ? (
+                        <Text weight={600}>{copy.membersOnly}</Text>
+                    ) : null}
+                    {step === 'email' ? (
+                        <Stack gap={3}>
+                            <Button
+                                full
+                                loading={google.busy}
+                                onClick={() => {
+                                    void google.start()
+                                }}
+                                variant='secondary'
+                            >
+                                {copy.google.cta}
+                            </Button>
+                            {googleError === undefined ? null : (
+                                <Text role='alert' size='sm' tone='dead'>
+                                    {googleError}
+                                </Text>
+                            )}
+                        </Stack>
+                    ) : null}
+                    {step === 'email' ? <Divider label={copy.google.or} space={0} /> : null}
                     {step === 'email' ? (
                         <Form
                             ariaLabel={copy.title}
@@ -63,9 +101,6 @@ export function SignInPage() {
                             }}
                         >
                             <Stack gap={4}>
-                                {params.get('why') === 'members' ? (
-                                    <Text weight={600}>{copy.membersOnly}</Text>
-                                ) : null}
                                 <Text tone='muted'>{copy.email.lede}</Text>
                                 <TextField
                                     autoComplete='email'

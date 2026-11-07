@@ -181,6 +181,17 @@ type CodeStepWording = {
     readonly submit: string
 }
 
+/** The Google option on a page that signs people in or lets them join. */
+type GoogleWording = {
+    /** On the rule between Google and the email form. */
+    readonly or: string
+    readonly cta: string
+    /** Google came back turned away. One answer for every reason, so it reveals nothing. */
+    readonly refused: string
+    /** The backend has no Google client, or Google could not be started. */
+    readonly unavailable: string
+}
+
 export type SignInContent = {
     readonly title: string
     /** Shown when a members-only page sent the person here. */
@@ -191,6 +202,7 @@ export type SignInContent = {
         readonly submit: string
     }
     readonly code: CodeStepWording
+    readonly google: GoogleWording
     readonly join: { readonly prompt: string; readonly link: string }
 }
 
@@ -210,6 +222,10 @@ export type JoinContent = PageHeading & {
         readonly submit: string
     }
     readonly code: CodeStepWording
+    readonly google: GoogleWording & {
+        /** While the nodes from this browser are added, after Google signs the new member in. */
+        readonly adding: string
+    }
     readonly signIn: PromptLink
 }
 

@@ -52,7 +52,9 @@ controls vertical rhythm (`none`, `sm`, `md`, `lg`), surface tone, border, and
 optional grid background. Use `Stack`, `Row`, and `Grid` for composition;
 `Box` provides a shared surface with token-based padding, tone, radius, border,
 semantic accent, and an optional lift-on-hover treatment. `Divider`, `Spacer`,
-and `ScrollArea` cover common layout details. `Canvas` is reserved for
+and `ScrollArea` cover common layout details; a `Divider` with a `label` puts
+short text such as "or" in the middle of the rule, between two ways to do one
+thing. `Canvas` is reserved for
 third-party drawing surfaces such as MapLibre.
 
 ### Typography

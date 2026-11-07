@@ -263,8 +263,15 @@ export function Box({
     )
 }
 
-export function Divider({ space = 5 }: { space?: Space }) {
-    return <div className={cx('divider', `divider_${String(space)}`)} />
+/** A rule across the width. With a `label`, the text sits in the middle of it, as "or" does between two ways in. */
+export function Divider({ space = 5, label }: { space?: Space; label?: string | undefined }) {
+    return label === undefined ? (
+        <div className={cx('divider', `divider_${String(space)}`)} />
+    ) : (
+        <div className={cx('divider_labelled', `divider_${String(space)}`)}>
+            <span>{label}</span>
+        </div>
+    )
 }
 
 export function Spacer({ size = 4 }: { size?: Space }) {

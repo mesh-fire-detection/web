@@ -218,3 +218,76 @@ describe('Sign in', () => {
         expect(await screen.findByRole('heading', { name: 'Account' })).toBeDefined()
     })
 })
+
+describe('Sign in with Google', () => {
+    const SOCIAL = 'POST /v1/auth/sign-in/social'
+    const realLocation = window.location
+
+    /** jsdom cannot leave the page, so `assign` is recorded instead of followed. */
+    function stubLocation() {
+        const assign = vi.fn()
+        Object.defineProperty(window, 'location', {
+            configurable: true,
+            value: { origin: 'https://meshfiredetection.org', assign },
+        })
+        return assign
+    }
+
+    afterEach(() => {
+        Object.defineProperty(window, 'location', { configurable: true, value: realLocation })
+    })
+
+    it('leaves for Google, coming back to where the person was going', async () => {
+        const user = userEvent.setup()
+        const assign = stubLocation()
+        const api = stubApi({
+            [SESSION]: json(null),
+            [SOCIAL]: json({
+                url: 'https://accounts.google.com/o/oauth2/v2/auth?x=1',
+                redirect: true,
+            }),
+        })
+        renderAt('/sign-in?next=%2Fnodes')
+
+        await user.click(await screen.findByRole('button', { name: 'Continue with Google' }))
+
+        expect(sentBodies(api, '/v1/auth/sign-in/social')).toEqual([
+            {
+                provider: 'google',
+                callbackURL: 'https://meshfiredetection.org/nodes',
+                errorCallbackURL: 'https://meshfiredetection.org/sign-in',
+            },
+        ])
+        expect(assign).toHaveBeenCalledWith('https://accounts.google.com/o/oauth2/v2/auth?x=1')
+    })
+
+    it('says the same thing whatever Google was refused for', async () => {
+        stubApi({ [SESSION]: json(null) })
+        renderAt('/sign-in?error=not_admitted')
+        const refused =
+            "Google sign-in isn't available for that account. Sign in with your email instead, or join first."
+        expect(await screen.findByText(refused)).toBeDefined()
+        cleanup()
+
+        renderAt('/sign-in?error=account_not_linked')
+        expect(await screen.findByText(refused)).toBeDefined()
+    })
+
+    it('says so when the backend has no Google client', async () => {
+        const user = userEvent.setup()
+        stubLocation()
+        stubApi({
+            [SESSION]: json(null),
+            [SOCIAL]: json({ code: 'PROVIDER_NOT_FOUND', message: 'Provider not found' }, 404),
+        })
+        renderAt('/sign-in')
+
+        await user.click(await screen.findByRole('button', { name: 'Continue with Google' }))
+
+        expect(
+            await screen.findByText(
+                "Google sign-in isn't available right now. Sign in with your email instead."
+            )
+        ).toBeDefined()
+    })
+})

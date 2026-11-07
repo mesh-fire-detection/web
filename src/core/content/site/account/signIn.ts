@@ -14,5 +14,12 @@ export const signInContent = {
             'Nothing after a few minutes? Check spam, or ask whoever invited you which address they used.',
         submit: 'Sign in',
     },
+    google: {
+        or: 'or',
+        cta: 'Continue with Google',
+        refused:
+            "Google sign-in isn't available for that account. Sign in with your email instead, or join first.",
+        unavailable: "Google sign-in isn't available right now. Sign in with your email instead.",
+    },
     join: { prompt: 'No account?', link: 'Join' },
 } as const satisfies SignInContent
