@@ -46,7 +46,7 @@ const errorCode = (body: unknown): string => {
  */
 export async function apiRequest<T>(
     path: `/${string}`,
-    init: { readonly method?: 'GET' | 'POST' | 'PATCH'; readonly body?: unknown } = {}
+    init: { readonly method?: 'GET' | 'POST' | 'PATCH' | 'DELETE'; readonly body?: unknown } = {}
 ): Promise<ApiResult<T>> {
     let response: Response
     try {

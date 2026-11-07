@@ -6,6 +6,9 @@ import { backUpConnectedNodes } from '@components/account/nodeBackup'
 import { fromMine, NodeList } from '@components/account/NodeList'
 import { useSession } from '@components/app/SessionProvider'
 import { Page } from '@components/layout/Page'
+import { LeaveAccount } from '@components/pages/site/account/LeaveAccount'
+import { Sessions } from '@components/pages/site/account/Sessions'
+import { SignInMethods } from '@components/pages/site/account/SignInMethods'
 import { TextField } from '@components/shared/forms/Field'
 import { Form } from '@components/shared/forms/Form'
 import { DescriptionItem, DescriptionList } from '@components/shared/page/List'
@@ -25,6 +28,8 @@ import { accountContent } from '@core/content/site/account/account'
 import { updatesContent } from '@core/content/site/account/updates'
 
 const copy = accountContent
+
+const dayFormat = new Intl.DateTimeFormat(undefined, { dateStyle: 'long' })
 
 /**
  * The name is the member's to change. The address is how they sign in, so it
@@ -85,6 +90,11 @@ function YourDetails({ user }: { readonly user: SessionUser }) {
                         {copy.details.emailFixed}
                     </Text>
                 </Stack>
+                <DescriptionList columns={1}>
+                    <DescriptionItem term={copy.details.joined}>
+                        {dayFormat.format(new Date(user.createdAt))}
+                    </DescriptionItem>
+                </DescriptionList>
                 <Row gap={3}>
                     <Button disabled={unchanged} loading={busy} type='submit'>
                         {copy.details.save}
@@ -184,13 +194,22 @@ function UpdatesSetting() {
 }
 
 export function AccountPage() {
-    const { session, signOut } = useSession()
+    const { session, signOut, signedOut } = useSession()
     const navigate = useNavigate()
+    // Set when the person ended their own session from here, by signing out
+    // everywhere or deleting the account: they are sent home, not to sign in.
+    const [left, setLeft] = useState(false)
 
-    if (session.status === 'signed_out') return <Navigate replace to={signInToSee('/account')} />
+    if (session.status === 'signed_out') {
+        return <Navigate replace to={left ? '/' : signInToSee('/account')} />
+    }
     if (session.status === 'loading') return <Page title={copy.title}>{null}</Page>
 
     const { user } = session
+    const leave = () => {
+        setLeft(true)
+        signedOut()
+    }
 
     return (
         <Page title={copy.title}>
@@ -199,6 +218,8 @@ export function AccountPage() {
                     <YourDetails key={user.id} user={user} />
                     <YourNodes />
                     <UpdatesSetting />
+                    <SignInMethods />
+                    <Sessions onSignedOut={leave} />
                     <Row>
                         <Button
                             onClick={() => {
@@ -213,6 +234,7 @@ export function AccountPage() {
                             {copy.signOut}
                         </Button>
                     </Row>
+                    <LeaveAccount onSignedOut={leave} />
                 </Stack>
             </Section>
         </Page>

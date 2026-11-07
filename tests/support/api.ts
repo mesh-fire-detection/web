@@ -7,11 +7,12 @@ export const MEMBER: SessionUser = {
     name: 'Ada Lovelace',
     email: 'ada@example.org',
     role: 'user',
+    createdAt: '2026-10-27T09:30:00.000Z',
 }
 
 /** `offline` rejects like a dropped connection; `pending` never answers. */
 type Reply = Response | 'offline' | 'pending'
-type Route = `${'GET' | 'POST' | 'PATCH'} /v1/${string}`
+type Route = `${'GET' | 'POST' | 'PATCH' | 'DELETE'} /v1/${string}`
 
 export const json = (body: unknown, status = 200): Response => Response.json(body, { status })
 
