@@ -154,6 +154,22 @@ These rules are enforced by ESLint (`no-restricted-syntax` plus `jsx-a11y`).
 - Never run commands that discard local uncommitted changes (`git checkout --`, `git restore`, `git reset --hard`, `git clean -fd`).
 - Never commit unless the user explicitly asks.
 
+## Issues and the Project Board
+
+- Work is tracked in issues on the
+  [project board](https://github.com/orgs/mesh-fire-detection/projects/2).
+  Website issues live here and backend ones in `mesh-fire-detection/backend`;
+  refer across repos as `backend#N`.
+- Before starting, read the issue the work belongs to, comments included.
+  Decisions are recorded there.
+- A PR that finishes an issue says `Closes #N`. One that does part of it says
+  `Part of #N`, which updates nothing, so when it merges, comment on the issue
+  with what shipped and what is left.
+- Keep the board's Status true: In progress when work starts. Closing an issue
+  moves it to Done.
+- A decision made in conversation that changes an issue's scope goes into the
+  issue, not only into the code.
+
 ## Definition of Done
 
 - Type checks pass.
@@ -161,3 +177,4 @@ These rules are enforced by ESLint (`no-restricted-syntax` plus `jsx-a11y`).
 - Tests pass.
 - Build passes.
 - No dead code, no temporary workarounds, no unexplained rule suppressions.
+- The issues the work touched say what shipped.
