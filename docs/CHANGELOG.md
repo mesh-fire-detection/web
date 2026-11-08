@@ -1,10 +1,14 @@
 # Changelog
 
 Notable changes to the web application are recorded here by version. How
-releases are cut is in [RELEASING.md](RELEASING.md). 0.1.2 was never released;
-its changes ship in the first tagged release.
+releases are cut is in [RELEASING.md](RELEASING.md).
 
 ## Unreleased
+
+## 0.2.0 — 2026-11-08
+
+The first tagged release. 0.1.2 was never released, and until now every merge
+to `main` deployed, so most of this was already live.
 
 ### Added
 
