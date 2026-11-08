@@ -1,3 +1,4 @@
+import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -29,6 +30,14 @@ const pagesBase = (): string => {
         : `${trimmed.startsWith('/') ? trimmed : `/${trimmed}`}/`
 }
 
+/**
+ * The release this build belongs to, from package.json (web#21). Only the
+ * version is defined, so the rest of package.json stays out of the bundle.
+ */
+const packageVersion = (
+    JSON.parse(fs.readFileSync(path.join(rootDir, 'package.json'), 'utf8')) as { version: string }
+).version
+
 /** SPA shells for known routes plus 404/robots/sitemap. */
 const githubPagesSpaFallback = (): Plugin => ({
     name: 'github-pages-spa-fallback',
@@ -43,6 +52,7 @@ export default defineConfig({
     publicDir: path.join(rootDir, 'public'),
     envDir: rootDir,
     base: pagesBase(),
+    define: { 'import.meta.env.VITE_APP_VERSION': JSON.stringify(packageVersion) },
     plugins: [react(), githubPagesSpaFallback()],
     resolve: {
         alias: {

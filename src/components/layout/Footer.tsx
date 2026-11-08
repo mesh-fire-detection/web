@@ -8,6 +8,12 @@ import { TextLink } from '@components/shared/widgets/Action'
 import { SITE } from '@core/config/site'
 import { footerContent } from '@core/content/site/footer'
 
+/**
+ * The release this build is (web#21), defined from package.json by the Vite
+ * config; `dev` under tests, which do not go through it.
+ */
+const VERSION = (import.meta.env['VITE_APP_VERSION'] as string | undefined) ?? 'dev'
+
 export function Footer() {
     const [year] = useState(() => new Date().getFullYear())
     return (
@@ -71,7 +77,7 @@ export function Footer() {
                             </TextLink>
                         </Text>
                         <Text as='span' size='xs' tone='faint'>
-                            © {year} {SITE.name}
+                            © {year} {SITE.name} · v{VERSION}
                         </Text>
                     </Row>
                 </Stack>
