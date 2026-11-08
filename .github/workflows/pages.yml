@@ -1,11 +1,19 @@
 name: Deploy to GitHub Pages
 
+# Pull requests are checked. The site deploys only when a GitHub Release is
+# published (web#21): merges collect on main until someone decides to ship.
+# Running this by hand with an earlier tag deploys that release again, which
+# is how to roll back; see docs/RELEASING.md.
 on:
-    push:
-        branches: [main]
     pull_request:
         branches: [main]
+    release:
+        types: [published]
     workflow_dispatch:
+        inputs:
+            tag:
+                description: The release tag to deploy, such as v0.2.0
+                required: true
 
 permissions:
     contents: read
@@ -45,15 +53,22 @@ jobs:
                   BLOG_DIR: blog
 
     build:
-        if: github.event_name != 'pull_request'
+        # A prerelease is for looking at, not for the live site.
+        if: github.event_name == 'workflow_dispatch' || (github.event_name == 'release' && !github.event.release.prerelease)
         runs-on: ubuntu-latest
         permissions:
             contents: read
             pages: write
             id-token: write
+        env:
+            TAG: ${{ github.event.release.tag_name || inputs.tag }}
         steps:
             - name: Checkout
               uses: actions/checkout@v7
+              with:
+                  ref: refs/tags/${{ env.TAG }}
+                  # The whole history, to check the tag is on main.
+                  fetch-depth: 0
 
             - name: Checkout posts
               uses: actions/checkout@v7
@@ -66,6 +81,24 @@ jobs:
               with:
                   node-version-file: .nvmrc
                   cache: npm
+
+            - name: Check the tag
+              run: |
+                  if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+                      echo "::error::$TAG is not a release tag like v1.2.3"
+                      exit 1
+                  fi
+                  # The footer shows package.json's version, so the two must agree.
+                  version="v$(node -p "require('./package.json').version")"
+                  if [[ "$version" != "$TAG" ]]; then
+                      echo "::error::package.json says $version but the tag is $TAG"
+                      exit 1
+                  fi
+                  # Only reviewed code ships: the tag must be on main.
+                  if ! git merge-base --is-ancestor HEAD origin/main; then
+                      echo "::error::$TAG is not on main"
+                      exit 1
+                  fi
 
             - name: Setup Pages
               id: pages
@@ -86,7 +119,6 @@ jobs:
                   path: dist
 
     deploy:
-        if: github.event_name != 'pull_request'
         needs: build
         runs-on: ubuntu-latest
         permissions:

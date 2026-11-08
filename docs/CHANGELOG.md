@@ -1,8 +1,10 @@
 # Changelog
 
-Notable changes to the web application are recorded here by version.
+Notable changes to the web application are recorded here by version. How
+releases are cut is in [RELEASING.md](RELEASING.md). 0.1.2 was never released;
+its changes ship in the first tagged release.
 
-## 0.1.2 — Unreleased
+## Unreleased
 
 ### Added
 
@@ -17,6 +19,8 @@ Notable changes to the web application are recorded here by version.
 
 ### Changed
 
+- The site deploys when a GitHub Release is published, not on every merge to
+  `main` (#21), and the footer shows which release it is.
 - Satellite controls use shared UI kit components, and the contribution rules
   require shared UI contracts for interface work.
 - Coverage calculations are hidden while a numeric input is empty.
