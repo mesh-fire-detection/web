@@ -165,11 +165,29 @@ prompt:
 - **Email** is shown but not editable: **You sign in with this address, so it
   cannot be changed here.**
 - No role is shown, for now.
+- **Joined** — the date the account was made.
 - **Your nodes** — from `GET /v1/me/nodes`, or a pointer to `/connect`; then
   **See every node**, to `/nodes`.
 - **Updates** — on or off (`PATCH /v1/me/subscription`).
+- **How you sign in** (`GET /v1/me/sign-in-methods`) — the emailed code, always
+  on and never removable, so the last way in cannot be removed. **Add Google**
+  goes to Google through `POST /v1/auth/link-social` and back to `/account`;
+  only the Google account for the same address is accepted, and coming back
+  with `?error=` says **Google was not added.** **Remove Google** calls
+  `DELETE /v1/me/sign-in-methods/google`.
+- **Where you are signed in** (`GET /v1/me/sessions`) — each session as
+  "Chrome on Windows" and the day it was last used, this browser marked. Every
+  other one has **Sign out** (`DELETE /v1/me/sessions/:id`). **Sign out
+  everywhere** (`DELETE /v1/me/sessions`) ends them all, this one included,
+  and returns to `/`.
 - Action **Sign out**: calls `POST /v1/auth/sign-out`, clears the cached
   session, and returns to `/`.
+- **Delete your account** — says first what happens: name and address removed,
+  signed out everywhere, updates and alert rules stopped; nodes stay on the
+  network with everything they reported; the address can join again as a new
+  account. **Delete account**, then **Delete my account** to confirm, calls
+  `DELETE /v1/me` and returns to `/`. The only admin is told to make someone
+  else an admin first (backend `docs/SPEC.md`, Leaving).
 
 ## Implementation direction
 
@@ -201,8 +219,6 @@ prompt:
 
 - Pages that need a session: alert rules, alerts, and admin pages for nodes,
   gateways and inviting users.
-- **Sign out everywhere**, once someone asks for it.
-- Google sign-in and the Join and Subscribe routes from backend #9 and #29.
 
 ## Acceptance criteria
 

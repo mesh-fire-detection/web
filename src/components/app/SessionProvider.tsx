@@ -24,6 +24,8 @@ type SessionValue = {
     readonly session: Session
     readonly signedIn: (user: SessionUser) => void
     readonly signOut: () => Promise<void>
+    /** For when the API has already ended this session, as signing out everywhere does. */
+    readonly signedOut: () => void
 }
 
 const SessionContext = createContext<SessionValue | null>(null)
@@ -61,7 +63,14 @@ export const SessionProvider = ({ children }: SessionProviderProperties) => {
         setSession({ status: 'signed_out' })
     }, [])
 
-    const value = useMemo(() => ({ session, signedIn, signOut }), [session, signedIn, signOut])
+    const signedOut = useCallback(() => {
+        setSession({ status: 'signed_out' })
+    }, [])
+
+    const value = useMemo(
+        () => ({ session, signedIn, signOut, signedOut }),
+        [session, signedIn, signOut, signedOut]
+    )
 
     return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>
 }

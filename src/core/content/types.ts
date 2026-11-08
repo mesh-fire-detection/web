@@ -308,8 +308,38 @@ export type AccountContent = {
         readonly emailFixed: string
         readonly save: string
         readonly saved: string
+        readonly joined: string
     }
     readonly signOut: string
+    readonly signIn: {
+        readonly title: string
+        readonly code: string
+        readonly codeNote: string
+        readonly google: string
+        readonly googleNote: string
+        readonly add: string
+        readonly remove: string
+        readonly addFailed: string
+        readonly unavailable: string
+    }
+    readonly sessions: {
+        readonly title: string
+        readonly thisBrowser: string
+        readonly lastActive: string
+        readonly unknownDevice: string
+        readonly end: string
+        readonly everywhere: string
+        readonly everywhereNote: string
+    }
+    readonly leave: {
+        readonly title: string
+        readonly body: readonly string[]
+        readonly start: string
+        readonly confirm: string
+        readonly confirmNote: string
+        readonly cancel: string
+        readonly onlyAdmin: string
+    }
     readonly nodes: {
         readonly title: string
         readonly empty: string

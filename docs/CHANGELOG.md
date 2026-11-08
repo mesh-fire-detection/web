@@ -16,6 +16,9 @@ its changes ship in the first tagged release.
   details and edit it. Sign-in says why when a members-only page sent you.
 - Nodes on your account are backed up: `/account` and `/nodes/:id` copy readings,
   connections, faults and settings saved by `/connect` to the server.
+- `/account` shows when you joined, lets you add or remove Google, lists where
+  you are signed in with a way to end any session or all of them, and lets you
+  delete your account after saying what happens to your nodes.
 
 ### Changed
 
