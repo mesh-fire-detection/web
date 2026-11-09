@@ -63,6 +63,10 @@ export const nodeContent = {
         direct: 'heard directly',
         unknownHops: 'route unknown',
         via: 'via',
+        through: 'Through',
+        fromGateway: 'Straight from this gateway',
+        fromBrowser: 'Uploaded from a browser',
+        lastUsed: 'Last used',
         allRoutes: 'Show all routes',
         fewerRoutes: 'Show fewer routes',
         nearby: {

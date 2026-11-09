@@ -2,12 +2,13 @@ import { Fragment, useEffect, useState } from 'react'
 
 import { Age, NodeTag } from '@components/pages/build/nearby/Indicators'
 import { minutesSince } from '@components/pages/nodes/listing'
+import { RouteLeg, RouteStop, RouteTrail } from '@components/shared/page/Timeline'
 import { Box, Row, Stack } from '@components/shared/primitives/Layout'
 import { Heading } from '@components/shared/typography/Heading'
 import { Text } from '@components/shared/typography/Text'
 import { Button, TextLink } from '@components/shared/widgets/Action'
 import { Badge } from '@components/shared/widgets/Badge'
-import { Icon } from '@components/shared/widgets/Icon'
+import { Icon, type IconName } from '@components/shared/widgets/Icon'
 import { fetchNodePath, type Node, type NodeConnection, type NodePath } from '@core/api/nodes'
 import { nearbyDetailsContent as peerWords } from '@core/content/build/nearby/nodeDetails'
 import { nodeContent } from '@core/content/nodes/node'
@@ -20,10 +21,12 @@ const words = nodeContent.path
 const connectionWords = nodesContent.connections
 
 type Stop = { readonly label: string; readonly to?: string }
-type Link = { readonly label: string; readonly at: string | null }
-/** One route drawn left to right: a stop, then a link and a stop, and so on. */
+type Link = { readonly label: string; readonly at: string | null; readonly icon?: IconName }
+/** One route, read top to bottom: a stop, then a link and a stop, and so on. */
 type Route = {
     readonly key: string
+    /** What sets this route apart: the gateway it went through, or the browser. */
+    readonly title: string
     readonly start: Stop
     readonly legs: readonly (readonly [Link, Stop])[]
 }
@@ -37,19 +40,27 @@ function hopsLabel(hops: number | null): string {
     return hops === 1 ? words.oneHop : `${words.relayedBy} ${String(hops)} ${words.hops}`
 }
 
-/** "Cellular (Notecard)", or "Wi-Fi" for the gateway's own internet. */
-function linkLabel(connection: NodeConnection): string {
-    if (connection.via !== 'notecard') return connectionWords.network.wifi
+const NETWORK_ICON = { wifi: 'wifi', cellular: 'cell', satellite: 'radio' } as const
+
+/** "Cellular (Notecard)", or "Wi-Fi" for the gateway's own internet, with its icon. */
+function gatewayLink(connection: NodeConnection): Link {
+    if (connection.via !== 'notecard') {
+        return { label: connectionWords.network.wifi, at: connection.lastUsedAt, icon: 'wifi' }
+    }
     return connection.network === null
-        ? words.notecard
-        : `${connectionWords.network[connection.network]} (${words.notecard})`
+        ? { label: words.notecard, at: connection.lastUsedAt }
+        : {
+              label: `${connectionWords.network[connection.network]} (${words.notecard})`,
+              at: connection.lastUsedAt,
+              icon: NETWORK_ICON[connection.network],
+          }
 }
 
-/** The gateway's leg to Mesh Fire Detection: through the message relay or Notehub. */
+/** The gateway's legs to Mesh Fire Detection: through the message relay or Notehub. */
 function serverLegs(connection: NodeConnection): readonly (readonly [Link, Stop])[] {
     const relay = connection.via === 'notecard' ? words.notehub : words.broker
     return [
-        [{ label: linkLabel(connection), at: connection.lastUsedAt }, { label: relay }],
+        [gatewayLink(connection), { label: relay }],
         [{ label: words.internet, at: null }, { label: words.server }],
     ]
 }
@@ -65,12 +76,6 @@ function routesFor(node: Node, path: NodePath): Route[] {
 function allRoutes(node: Node, path: NodePath): Route[] {
     const routes = path.deliveries.flatMap((delivery) => {
         const self = delivery.gateway.id === node.id
-        const gateway: Stop = self
-            ? { label: words.self }
-            : {
-                  label: delivery.gateway.name,
-                  to: `/nodes/${encodeURIComponent(delivery.gateway.id)}`,
-              }
         const signal =
             delivery.signal === null
                 ? ''
@@ -82,12 +87,19 @@ function allRoutes(node: Node, path: NodePath): Route[] {
                       {
                           label: `${words.lora} · ${hopsLabel(delivery.hops)}${signal}`,
                           at: delivery.lastAt,
+                          icon: 'radio',
                       },
-                      gateway,
+                      {
+                          label: delivery.gateway.name,
+                          to: `/nodes/${encodeURIComponent(delivery.gateway.id)}`,
+                      },
                   ],
               ]
         return delivery.connections.map((connection) => ({
             key: `${delivery.gateway.id}-${connection.via}`,
+            title: self
+                ? `${words.fromGateway} · ${gatewayLink(connection).label}`
+                : `${words.through} ${delivery.gateway.name} · ${gatewayLink(connection).label}`,
             start: { label: self ? words.self : node.name },
             legs: [...mesh, ...serverLegs(connection)],
         }))
@@ -99,10 +111,15 @@ function allRoutes(node: Node, path: NodePath): Route[] {
               ...routes,
               {
                   key: 'browser',
+                  title: words.fromBrowser,
                   start: { label: node.name },
                   legs: [
                       [
-                          { label: connectionWords.via.browser, at: browser.lastUsedAt },
+                          {
+                              label: connectionWords.via.browser,
+                              at: browser.lastUsedAt,
+                              icon: 'usb',
+                          },
                           { label: words.connect },
                       ],
                       [{ label: words.internet, at: null }, { label: words.server }],
@@ -111,41 +128,62 @@ function allRoutes(node: Node, path: NodePath): Route[] {
           ]
 }
 
-function StopChip({ stop }: { readonly stop: Stop }) {
+function StopLabel({ stop }: { readonly stop: Stop }) {
+    return stop.to === undefined ? (
+        <Text as='span' size='sm' weight={600}>
+            {stop.label}
+        </Text>
+    ) : (
+        <TextLink size='sm' to={stop.to}>
+            {stop.label}
+        </TextLink>
+    )
+}
+
+/** The route as one sentence, for screen readers. */
+const describe = (route: Route): string =>
+    [route.start.label, ...route.legs.map(([link, stop]) => `${link.label} to ${stop.label}`)].join(
+        ', '
+    )
+
+/** One route in its own card: what sets it apart and when it was used, then the trail. */
+function RouteCard({ route, now }: { readonly route: Route; readonly now: number }) {
+    const last = route.legs[0]?.[0].at ?? null
     return (
-        <Box padding={2} radius='sm' tone='surface-2'>
-            {stop.to === undefined ? (
-                <Text as='span' size='sm' weight={600}>
-                    {stop.label}
-                </Text>
-            ) : (
-                <TextLink size='sm' to={stop.to}>
-                    {stop.label}
-                </TextLink>
-            )}
+        <Box tone='surface-2' padding={4} radius='md'>
+            <Stack gap={3}>
+                <Row gap={2} justify='between'>
+                    <Text as='span' size='sm' weight={600}>
+                        {route.title}
+                    </Text>
+                    <Text as='span' size='xs' tone='faint'>
+                        {words.lastUsed} {ago(last, now)}
+                    </Text>
+                </Row>
+                <RouteTrail label={describe(route)}>
+                    <RouteStop>
+                        <StopLabel stop={route.start} />
+                    </RouteStop>
+                    {route.legs.map(([link, stop], index) => (
+                        <Fragment key={`${route.key}-${String(index)}`}>
+                            <RouteLeg
+                                icon={link.icon}
+                                meta={link.at === null ? undefined : ago(link.at, now)}
+                            >
+                                {link.label}
+                            </RouteLeg>
+                            <RouteStop end={index === route.legs.length - 1}>
+                                <StopLabel stop={stop} />
+                            </RouteStop>
+                        </Fragment>
+                    ))}
+                </RouteTrail>
+            </Stack>
         </Box>
     )
 }
 
-function LinkArrow({ link, now }: { readonly link: Link; readonly now: number }) {
-    return (
-        <Stack gap={0} align='center'>
-            <Text as='span' size='2xs' tone='muted'>
-                {link.label}
-            </Text>
-            <Text as='span' size='sm' tone='faint' mono>
-                ──→
-            </Text>
-            {link.at === null ? null : (
-                <Text as='span' size='2xs' tone='faint'>
-                    {ago(link.at, now)}
-                </Text>
-            )}
-        </Stack>
-    )
-}
-
-/** Each way this node's data has reached the server, drawn stop by stop. */
+/** Each way this node's data has reached Mesh Fire Detection, newest first. */
 const VISIBLE_ROUTES = 3
 
 function Diagram({ routes, now }: { readonly routes: readonly Route[]; readonly now: number }) {
@@ -159,23 +197,9 @@ function Diagram({ routes, now }: { readonly routes: readonly Route[]; readonly 
     }
     const shown = expanded ? routes : routes.slice(0, VISIBLE_ROUTES)
     return (
-        <Stack gap={4}>
+        <Stack gap={3}>
             {shown.map((route) => (
-                <Row
-                    key={route.key}
-                    gap={2}
-                    align='center'
-                    role='group'
-                    ariaLabel={describe(route)}
-                >
-                    <StopChip stop={route.start} />
-                    {route.legs.map(([link, stop], index) => (
-                        <Fragment key={`${route.key}-${String(index)}`}>
-                            <LinkArrow link={link} now={now} />
-                            <StopChip stop={stop} />
-                        </Fragment>
-                    ))}
-                </Row>
+                <RouteCard key={route.key} now={now} route={route} />
             ))}
             {routes.length > VISIBLE_ROUTES ? (
                 <Button
@@ -192,12 +216,6 @@ function Diagram({ routes, now }: { readonly routes: readonly Route[]; readonly 
         </Stack>
     )
 }
-
-/** The route as one sentence, for screen readers. */
-const describe = (route: Route): string =>
-    [route.start.label, ...route.legs.map(([link, stop]) => `${link.label} to ${stop.label}`)].join(
-        ', '
-    )
 
 type Nearby = NodePath['nearby'][number]
 

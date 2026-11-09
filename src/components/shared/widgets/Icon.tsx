@@ -27,6 +27,7 @@ export type IconName =
     | 'usb'
     | 'flask'
     | 'person'
+    | 'wifi'
 
 const PATHS: Record<IconName, ReactNode> = {
     person: <path d='M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm-7 8a7 7 0 0 1 14 0' />,
@@ -61,6 +62,12 @@ const PATHS: Record<IconName, ReactNode> = {
         />
     ),
     'arrow-right': <path d='M5 12h14m-6-6 6 6-6 6' />,
+    wifi: (
+        <>
+            <path d='M2 9a15 15 0 0 1 20 0M5 12.5a10 10 0 0 1 14 0M8.5 16a5 5 0 0 1 7 0' />
+            <circle cx='12' cy='19' r='1' />
+        </>
+    ),
     'arrow-up-right': <path d='M8 16 16 8m-6 0h6v6' />,
     download: <path d='M12 3v12m0 0 4-4m-4 4-4-4M4 19h16' />,
     radio: (

@@ -21,7 +21,13 @@ import { DescriptionItem, DescriptionList, List, ListItem } from '@components/sh
 import { MetricGrid } from '@components/shared/page/MetricGrid'
 import { SectionHead } from '@components/shared/page/SectionHead'
 import { StepItem, StepList } from '@components/shared/page/StepList'
-import { Timeline, TimelineItem } from '@components/shared/page/Timeline'
+import {
+    RouteLeg,
+    RouteStop,
+    RouteTrail,
+    Timeline,
+    TimelineItem,
+} from '@components/shared/page/Timeline'
 import {
     Box,
     Divider,
@@ -323,6 +329,15 @@ export function DesignPage() {
                         <Timeline>
                             <TimelineItem meta='Today'>An event</TimelineItem>
                         </Timeline>
+                        <RouteTrail label='Sensor, by radio to gateway, by cellular to the server'>
+                            <RouteStop>Sensor</RouteStop>
+                            <RouteLeg icon='radio' meta='2 min ago'>
+                                Radio
+                            </RouteLeg>
+                            <RouteStop>Gateway</RouteStop>
+                            <RouteLeg icon='cell'>Cellular</RouteLeg>
+                            <RouteStop end>Server</RouteStop>
+                        </RouteTrail>
                         <ScrollArea label='Scrollable example'>
                             <CodeBlock>{'Scrollable content'}</CodeBlock>
                         </ScrollArea>

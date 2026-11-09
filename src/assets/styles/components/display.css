@@ -186,6 +186,53 @@
     }
 }
 
+/* ----------------------------------------------------------- RouteTrail --- */
+.route_trail {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.route_stop,
+.route_leg {
+    display: grid;
+    grid-template-columns: var(--route_rail) minmax(0, 1fr);
+    column-gap: var(--s_3);
+}
+
+.route_dot {
+    place-self: center center;
+    width: var(--route_dot);
+    height: var(--route_dot);
+    border: 2px solid var(--line_hover);
+    border-radius: 50%;
+    background: var(--surface_2);
+}
+
+.route_stop_end .route_dot {
+    border-color: var(--fire);
+    background: var(--fire);
+}
+
+.route_rail {
+    justify-self: center;
+    width: 2px;
+    background: var(--line_strong);
+}
+
+.route_body {
+    min-width: 0;
+    padding-block: var(--s_1);
+}
+
+.route_leg_body {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    padding-block: var(--s_2);
+    gap: var(--s_1) var(--s_2);
+}
+
 /* --------------------------------------------------------------- Table --- */
 .table {
     width: 100%;
