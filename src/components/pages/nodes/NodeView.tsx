@@ -12,7 +12,7 @@ import { NodeEditor } from '@components/pages/nodes/NodeEditor'
 import { NodePathView } from '@components/pages/nodes/NodePath'
 import { NodeTelemetry } from '@components/pages/nodes/NodeTelemetry'
 import { DescriptionItem, DescriptionList } from '@components/shared/page/List'
-import { Grid, Row, Section, Stack } from '@components/shared/primitives/Layout'
+import { Box, Grid, Row, Section, Stack } from '@components/shared/primitives/Layout'
 import { Heading } from '@components/shared/typography/Heading'
 import { Text } from '@components/shared/typography/Text'
 import { Button, ButtonLink, TextLink } from '@components/shared/widgets/Action'
@@ -150,7 +150,7 @@ function DeploymentRecord({ node }: { readonly node: Node }) {
     return (
         <Stack gap={3}>
             <Stack gap={1}>
-                <Heading level={2} size='md'>
+                <Heading level={2} size='sm'>
                     {words.title}
                 </Heading>
                 <Text size='sm' tone='muted'>
@@ -186,7 +186,7 @@ function Owners({ owners }: { readonly owners: NonNullable<Node['details']>['own
     return (
         <Stack gap={3}>
             <Stack gap={1}>
-                <Heading level={2} size='md'>
+                <Heading level={2} size='sm'>
                     {words.title}
                 </Heading>
                 <Text size='sm' tone='muted'>
@@ -228,7 +228,7 @@ function Details({ details }: { readonly details: NonNullable<Node['details']> }
     return (
         <Stack gap={3}>
             <Stack gap={1}>
-                <Heading level={2} size='md'>
+                <Heading level={2} size='sm'>
                     {words.title}
                 </Heading>
                 <Text size='sm' tone='muted'>
@@ -366,13 +366,23 @@ function NodeBody({ id }: { readonly id: string }) {
             title={node.name}
         >
             <Section>
-                <Stack gap={7}>
-                    <UseLine node={node} />
-                    <Identity node={node} now={at} />
+                <Stack gap={4}>
+                    <Box tone='surface' padding={5} radius='md'>
+                        <Stack gap={5}>
+                            <UseLine node={node} />
+                            <Identity node={node} now={at} />
+                        </Stack>
+                    </Box>
                     <NodePathView node={node} />
                     <NodeTelemetry node={node} />
-                    <DeploymentRecord node={node} />
-                    {node.details === null ? null : <Owners owners={node.details.owners} />}
+                    <Box tone='surface' padding={5} radius='md'>
+                        <DeploymentRecord node={node} />
+                    </Box>
+                    {node.details === null ? null : (
+                        <Box tone='surface' padding={5} radius='md'>
+                            <Owners owners={node.details.owners} />
+                        </Box>
+                    )}
                     {editing ? (
                         <NodeEditor
                             node={node}
@@ -386,25 +396,27 @@ function NodeBody({ id }: { readonly id: string }) {
                             }}
                         />
                     ) : node.details === null ? null : (
-                        <>
-                            <Details details={node.details} />
-                            <Row gap={3}>
-                                <Button
-                                    onClick={() => {
-                                        setSaved(false)
-                                        setEditing(true)
-                                    }}
-                                    variant='secondary'
-                                >
-                                    {copy.edit.open}
-                                </Button>
-                                {saved ? (
-                                    <Text role='status' size='sm' tone='live'>
-                                        {copy.edit.saved}
-                                    </Text>
-                                ) : null}
-                            </Row>
-                        </>
+                        <Box tone='surface' padding={5} radius='md'>
+                            <Stack gap={4}>
+                                <Details details={node.details} />
+                                <Row gap={3}>
+                                    <Button
+                                        onClick={() => {
+                                            setSaved(false)
+                                            setEditing(true)
+                                        }}
+                                        variant='secondary'
+                                    >
+                                        {copy.edit.open}
+                                    </Button>
+                                    {saved ? (
+                                        <Text role='status' size='sm' tone='live'>
+                                            {copy.edit.saved}
+                                        </Text>
+                                    ) : null}
+                                </Row>
+                            </Stack>
+                        </Box>
                     )}
                 </Stack>
             </Section>

@@ -280,41 +280,45 @@ export function NodePathView({ node }: { readonly node: Node }) {
     }, [node.id])
 
     return (
-        <Stack gap={7}>
-            <Stack gap={3}>
-                <Stack gap={1}>
-                    <Heading level={2} size='md'>
-                        {words.title}
-                    </Heading>
-                    <Text size='sm' tone='muted'>
-                        {words.lede}
-                    </Text>
-                </Stack>
-                {loaded === null ? (
-                    <Text role='status' size='sm' tone='muted'>
-                        {words.loading}
-                    </Text>
-                ) : loaded === 'failed' ? (
-                    <Text size='sm' tone='muted'>
-                        {words.failed}
-                    </Text>
-                ) : (
-                    <Diagram now={loaded.at} routes={routesFor(node, loaded.path)} />
-                )}
-            </Stack>
-            {loaded === null || loaded === 'failed' ? null : (
+        <>
+            <Box tone='surface' padding={5} radius='md'>
                 <Stack gap={3}>
                     <Stack gap={1}>
-                        <Heading level={2} size='md'>
-                            {words.nearby.title}
+                        <Heading level={2} size='sm'>
+                            {words.title}
                         </Heading>
                         <Text size='sm' tone='muted'>
-                            {words.nearby.lede}
+                            {words.lede}
                         </Text>
                     </Stack>
-                    <NearbyList nearby={loaded.path.nearby} />
+                    {loaded === null ? (
+                        <Text role='status' size='sm' tone='muted'>
+                            {words.loading}
+                        </Text>
+                    ) : loaded === 'failed' ? (
+                        <Text size='sm' tone='muted'>
+                            {words.failed}
+                        </Text>
+                    ) : (
+                        <Diagram now={loaded.at} routes={routesFor(node, loaded.path)} />
+                    )}
                 </Stack>
+            </Box>
+            {loaded === null || loaded === 'failed' ? null : (
+                <Box tone='surface' padding={5} radius='md'>
+                    <Stack gap={3}>
+                        <Stack gap={1}>
+                            <Heading level={2} size='sm'>
+                                {words.nearby.title}
+                            </Heading>
+                            <Text size='sm' tone='muted'>
+                                {words.nearby.lede}
+                            </Text>
+                        </Stack>
+                        <NearbyList nearby={loaded.path.nearby} />
+                    </Stack>
+                </Box>
             )}
-        </Stack>
+        </>
     )
 }
