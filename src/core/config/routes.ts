@@ -10,6 +10,8 @@ type RouteShape = {
     readonly id: string
     readonly path: `/${string}`
     readonly label: string
+    /** A shorter name for the header, when `label` is too long there. */
+    readonly navLabel?: string
     /** In the header nav: always, never, or only for someone signed in. */
     readonly nav: boolean | 'signed_in'
     /** Holds a live node connection, so links open it beside the current page. */
@@ -21,9 +23,19 @@ type RouteShape = {
 export const APP_ROUTES = [
     { id: 'design', path: '/design', label: 'UI Kit', nav: false },
     { id: 'home', path: '/', label: 'Home', nav: false },
+    // Header order is table order: Map, Nodes (members), Connect, About (web#29).
+    // Build is the header's Build a Node button, so it is not a link as well.
     { id: 'map', path: '/map', label: 'Map', nav: true },
-    { id: 'build', path: '/build', label: 'Build', nav: true },
-    { id: 'connect', path: '/connect', label: 'Connect a Node', nav: false, newTab: true },
+    { id: 'nodes', path: '/nodes', label: 'Nodes', nav: 'signed_in', unlisted: true },
+    { id: 'build', path: '/build', label: 'Build', nav: false },
+    {
+        id: 'connect',
+        path: '/connect',
+        label: 'Connect a Node',
+        navLabel: 'Connect',
+        nav: true,
+        newTab: true,
+    },
     { id: 'firmware', path: '/firmware', label: 'Firmware', nav: false },
     {
         id: 'satellite',
@@ -50,7 +62,6 @@ export const APP_ROUTES = [
         unlisted: true,
     },
     { id: 'account', path: '/account', label: 'Account', nav: false, unlisted: true },
-    { id: 'nodes', path: '/nodes', label: 'Nodes', nav: 'signed_in', unlisted: true },
     { id: 'node', path: '/nodes/:id', label: 'Node', nav: false, unlisted: true },
 ] as const satisfies readonly RouteShape[]
 
@@ -62,6 +73,11 @@ export function navRoutes(signedIn: boolean): readonly RouteDefinition[] {
     return APP_ROUTES.filter(
         (route) => route.nav === true || (signedIn && route.nav === 'signed_in')
     )
+}
+
+/** What the header calls a route: its short name when it has one. */
+export function navLabel(route: RouteDefinition): string {
+    return 'navLabel' in route ? route.navLabel : route.label
 }
 
 /** Whether an in-app link target is a route marked `newTab`; hash and query are ignored. */

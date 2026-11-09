@@ -201,8 +201,11 @@
 }
 
 .navlink {
+    display: inline-flex;
     position: relative;
+    align-items: center;
     padding: var(--s_2) 0;
+    gap: var(--s_1);
     color: var(--text_2);
     font-weight: 500;
     font-size: var(--fs_sm);

@@ -9,7 +9,7 @@ import { Container, Row, Stack } from '@components/shared/primitives/Layout'
 import { Text } from '@components/shared/typography/Text'
 import { Button, ButtonLink, IconLink, NavLink } from '@components/shared/widgets/Action'
 import { Icon } from '@components/shared/widgets/Icon'
-import { navRoutes } from '@core/config/routes'
+import { navLabel, navRoutes, opensInNewTab } from '@core/config/routes'
 import { SITE } from '@core/config/site'
 
 /**
@@ -79,7 +79,14 @@ export function Header() {
                     <Row gap={6} wrap={false} className='header_nav' as='nav' ariaLabel='Primary'>
                         {links.map((item) => (
                             <NavLink key={item.path} to={item.path}>
-                                {item.label}
+                                {navLabel(item)}
+                                {opensInNewTab(item.path) ? (
+                                    <Icon
+                                        name='arrow-up-right'
+                                        size={12}
+                                        label='opens in a new tab'
+                                    />
+                                ) : null}
                             </NavLink>
                         ))}
                     </Row>
@@ -130,8 +137,13 @@ export function Header() {
                                 justify='between'
                                 wrap={false}
                             >
-                                <NavLink to={item.path}>{item.label}</NavLink>
-                                <Icon name='arrow-right' size={14} />
+                                <NavLink to={item.path}>{navLabel(item)}</NavLink>
+                                <Icon
+                                    name={
+                                        opensInNewTab(item.path) ? 'arrow-up-right' : 'arrow-right'
+                                    }
+                                    size={14}
+                                />
                             </Row>
                         ))}
                         <Row
