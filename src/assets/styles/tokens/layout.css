@@ -23,6 +23,8 @@
     --timeline_meta_sm: 4rem;
     --timeline_meta_md: 6.5rem;
     --timeline_meta_lg: 14rem;
+    --route_rail: 1.25rem;
+    --route_dot: 0.75rem;
     --slider_thumb_offset: -5.5px;
     --bom_build_time_width: 5rem;
     --bom_cost_width: 7rem;

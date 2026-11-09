@@ -5,11 +5,45 @@ export type NodeType = 'base' | 'cellular' | 'sensor' | 'vision'
 export type NodeRole = 'base' | 'gateway' | 'sensor' | 'vision'
 
 /** One way a node's data reaches the backend, the most recently used first. */
-type NodeConnection = {
-    readonly via: 'mqtt' | 'notecard' | 'browser'
+export type NodeConnection = {
+    readonly via: 'mesh' | 'mqtt' | 'notecard' | 'browser'
     /** Null when it isn't known, such as a Notecard before Notehub has said. */
     readonly network: 'wifi' | 'cellular' | 'satellite' | null
     readonly lastUsedAt: string | null
+    /** For `mesh`: the gateway that delivered the node's packets. */
+    readonly gatewayId?: string
+}
+
+type Signal = { readonly snr: number; readonly rssi: number | null; readonly at: string }
+type NodeRef = { readonly id: string; readonly name: string }
+
+/**
+ * How one node's packets reach the server, and the nodes around it, from the
+ * last 7 days. The mesh records how many hops a packet took, not which relays.
+ */
+export type NodePath = {
+    readonly deliveries: readonly {
+        /** The node itself when it is a gateway delivering its own packets. */
+        readonly gateway: NodeRef
+        readonly hops: number | null
+        readonly lastAt: string
+        /** The gateway's reading of this node, when it heard it directly. */
+        readonly signal: Signal | null
+        /** How the gateway reaches the server. */
+        readonly connections: readonly NodeConnection[]
+    }[]
+    readonly nearby: readonly {
+        readonly node: NodeRef & {
+            readonly meshId: string
+            readonly hardware: string | null
+            readonly firmware: string | null
+            readonly batteryPct: number | null
+        }
+        /** This node hearing the other one. */
+        readonly hears: Signal | null
+        /** The other node hearing this one. */
+        readonly heardBy: Signal | null
+    }[]
 }
 export type NodeStatus = 'online' | 'degraded' | 'offline'
 /** [longitude, latitude], GeoJSON order. */
@@ -146,6 +180,10 @@ export async function fetchNodes(): Promise<ApiResult<readonly Node[]>> {
 export async function fetchNode(id: string): Promise<ApiResult<Node>> {
     const result = await apiRequest<{ node: ServerNode }>(`/v1/nodes/${encodeURIComponent(id)}`)
     return result.ok ? { ok: true, data: withRoles(result.data.node) } : result
+}
+
+export function fetchNodePath(id: string): Promise<ApiResult<NodePath>> {
+    return apiRequest<NodePath>(`/v1/nodes/${encodeURIComponent(id)}/path`)
 }
 
 export async function updateNode(id: string, changes: NodeChanges): Promise<ApiResult<Node>> {
