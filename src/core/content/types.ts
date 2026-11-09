@@ -361,8 +361,8 @@ export type NodesContent = PageHeading & {
         | 'show'
         | 'all'
         | 'mine'
-        | 'type'
-        | 'anyType'
+        | 'role'
+        | 'anyRole'
         | 'status'
         | 'anyStatus'
         | 'search'
@@ -371,8 +371,14 @@ export type NodesContent = PageHeading & {
         | 'submit'
     >
     readonly types: Words<'base' | 'cellular' | 'sensor' | 'vision'>
+    readonly roles: Words<'base' | 'gateway' | 'sensor' | 'vision'>
+    readonly connections: {
+        readonly via: Words<'mqtt' | 'notecard' | 'browser'>
+        readonly network: Words<'wifi' | 'cellular' | 'satellite'>
+        readonly never: string
+    }
     readonly statuses: Words<'online' | 'degraded' | 'offline'>
-    readonly table: Words<'caption' | 'node' | 'type' | 'status' | 'battery' | 'heard'>
+    readonly table: Words<'caption' | 'node' | 'role' | 'status' | 'battery' | 'heard'>
     readonly viewOnMap: string
     readonly yours: string
     readonly disabled: string
@@ -402,7 +408,7 @@ export type NodeContent = {
     readonly openConnect: string
     readonly viewOnMap: string
     readonly identity: Words<
-        'meshId' | 'type' | 'hardware' | 'firmware' | 'build' | 'heard' | 'status'
+        'meshId' | 'roles' | 'connections' | 'hardware' | 'firmware' | 'build' | 'heard' | 'status'
     >
     readonly record: Words<'title' | 'lede' | 'position' | 'elevation' | 'antenna' | 'deployed'>
     readonly approximate: string

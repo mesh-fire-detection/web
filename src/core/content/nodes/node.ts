@@ -34,7 +34,8 @@ export const nodeContent = {
     viewOnMap: 'View on map',
     identity: {
         meshId: 'Mesh ID',
-        type: 'Type',
+        roles: 'Role',
+        connections: 'Connects via',
         hardware: 'Hardware',
         firmware: 'Firmware',
         build: 'Build',

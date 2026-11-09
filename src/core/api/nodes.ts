@@ -1,6 +1,16 @@
 import { apiRequest, type ApiResult } from '@core/api/client'
 
 export type NodeType = 'base' | 'cellular' | 'sensor' | 'vision'
+/** What a node does, from what it has shown (backend#51). `base` only relays. */
+export type NodeRole = 'base' | 'gateway' | 'sensor' | 'vision'
+
+/** One way a node's data reaches the backend, the most recently used first. */
+type NodeConnection = {
+    readonly via: 'mqtt' | 'notecard' | 'browser'
+    /** Null when it isn't known, such as a Notecard before Notehub has said. */
+    readonly network: 'wifi' | 'cellular' | 'satellite' | null
+    readonly lastUsedAt: string | null
+}
 export type NodeStatus = 'online' | 'degraded' | 'offline'
 /** [longitude, latitude], GeoJSON order. */
 type Position = readonly [number, number]
@@ -15,7 +25,10 @@ export type Node = {
     readonly id: string
     readonly meshId: string
     readonly name: string
+    /** What its people chose; `roles` is what it has shown. */
     readonly type: NodeType | null
+    readonly roles: readonly NodeRole[]
+    readonly connections: readonly NodeConnection[]
     readonly status: NodeStatus
     readonly position: Position | null
     readonly approximate: boolean
@@ -114,23 +127,33 @@ export type UploadResult = {
     readonly skipped: number
 }
 
+/** A node as a backend from before roles (backend#51) sends it. */
+type ServerNode = Omit<Node, 'roles' | 'connections'> & Partial<Pick<Node, 'roles' | 'connections'>>
+
+/** Roles from the chosen type, until the backend that sends them is deployed. */
+function withRoles(node: ServerNode): Node {
+    const chosen: readonly NodeRole[] =
+        node.type === null ? [] : [node.type === 'cellular' ? 'gateway' : node.type]
+    return { ...node, roles: node.roles ?? chosen, connections: node.connections ?? [] }
+}
+
 export async function fetchNodes(): Promise<ApiResult<readonly Node[]>> {
-    const result = await apiRequest<{ nodes: Node[] }>('/v1/nodes')
-    return result.ok ? { ok: true, data: result.data.nodes } : result
+    const result = await apiRequest<{ nodes: ServerNode[] }>('/v1/nodes')
+    return result.ok ? { ok: true, data: result.data.nodes.map((node) => withRoles(node)) } : result
 }
 
 /** `not_found` both for an unknown node and for one the caller may not see. */
 export async function fetchNode(id: string): Promise<ApiResult<Node>> {
-    const result = await apiRequest<{ node: Node }>(`/v1/nodes/${encodeURIComponent(id)}`)
-    return result.ok ? { ok: true, data: result.data.node } : result
+    const result = await apiRequest<{ node: ServerNode }>(`/v1/nodes/${encodeURIComponent(id)}`)
+    return result.ok ? { ok: true, data: withRoles(result.data.node) } : result
 }
 
 export async function updateNode(id: string, changes: NodeChanges): Promise<ApiResult<Node>> {
-    const result = await apiRequest<{ node: Node }>(`/v1/nodes/${encodeURIComponent(id)}`, {
+    const result = await apiRequest<{ node: ServerNode }>(`/v1/nodes/${encodeURIComponent(id)}`, {
         method: 'PATCH',
         body: changes,
     })
-    return result.ok ? { ok: true, data: result.data.node } : result
+    return result.ok ? { ok: true, data: withRoles(result.data.node) } : result
 }
 
 /** Sending the same thing twice stores it once. */

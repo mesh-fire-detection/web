@@ -10,8 +10,8 @@ import {
     listNodes,
     mapLink,
     minutesSince,
+    NODE_ROLES,
     NODE_STATUSES,
-    NODE_TYPES,
     readFilters,
     sortValue,
     STATUS_KIND,
@@ -40,16 +40,16 @@ const SHOW_OPTIONS = [
     { value: 'all', label: copy.filters.all },
     { value: 'mine', label: copy.filters.mine },
 ] as const
-const TYPE_OPTIONS = [
-    { value: 'all', label: copy.filters.anyType },
-    ...NODE_TYPES.map((type) => ({ value: type, label: copy.types[type] })),
+const ROLE_OPTIONS = [
+    { value: 'all', label: copy.filters.anyRole },
+    ...NODE_ROLES.map((role) => ({ value: role, label: copy.roles[role] })),
 ] as const
 const STATUS_OPTIONS = [
     { value: 'all', label: copy.filters.anyStatus },
     ...NODE_STATUSES.map((status) => ({ value: status, label: copy.statuses[status] })),
 ] as const
 
-const UNFILTERED = { mine: false, type: null, status: null, query: '' } as const
+const UNFILTERED = { mine: false, role: null, status: null, query: '' } as const
 
 /** Where it is, as precisely as the API says: approximate unless it is yours or chosen exact. */
 function place(node: Node): string {
@@ -84,14 +84,18 @@ function columnsFor(now: number): readonly Column<Node>[] {
             ),
         },
         {
-            key: 'type',
-            header: copy.table.type,
-            sortValue: (node) => sortValue(node, 'type', now),
+            key: 'role',
+            header: copy.table.role,
+            sortValue: (node) => sortValue(node, 'role', now),
             render: (node) =>
-                node.type === null ? (
+                node.roles.length === 0 ? (
                     <Value tone='faint'>—</Value>
                 ) : (
-                    <Badge>{copy.types[node.type]}</Badge>
+                    <Row gap={1}>
+                        {node.roles.map((role) => (
+                            <Badge key={role}>{copy.roles[role]}</Badge>
+                        ))}
+                    </Row>
                 ),
         },
         {
@@ -176,12 +180,12 @@ function NodeFilters({
                     value={filters.mine ? 'mine' : 'all'}
                 />
                 <SelectField
-                    label={copy.filters.type}
-                    onChange={(type) => {
-                        apply({ ...filters, type: type === 'all' ? null : type })
+                    label={copy.filters.role}
+                    onChange={(role) => {
+                        apply({ ...filters, role: role === 'all' ? null : role })
                     }}
-                    options={TYPE_OPTIONS}
-                    value={filters.type ?? 'all'}
+                    options={ROLE_OPTIONS}
+                    value={filters.role ?? 'all'}
                 />
                 <SelectField
                     label={copy.filters.status}
