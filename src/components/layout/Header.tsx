@@ -9,7 +9,7 @@ import { Container, Row, Stack } from '@components/shared/primitives/Layout'
 import { Text } from '@components/shared/typography/Text'
 import { Button, ButtonLink, IconLink, NavLink } from '@components/shared/widgets/Action'
 import { Icon } from '@components/shared/widgets/Icon'
-import { NAV_ROUTES } from '@core/config/routes'
+import { navRoutes } from '@core/config/routes'
 import { SITE } from '@core/config/site'
 
 /**
@@ -52,6 +52,8 @@ function AccountLink({
 
 export function Header() {
     const { open, openMenu, closeMenu } = useNavMenu()
+    const { session } = useSession()
+    const links = navRoutes(session.status === 'signed_in')
     const location = useLocation()
     const [drawerPath, setDrawerPath] = useState(location.pathname)
 
@@ -75,7 +77,7 @@ export function Header() {
                     <Wordmark />
 
                     <Row gap={6} wrap={false} className='header_nav' as='nav' ariaLabel='Primary'>
-                        {NAV_ROUTES.map((item) => (
+                        {links.map((item) => (
                             <NavLink key={item.path} to={item.path}>
                                 {item.label}
                             </NavLink>
@@ -121,7 +123,7 @@ export function Header() {
                         ariaLabel='Primary, mobile'
                         id={OVERLAY_NAV_ID}
                     >
-                        {NAV_ROUTES.map((item) => (
+                        {links.map((item) => (
                             <Row
                                 key={item.path}
                                 className='header_drawer_row'

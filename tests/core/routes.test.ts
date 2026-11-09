@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { APP_ROUTES, NAV_ROUTES, opensInNewTab } from '@core/config/routes'
+import { APP_ROUTES, navRoutes, opensInNewTab } from '@core/config/routes'
 
 describe('route table', () => {
     it('has unique ids and paths', () => {
@@ -10,11 +10,15 @@ describe('route table', () => {
         expect(new Set(paths).size).toBe(paths.length)
     })
 
-    it('derives NAV_ROUTES from the nav flag only', () => {
-        expect(NAV_ROUTES.map((route) => route.id)).toEqual(
-            APP_ROUTES.filter((route) => route.nav).map((route) => route.id)
-        )
-        expect(NAV_ROUTES.length).toBe(APP_ROUTES.filter((route) => route.nav).length)
+    it('shows Map, Build and About to everyone, and Nodes only when signed in', () => {
+        const ids = (signedIn: boolean) => navRoutes(signedIn).map((route) => route.id)
+        expect(ids(false)).toEqual(['map', 'build', 'about'])
+        expect(ids(true)).toEqual(['map', 'build', 'about', 'nodes'])
+    })
+
+    it('keeps Coverage and Open Problems out of the header (web#12)', () => {
+        expect(navRoutes(true).map((route) => route.id)).not.toContain('coverage')
+        expect(navRoutes(true).map((route) => route.id)).not.toContain('open_problems')
     })
 
     it('opens the node connection page in a new tab, with or without a hash', () => {
