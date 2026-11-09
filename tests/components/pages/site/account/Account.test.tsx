@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, render, screen } from '@testing-library/react'
+import { cleanup, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom'
 import { afterEach, describe, expect, it, vi } from 'vitest'
@@ -132,6 +132,24 @@ describe('Header account link', () => {
         const link = await screen.findByRole('link', { name: 'Account' })
         expect(link.getAttribute('href')).toBe('/account')
         expect(screen.queryByText(MEMBER.name)).toBeNull()
+    })
+
+    it('shows Nodes in the primary nav only to someone signed in (web#13)', async () => {
+        stubApi({ [SESSION]: json({ session: {}, user: MEMBER }) })
+        renderAt('/')
+
+        const nav = await screen.findByRole('navigation', { name: 'Primary' })
+        expect(await within(nav).findByRole('link', { name: 'Nodes' })).toBeDefined()
+        expect(within(nav).queryByRole('link', { name: 'Coverage' })).toBeNull()
+    })
+
+    it('leaves Nodes out of the primary nav when signed out', async () => {
+        stubApi({ [SESSION]: json(null) })
+        renderAt('/')
+
+        await screen.findByRole('link', { name: 'Join' })
+        const nav = screen.getByRole('navigation', { name: 'Primary' })
+        expect(within(nav).queryByRole('link', { name: 'Nodes' })).toBeNull()
     })
 
     it('treats an unreachable API as signed out, so the site still works', async () => {

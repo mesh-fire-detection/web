@@ -5,6 +5,12 @@ releases are cut is in [RELEASING.md](RELEASING.md).
 
 ## Unreleased
 
+### Changed
+
+- The header shows Map, Build and About; Coverage and Open Problems are
+  linked from the footer instead (#12).
+- Signed-in people see Nodes in the header (#13).
+
 ## 0.2.0 — 2026-11-08
 
 The first tagged release. 0.1.2 was never released, and until now every merge
