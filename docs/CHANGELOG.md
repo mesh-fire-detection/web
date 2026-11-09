@@ -5,6 +5,8 @@ releases are cut is in [RELEASING.md](RELEASING.md).
 
 ## Unreleased
 
+## 0.2.1 — 2026-11-08
+
 ### Changed
 
 - The header shows Map, Build and About; Coverage and Open Problems are
