@@ -61,11 +61,8 @@ export const nodeContent = {
         via: 'via',
         nearby: {
             title: 'Nearby nodes',
-            lede: 'Nodes this one hears, and nodes that hear it, from the last 7 days. SNR is signal over noise: higher is clearer, and below about −10 dB a link is marginal.',
-            caption: 'Nodes heard by or hearing this node, with the latest signal each way.',
-            node: 'Node',
-            hears: 'It hears them',
-            heardBy: 'They hear it',
+            lede: 'Strongest signal first, from the last 7 days. Select a node to open it.',
+            theyHear: 'they hear it',
             none: 'No neighbours reported in the last 7 days.',
         },
     },

@@ -1,15 +1,20 @@
 import { Fragment, useEffect, useState } from 'react'
 
+import { Age, NodeTag } from '@components/pages/build/nearby/Indicators'
 import { minutesSince } from '@components/pages/nodes/listing'
-import { DataTable, type Column } from '@components/shared/page/DataTable'
 import { Box, Row, Stack } from '@components/shared/primitives/Layout'
 import { Heading } from '@components/shared/typography/Heading'
-import { Text, Value } from '@components/shared/typography/Text'
-import { TextLink } from '@components/shared/widgets/Action'
+import { Text } from '@components/shared/typography/Text'
+import { Button, TextLink } from '@components/shared/widgets/Action'
+import { Badge } from '@components/shared/widgets/Badge'
+import { Icon } from '@components/shared/widgets/Icon'
 import { fetchNodePath, type Node, type NodeConnection, type NodePath } from '@core/api/nodes'
+import { nearbyDetailsContent as peerWords } from '@core/content/build/nearby/nodeDetails'
 import { nodeContent } from '@core/content/nodes/node'
 import { nodesContent } from '@core/content/nodes/nodes'
 import { sinceMinutes } from '@core/format/format'
+import { isMfdNode } from '@core/nearby/firmware'
+import { formatNumber, metricLabel, SIGNAL_TONE, signalQuality } from '@core/nearby/metrics'
 
 const words = nodeContent.path
 const connectionWords = nodesContent.connections
@@ -164,25 +169,94 @@ const describe = (route: Route): string =>
 
 type Nearby = NodePath['nearby'][number]
 
-const snr = (signal: Nearby['hears']) =>
-    signal === null ? <Value tone='faint'>—</Value> : <Value>{signal.snr} dB</Value>
+const VISIBLE = 5
 
-const NEARBY_COLUMNS: readonly Column<Nearby>[] = [
-    {
-        key: 'node',
-        header: words.nearby.node,
-        render: (row) => (
-            <TextLink to={`/nodes/${encodeURIComponent(row.node.id)}`}>{row.node.name}</TextLink>
-        ),
-    },
-    { key: 'hears', header: words.nearby.hears, align: 'end', render: (row) => snr(row.hears) },
-    {
-        key: 'heardBy',
-        header: words.nearby.heardBy,
-        align: 'end',
-        render: (row) => snr(row.heardBy),
-    },
-]
+/** The signal badge, as /connect shows it: how well this node hears the other one. */
+function SignalBadge({ entry }: { readonly entry: Nearby }) {
+    const signal = entry.hears ?? entry.heardBy
+    if (signal === null) return null
+    const quality = signalQuality(signal.snr)
+    return (
+        <Badge kind='neutral' size='xs' mono={false} uppercase={false}>
+            <Icon name='radio' size={14} />
+            <Text as='span' size='xs' tone={SIGNAL_TONE[quality]}>
+                {peerWords.quality[quality]} · {formatNumber(signal.snr, 'dB')}
+                {signal.rssi === null ? '' : ` · ${formatNumber(signal.rssi, 'dBm')}`}
+                {entry.hears === null ? ` · ${words.nearby.theyHear}` : ''}
+            </Text>
+        </Badge>
+    )
+}
+
+/** One neighbour laid out like a /connect peer, its name linking to its page. */
+function NearbyRow({ entry }: { readonly entry: Nearby }) {
+    const { node } = entry
+    const times = [entry.hears?.at, entry.heardBy?.at]
+        .filter((at) => at !== undefined)
+        .map((at) => Date.parse(at))
+    const heard = times.length === 0 ? undefined : Math.max(...times)
+    return (
+        <div className='nearby_peer'>
+            <NodeTag
+                num={Number.parseInt(node.meshId.slice(1), 16)}
+                ours={isMfdNode({ name: node.name, shortName: '', firmware: node.firmware ?? '' })}
+                size='sm'
+            />
+            <Text size='sm' weight={600} className='nearby_peer_name'>
+                <TextLink to={`/nodes/${encodeURIComponent(node.id)}`}>{node.name}</TextLink>
+            </Text>
+            <Text size='2xs' tone='faint' className='nearby_peer_meta'>
+                {node.hardware ?? ''}
+                {heard !== undefined && node.hardware !== null ? ' · ' : null}
+                {heard === undefined ? null : (
+                    <span>
+                        {peerWords.lastHeard} <Age time={heard} />
+                    </span>
+                )}
+            </Text>
+            <div className='nearby_peer_link'>
+                <SignalBadge entry={entry} />
+            </div>
+            {node.batteryPct === null ? null : (
+                <Text size='xs' tone='muted' className='nearby_peer_readings'>
+                    {metricLabel('deviceMetrics.batteryLevel')} {node.batteryPct} %
+                </Text>
+            )}
+        </div>
+    )
+}
+
+/** Strongest first, five at a time, as /connect lists a node's peers. */
+function NearbyList({ nearby }: { readonly nearby: readonly Nearby[] }) {
+    const [expanded, setExpanded] = useState(false)
+    return nearby.length === 0 ? (
+        <Text size='sm' tone='faint'>
+            {words.nearby.none}
+        </Text>
+    ) : (
+        <Stack gap={3}>
+            <div className='nearby_peers'>
+                {(expanded ? nearby : nearby.slice(0, VISIBLE)).map((entry) => (
+                    <NearbyRow key={entry.node.id} entry={entry} />
+                ))}
+            </div>
+            {nearby.length > VISIBLE ? (
+                <Button
+                    size='sm'
+                    variant='ghost'
+                    ariaExpanded={expanded}
+                    onClick={() => {
+                        setExpanded(!expanded)
+                    }}
+                >
+                    {expanded
+                        ? peerWords.showFewer
+                        : `${peerWords.showAll} (${String(nearby.length)})`}
+                </Button>
+            ) : null}
+        </Stack>
+    )
+}
 
 /** Path to the server and the nodes around it, from backend `/v1/nodes/:id/path`. */
 export function NodePathView({ node }: { readonly node: Node }) {
@@ -233,17 +307,7 @@ export function NodePathView({ node }: { readonly node: Node }) {
                             {words.nearby.lede}
                         </Text>
                     </Stack>
-                    <DataTable
-                        caption={words.nearby.caption}
-                        columns={NEARBY_COLUMNS}
-                        emptyContent={
-                            <Text size='sm' tone='muted'>
-                                {words.nearby.none}
-                            </Text>
-                        }
-                        getRowKey={(row) => row.node.id}
-                        rows={loaded.path.nearby}
-                    />
+                    <NearbyList nearby={loaded.path.nearby} />
                 </Stack>
             )}
         </Stack>

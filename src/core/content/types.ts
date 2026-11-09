@@ -429,7 +429,7 @@ export type NodeContent = {
         | 'unknownHops'
         | 'via'
     > & {
-        readonly nearby: Words<'title' | 'lede' | 'caption' | 'node' | 'hears' | 'heardBy' | 'none'>
+        readonly nearby: Words<'title' | 'lede' | 'theyHear' | 'none'>
     }
     readonly approximate: string
     readonly details: Words<

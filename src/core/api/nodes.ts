@@ -33,7 +33,12 @@ export type NodePath = {
         readonly connections: readonly NodeConnection[]
     }[]
     readonly nearby: readonly {
-        readonly node: NodeRef
+        readonly node: NodeRef & {
+            readonly meshId: string
+            readonly hardware: string | null
+            readonly firmware: string | null
+            readonly batteryPct: number | null
+        }
         /** This node hearing the other one. */
         readonly hears: Signal | null
         /** The other node hearing this one. */

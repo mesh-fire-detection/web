@@ -201,7 +201,14 @@ describe('Node view', () => {
                 ],
                 nearby: [
                     {
-                        node: { id: 'sen-02', name: 'Lower sensor' },
+                        node: {
+                            id: 'sen-02',
+                            name: 'Lower sensor',
+                            meshId: '!a1b20002',
+                            hardware: 'RAK4631',
+                            firmware: null,
+                            batteryPct: 92,
+                        },
                         hears: { snr: 4, rssi: null, at: minutesAgo(30) },
                         heardBy: null,
                     },
@@ -219,7 +226,8 @@ describe('Node view', () => {
             '/nodes/cel-01'
         )
         expect(screen.getByRole('link', { name: 'Lower sensor' })).toBeDefined()
-        expect(screen.getByText('4 dB')).toBeDefined()
+        expect(screen.getByText('Good · 4 dB')).toBeDefined()
+        expect(screen.getByText('Battery 92 %')).toBeDefined()
     })
 
     it('shows what a node does and how it connects, most recent first', async () => {
