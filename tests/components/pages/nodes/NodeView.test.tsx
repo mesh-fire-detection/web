@@ -219,7 +219,7 @@ describe('Node view', () => {
 
         expect(
             await screen.findByLabelText(
-                'Ridge sensor, LoRa · 2 hops to Truck Road Gate, Notecard · Cellular to Notehub, HTTPS to Server'
+                'Ridge sensor, Radio · passed along by 2 nodes to Truck Road Gate, Cellular (Notecard) to Notehub (Blues cloud), Internet to Mesh Fire Detection'
             )
         ).toBeDefined()
         expect(screen.getByRole('link', { name: 'Truck Road Gate' }).getAttribute('href')).toBe(

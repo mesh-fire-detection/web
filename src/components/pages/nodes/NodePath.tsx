@@ -34,21 +34,23 @@ const ago = (at: string | null, now: number): string =>
 function hopsLabel(hops: number | null): string {
     if (hops === null) return words.unknownHops
     if (hops === 0) return words.direct
-    return hops === 1 ? words.oneHop : `${String(hops)} ${words.hops}`
+    return hops === 1 ? words.oneHop : `${words.relayedBy} ${String(hops)} ${words.hops}`
 }
 
-/** The gateway's leg to the server: through the broker or Notehub. */
+/** "Cellular (Notecard)", or "Wi-Fi" for the gateway's own internet. */
+function linkLabel(connection: NodeConnection): string {
+    if (connection.via !== 'notecard') return connectionWords.network.wifi
+    return connection.network === null
+        ? words.notecard
+        : `${connectionWords.network[connection.network]} (${words.notecard})`
+}
+
+/** The gateway's leg to Mesh Fire Detection: through the message relay or Notehub. */
 function serverLegs(connection: NodeConnection): readonly (readonly [Link, Stop])[] {
-    const network =
-        connection.network === null ? '' : ` · ${connectionWords.network[connection.network]}`
-    const link = {
-        label: `${connectionWords.via[connection.via]}${network}`,
-        at: connection.lastUsedAt,
-    }
     const relay = connection.via === 'notecard' ? words.notehub : words.broker
     return [
-        [link, { label: relay }],
-        [{ label: 'HTTPS', at: null }, { label: words.server }],
+        [{ label: linkLabel(connection), at: connection.lastUsedAt }, { label: relay }],
+        [{ label: words.internet, at: null }, { label: words.server }],
     ]
 }
 
@@ -61,7 +63,10 @@ function routesFor(node: Node, path: NodePath): Route[] {
                   label: delivery.gateway.name,
                   to: `/nodes/${encodeURIComponent(delivery.gateway.id)}`,
               }
-        const signal = delivery.signal === null ? '' : ` · SNR ${String(delivery.signal.snr)} dB`
+        const signal =
+            delivery.signal === null
+                ? ''
+                : ` · ${peerWords.quality[signalQuality(delivery.signal.snr)]} ${words.signal}`
         const mesh: readonly (readonly [Link, Stop])[] = self
             ? []
             : [
@@ -92,7 +97,7 @@ function routesFor(node: Node, path: NodePath): Route[] {
                           { label: connectionWords.via.browser, at: browser.lastUsedAt },
                           { label: words.connect },
                       ],
-                      [{ label: 'HTTPS', at: null }, { label: words.server }],
+                      [{ label: words.internet, at: null }, { label: words.server }],
                   ],
               },
           ]
