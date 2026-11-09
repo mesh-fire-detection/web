@@ -43,7 +43,7 @@ export const nodeContent = {
         status: 'Network status',
     },
     path: {
-        title: 'How its data gets to Mesh Fire Detection',
+        title: 'Connection path',
         lede: 'The route this node’s readings took in the last 7 days. We can see how many nodes passed a reading along, but not which ones.',
         loading: 'Loading the path…',
         failed: 'The path could not be loaded.',
@@ -63,6 +63,8 @@ export const nodeContent = {
         direct: 'heard directly',
         unknownHops: 'route unknown',
         via: 'via',
+        allRoutes: 'Show all routes',
+        fewerRoutes: 'Show fewer routes',
         nearby: {
             title: 'Nearby nodes',
             lede: 'Strongest signal first, from the last 7 days. Select a node to open it.',

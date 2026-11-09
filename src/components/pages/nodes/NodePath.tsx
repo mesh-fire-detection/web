@@ -54,7 +54,15 @@ function serverLegs(connection: NodeConnection): readonly (readonly [Link, Stop]
     ]
 }
 
+/** When a route was last used: its first link, the one this node's data took. */
+const usedAt = (route: Route): string => route.legs[0]?.[0].at ?? ''
+
+/** Newest first, so the routes in use now come before the ones a node used to take. */
 function routesFor(node: Node, path: NodePath): Route[] {
+    return allRoutes(node, path).toSorted((a, b) => usedAt(b).localeCompare(usedAt(a)))
+}
+
+function allRoutes(node: Node, path: NodePath): Route[] {
     const routes = path.deliveries.flatMap((delivery) => {
         const self = delivery.gateway.id === node.id
         const gateway: Stop = self
@@ -138,14 +146,21 @@ function LinkArrow({ link, now }: { readonly link: Link; readonly now: number })
 }
 
 /** Each way this node's data has reached the server, drawn stop by stop. */
+const VISIBLE_ROUTES = 3
+
 function Diagram({ routes, now }: { readonly routes: readonly Route[]; readonly now: number }) {
-    return routes.length === 0 ? (
-        <Text size='sm' tone='muted'>
-            {words.none}
-        </Text>
-    ) : (
+    const [expanded, setExpanded] = useState(false)
+    if (routes.length === 0) {
+        return (
+            <Text size='sm' tone='muted'>
+                {words.none}
+            </Text>
+        )
+    }
+    const shown = expanded ? routes : routes.slice(0, VISIBLE_ROUTES)
+    return (
         <Stack gap={4}>
-            {routes.map((route) => (
+            {shown.map((route) => (
                 <Row
                     key={route.key}
                     gap={2}
@@ -162,6 +177,18 @@ function Diagram({ routes, now }: { readonly routes: readonly Route[]; readonly 
                     ))}
                 </Row>
             ))}
+            {routes.length > VISIBLE_ROUTES ? (
+                <Button
+                    size='sm'
+                    variant='ghost'
+                    ariaExpanded={expanded}
+                    onClick={() => {
+                        setExpanded(!expanded)
+                    }}
+                >
+                    {expanded ? words.fewerRoutes : `${words.allRoutes} (${String(routes.length)})`}
+                </Button>
+            ) : null}
         </Stack>
     )
 }

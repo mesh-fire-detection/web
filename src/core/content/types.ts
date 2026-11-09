@@ -425,6 +425,8 @@ export type NodeContent = {
         | 'notecard'
         | 'signal'
         | 'relayedBy'
+        | 'allRoutes'
+        | 'fewerRoutes'
         | 'connect'
         | 'lora'
         | 'oneHop'
