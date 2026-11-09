@@ -373,7 +373,7 @@ export type NodesContent = PageHeading & {
     readonly types: Words<'base' | 'cellular' | 'sensor' | 'vision'>
     readonly roles: Words<'base' | 'gateway' | 'sensor' | 'vision'>
     readonly connections: {
-        readonly via: Words<'mqtt' | 'notecard' | 'browser'>
+        readonly via: Words<'mesh' | 'mqtt' | 'notecard' | 'browser'>
         readonly network: Words<'wifi' | 'cellular' | 'satellite'>
         readonly never: string
     }
@@ -411,6 +411,26 @@ export type NodeContent = {
         'meshId' | 'roles' | 'connections' | 'hardware' | 'firmware' | 'build' | 'heard' | 'status'
     >
     readonly record: Words<'title' | 'lede' | 'position' | 'elevation' | 'antenna' | 'deployed'>
+    readonly path: Words<
+        | 'title'
+        | 'lede'
+        | 'loading'
+        | 'failed'
+        | 'none'
+        | 'self'
+        | 'server'
+        | 'notehub'
+        | 'broker'
+        | 'connect'
+        | 'lora'
+        | 'oneHop'
+        | 'hops'
+        | 'direct'
+        | 'unknownHops'
+        | 'via'
+    > & {
+        readonly nearby: Words<'title' | 'lede' | 'caption' | 'node' | 'hears' | 'heardBy' | 'none'>
+    }
     readonly approximate: string
     readonly details: Words<
         | 'title'

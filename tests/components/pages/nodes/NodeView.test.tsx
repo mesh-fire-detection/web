@@ -181,6 +181,47 @@ describe('Node view', () => {
         )
     })
 
+    it('draws the path to the server and lists the nodes around it', async () => {
+        stubApi({
+            [SESSION]: SIGNED_IN,
+            'GET /v1/nodes/sen-01': json({ node: RIDGE }),
+            'GET /v1/nodes/sen-01/readings': NO_READINGS,
+            'GET /v1/nodes/sen-01/metrics': NO_METRICS,
+            'GET /v1/nodes/sen-01/path': json({
+                deliveries: [
+                    {
+                        gateway: { id: 'cel-01', name: 'Truck Road Gate' },
+                        hops: 2,
+                        lastAt: minutesAgo(1),
+                        signal: null,
+                        connections: [
+                            { via: 'notecard', network: 'cellular', lastUsedAt: minutesAgo(1) },
+                        ],
+                    },
+                ],
+                nearby: [
+                    {
+                        node: { id: 'sen-02', name: 'Lower sensor' },
+                        hears: { snr: 4, rssi: null, at: minutesAgo(30) },
+                        heardBy: null,
+                    },
+                ],
+            }),
+        })
+        renderAt('/nodes/sen-01')
+
+        expect(
+            await screen.findByLabelText(
+                'Ridge sensor, LoRa · 2 hops to Truck Road Gate, Notecard · Cellular to Notehub, HTTPS to Server'
+            )
+        ).toBeDefined()
+        expect(screen.getByRole('link', { name: 'Truck Road Gate' }).getAttribute('href')).toBe(
+            '/nodes/cel-01'
+        )
+        expect(screen.getByRole('link', { name: 'Lower sensor' })).toBeDefined()
+        expect(screen.getByText('4 dB')).toBeDefined()
+    })
+
     it('shows what a node does and how it connects, most recent first', async () => {
         stubApi({
             [SESSION]: SIGNED_IN,

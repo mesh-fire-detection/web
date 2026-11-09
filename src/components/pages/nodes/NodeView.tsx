@@ -9,6 +9,7 @@ import { Page } from '@components/layout/Page'
 import { FirmwareBuild, FirmwareVersion } from '@components/pages/build/nearby/Indicators'
 import { mapLink, minutesSince, nodeUse, STATUS_KIND } from '@components/pages/nodes/listing'
 import { NodeEditor } from '@components/pages/nodes/NodeEditor'
+import { NodePathView } from '@components/pages/nodes/NodePath'
 import { NodeTelemetry } from '@components/pages/nodes/NodeTelemetry'
 import { DescriptionItem, DescriptionList } from '@components/shared/page/List'
 import { Grid, Row, Section, Stack } from '@components/shared/primitives/Layout'
@@ -73,7 +74,12 @@ function UseLine({ node }: { readonly node: Node }) {
 /** "Notecard · Cellular, 4 min ago": the path, its network when known, and when it was used. */
 function connectionLine(connection: Node['connections'][number], now: number): string {
     const words = nodesContent.connections
-    const network = connection.network === null ? '' : ` · ${words.network[connection.network]}`
+    const network =
+        connection.network === null
+            ? connection.gatewayId === undefined
+                ? ''
+                : ` · ${copy.path.via} ${connection.gatewayId}`
+            : ` · ${words.network[connection.network]}`
     const used =
         connection.lastUsedAt === null
             ? words.never
@@ -363,6 +369,7 @@ function NodeBody({ id }: { readonly id: string }) {
                 <Stack gap={7}>
                     <UseLine node={node} />
                     <Identity node={node} now={at} />
+                    <NodePathView node={node} />
                     <NodeTelemetry node={node} />
                     <DeploymentRecord node={node} />
                     {node.details === null ? null : <Owners owners={node.details.owners} />}

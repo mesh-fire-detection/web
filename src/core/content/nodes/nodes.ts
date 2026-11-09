@@ -25,7 +25,12 @@ export const nodesContent = {
     types: { base: 'Base', cellular: 'Cellular', sensor: 'Sensor', vision: 'Vision' },
     roles: { base: 'Base', gateway: 'Gateway', sensor: 'Sensor', vision: 'Vision' },
     connections: {
-        via: { mqtt: 'MQTT', notecard: 'Notecard', browser: 'Browser (USB or Bluetooth)' },
+        via: {
+            mesh: 'Mesh',
+            mqtt: 'MQTT',
+            notecard: 'Notecard',
+            browser: 'Browser (USB or Bluetooth)',
+        },
         network: { wifi: 'Wi-Fi', cellular: 'Cellular', satellite: 'Satellite' },
         never: 'not used yet',
     },
