@@ -34,6 +34,7 @@ export const APP_ROUTES = [
     },
     // Reference pages: linked from the footer, not the header (web#12).
     { id: 'coverage', path: '/coverage', label: 'Coverage', nav: false },
+    { id: 'gateways', path: '/gateways', label: 'How Data Gets In', nav: false },
     { id: 'open_problems', path: '/open-problems', label: 'Open Problems', nav: false },
     { id: 'about', path: '/about', label: 'About', nav: true },
     { id: 'blog', path: '/blog', label: 'Blog', nav: false },

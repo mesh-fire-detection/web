@@ -393,6 +393,30 @@ export type NodesContent = PageHeading & {
     }
 }
 
+/** `/gateways`: the paths into the server, and each gateway's latest deliveries (web#14). */
+export type GatewaysContent = PageHeading & {
+    readonly paths: readonly {
+        readonly id: 'mqtt' | 'notecard' | 'browser'
+        readonly title: string
+        readonly via: string
+        readonly route: readonly string[]
+        readonly when: string
+        readonly needs: readonly string[]
+    }[]
+    readonly routeLabel: string
+    readonly whenLabel: string
+    readonly needsLabel: string
+    readonly live: Words<'title' | 'lede' | 'signIn' | 'loading' | 'broker' | 'caption'> & {
+        readonly failed: Notice
+        readonly none: Notice
+        readonly brokerStates: Words<'connected' | 'disconnected' | 'disabled'>
+        readonly columns: Words<'gateway' | 'paths' | 'last' | 'refused'>
+        readonly disabled: string
+        readonly never: string
+        readonly states: Words<'live' | 'warn' | 'dead' | 'neutral'>
+    }
+}
+
 /** `/nodes/:id`: one node, and editing it for the people on it. */
 export type NodeContent = {
     readonly title: string

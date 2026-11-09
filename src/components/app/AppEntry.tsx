@@ -14,6 +14,7 @@ import { SatellitePage } from '@components/pages/build/satellite/Satellite'
 import { CoveragePage } from '@components/pages/coverage/Coverage'
 import { HomePage } from '@components/pages/Home'
 import { MapPage } from '@components/pages/Map'
+import { GatewaysPage } from '@components/pages/nodes/Gateways'
 import { NodesPage } from '@components/pages/nodes/Nodes'
 import { NodePage } from '@components/pages/nodes/NodeView'
 import { OpenProblemsPage } from '@components/pages/problems/OpenProblems'
@@ -38,6 +39,7 @@ const PAGES: Record<RouteId, ComponentType> = {
     map: MapPage,
     build: BuildPage,
     coverage: CoveragePage,
+    gateways: GatewaysPage,
     open_problems: OpenProblemsPage,
     about: AboutPage,
     blog: BlogPage,

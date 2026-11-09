@@ -31,6 +31,7 @@ export const footerContent = {
             links: [
                 { label: 'Live Map', to: '/map' },
                 { label: 'Coverage Calculator', to: '/coverage' },
+                { label: 'How Data Gets In', to: '/gateways' },
                 { label: 'Node Status', to: '/map#nodes' },
                 { label: 'Deployment Log', to: '/map#log' },
                 { label: 'False Positives', to: '/open-problems#false-positives' },
