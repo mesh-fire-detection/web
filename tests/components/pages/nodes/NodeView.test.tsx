@@ -10,7 +10,7 @@ import { NodePage } from '@components/pages/nodes/NodeView'
 
 import { json, MEMBER, sentBodies, stubApi } from '../../../support/api'
 
-import { BENCH, minutesAgo, RIDGE } from './fixtures'
+import { BENCH, GATE, minutesAgo, RIDGE } from './fixtures'
 
 afterEach(cleanup)
 
@@ -179,6 +179,33 @@ describe('Node view', () => {
         expect(screen.getByRole('link', { name: 'Open in Connect' }).getAttribute('href')).toBe(
             '/connect'
         )
+    })
+
+    it('shows what a node does and how it connects, most recent first', async () => {
+        stubApi({
+            [SESSION]: SIGNED_IN,
+            'GET /v1/nodes/cel-01': json({ node: GATE }),
+            'GET /v1/nodes/cel-01/readings': NO_READINGS,
+            'GET /v1/nodes/cel-01/metrics': NO_METRICS,
+        })
+        renderAt('/nodes/cel-01')
+
+        expect(await screen.findByText('Gateway, Sensor')).toBeDefined()
+        expect(screen.getByText('Notecard · Cellular, 2 min ago')).toBeDefined()
+        expect(screen.getByText('MQTT · Wi-Fi, not used yet')).toBeDefined()
+    })
+
+    it('works out roles from the chosen type when the backend does not send them', async () => {
+        const { roles: _roles, connections: _connections, ...older } = GATE
+        stubApi({
+            [SESSION]: SIGNED_IN,
+            'GET /v1/nodes/cel-01': json({ node: older }),
+            'GET /v1/nodes/cel-01/readings': NO_READINGS,
+            'GET /v1/nodes/cel-01/metrics': NO_METRICS,
+        })
+        renderAt('/nodes/cel-01')
+
+        expect(await screen.findByText('Gateway')).toBeDefined()
     })
 
     it('gives the people on a node its details and editing, and saves their changes', async () => {

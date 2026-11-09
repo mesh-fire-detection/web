@@ -18,7 +18,7 @@ describe('node list filters', () => {
     it('round-trips through the URL, writing only what differs from the default', () => {
         const filters: Filters = {
             mine: true,
-            type: 'sensor',
+            role: 'sensor',
             status: 'offline',
             query: 'ridge',
             sort: 'heard',
@@ -28,21 +28,28 @@ describe('node list filters', () => {
         const written = writeFilters(filters)
 
         expect(written.toString()).toBe(
-            'mine=1&type=sensor&status=offline&q=ridge&sort=heard&dir=desc'
+            'mine=1&role=sensor&status=offline&q=ridge&sort=heard&dir=desc'
         )
         expect(readFilters(written)).toEqual(filters)
         expect(writeFilters(NONE).toString()).toBe('')
     })
 
+    it('reads a link from before roles, where cellular meant a gateway', () => {
+        expect(readFilters(new URLSearchParams('type=cellular')).role).toBe('gateway')
+        expect(readFilters(new URLSearchParams('type=sensor')).role).toBe('sensor')
+    })
+
     it('ignores what it does not recognise in the URL', () => {
         expect(
-            readFilters(new URLSearchParams('type=boat&status=gone&sort=colour&mine=yes'))
+            readFilters(new URLSearchParams('role=boat&type=boat&status=gone&sort=colour&mine=yes'))
         ).toEqual(NONE)
     })
 
-    it('narrows by mine, type, status and a search over ID and name', () => {
+    it('narrows by mine, role, status and a search over ID and name', () => {
         expect(ids({ mine: true })).toEqual(['n-0001'])
-        expect(ids({ type: 'cellular' })).toEqual(['cel-01'])
+        expect(ids({ role: 'gateway' })).toEqual(['cel-01'])
+        // A node can have more than one role.
+        expect(ids({ role: 'sensor' })).toEqual(['sen-01', 'cel-01'])
         expect(ids({ status: 'offline' })).toEqual(['n-0001'])
         expect(ids({ query: 'SEN-0' })).toEqual(['sen-01'])
         expect(ids({ query: 'truck' })).toEqual(['cel-01'])

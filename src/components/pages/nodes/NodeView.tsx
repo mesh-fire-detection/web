@@ -70,6 +70,17 @@ function UseLine({ node }: { readonly node: Node }) {
     )
 }
 
+/** "Notecard · Cellular, 4 min ago": the path, its network when known, and when it was used. */
+function connectionLine(connection: Node['connections'][number], now: number): string {
+    const words = nodesContent.connections
+    const network = connection.network === null ? '' : ` · ${words.network[connection.network]}`
+    const used =
+        connection.lastUsedAt === null
+            ? words.never
+            : sinceMinutes(minutesSince(connection.lastUsedAt, now))
+    return `${words.via[connection.via]}${network}, ${used}`
+}
+
 /** Recorded by the network or the node itself: nothing here is typed in. */
 function Identity({ node, now }: { readonly node: Node; readonly now: number }) {
     const words = copy.identity
@@ -77,9 +88,30 @@ function Identity({ node, now }: { readonly node: Node; readonly now: number }) 
         <Grid gap={4} minColumnWidth={160}>
             <Metric label={words.meshId} size='sm' value={node.meshId} />
             <Metric
-                label={words.type}
+                label={words.roles}
                 size='sm'
-                value={node.type === null ? copy.unset : nodesContent.types[node.type]}
+                value={
+                    node.roles.length === 0
+                        ? copy.unset
+                        : node.roles.map((role) => nodesContent.roles[role]).join(', ')
+                }
+            />
+            <Metric
+                label={words.connections}
+                size='sm'
+                value={
+                    node.connections.length === 0 ? (
+                        copy.unset
+                    ) : (
+                        <Stack gap={1}>
+                            {node.connections.map((connection) => (
+                                <Text key={connection.via} as='span' size='sm'>
+                                    {connectionLine(connection, now)}
+                                </Text>
+                            ))}
+                        </Stack>
+                    )
+                }
             />
             <Metric label={words.hardware} size='sm' value={node.details?.hardware ?? copy.unset} />
             <Metric

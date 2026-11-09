@@ -1,8 +1,9 @@
-import type { Node, NodeStatus, NodeType } from '@core/api/nodes'
+import type { Node, NodeRole, NodeStatus, NodeType } from '@core/api/nodes'
 
 export const NODE_TYPES = ['base', 'cellular', 'sensor', 'vision'] as const satisfies NodeType[]
+export const NODE_ROLES = ['gateway', 'sensor', 'base', 'vision'] as const satisfies NodeRole[]
 export const NODE_STATUSES = ['online', 'degraded', 'offline'] as const satisfies NodeStatus[]
-const SORT_KEYS = ['name', 'type', 'status', 'battery', 'heard'] as const
+const SORT_KEYS = ['name', 'role', 'status', 'battery', 'heard'] as const
 export type SortKey = (typeof SORT_KEYS)[number]
 type Direction = 'ascending' | 'descending'
 
@@ -30,7 +31,7 @@ const STATUS_RANK: Record<NodeStatus, number> = { offline: 0, degraded: 1, onlin
 /** The list's filters and sort, all kept in the URL so a filtered view can be shared. */
 export type Filters = {
     readonly mine: boolean
-    readonly type: NodeType | null
+    readonly role: NodeRole | null
     readonly status: NodeStatus | null
     readonly query: string
     readonly sort: SortKey | null
@@ -40,11 +41,16 @@ export type Filters = {
 const oneOf = <T extends string>(values: readonly T[], raw: string | null): T | null =>
     values.find((value) => value === raw) ?? null
 
+/** A link from before roles said `type=`; `cellular` was a gateway. */
+function legacyRole(raw: string | null): NodeRole | null {
+    return raw === 'cellular' ? 'gateway' : oneOf(NODE_ROLES, raw)
+}
+
 /** Anything the URL does not say, or says wrongly, falls back to the default. */
 export function readFilters(params: URLSearchParams): Filters {
     return {
         mine: params.get('mine') === '1',
-        type: oneOf(NODE_TYPES, params.get('type')),
+        role: oneOf(NODE_ROLES, params.get('role')) ?? legacyRole(params.get('type')),
         status: oneOf(NODE_STATUSES, params.get('status')),
         query: params.get('q')?.trim() ?? '',
         sort: oneOf(SORT_KEYS, params.get('sort')),
@@ -56,7 +62,7 @@ export function readFilters(params: URLSearchParams): Filters {
 export function writeFilters(filters: Filters): URLSearchParams {
     const params = new URLSearchParams()
     if (filters.mine) params.set('mine', '1')
-    if (filters.type !== null) params.set('type', filters.type)
+    if (filters.role !== null) params.set('role', filters.role)
     if (filters.status !== null) params.set('status', filters.status)
     if (filters.query !== '') params.set('q', filters.query)
     if (filters.sort !== null) {
@@ -67,7 +73,7 @@ export function writeFilters(filters: Filters): URLSearchParams {
 }
 
 export const isFiltered = (filters: Filters): boolean =>
-    filters.mine || filters.type !== null || filters.status !== null || filters.query !== ''
+    filters.mine || filters.role !== null || filters.status !== null || filters.query !== ''
 
 /** A column heading pressed: sorts by it, or reverses it when it is already the sort. */
 export const toggleSort = (filters: Filters, key: SortKey): Filters => ({
@@ -89,8 +95,10 @@ export function sortValue(node: Node, key: SortKey, now: number): string | numbe
         case 'name': {
             return node.name
         }
-        case 'type': {
-            return node.type
+        case 'role': {
+            // Listed by its first role, in the order the filter offers them.
+            const first = NODE_ROLES.findIndex((role) => node.roles.includes(role))
+            return first === -1 ? null : first
         }
         case 'status': {
             return STATUS_RANK[node.status]
@@ -120,7 +128,7 @@ export function listNodes(nodes: readonly Node[], filters: Filters, now: number)
     const shown = nodes.filter(
         (node) =>
             (!filters.mine || node.mine) &&
-            (filters.type === null || node.type === filters.type) &&
+            (filters.role === null || node.roles.includes(filters.role)) &&
             (filters.status === null || node.status === filters.status) &&
             (query === '' || `${node.id} ${node.name}`.toLocaleLowerCase().includes(query))
     )

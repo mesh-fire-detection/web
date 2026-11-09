@@ -97,11 +97,11 @@ describe('Nodes', () => {
         expect(screen.getByTestId('where').textContent).toBe('/nodes?mine=1')
 
         await user.click(screen.getByRole('button', { name: 'All' }))
-        await user.selectOptions(screen.getByLabelText('Type'), 'cellular')
+        await user.selectOptions(screen.getByLabelText('Role'), 'gateway')
         expect(await listed()).toEqual(['Truck Road Gate'])
-        expect(screen.getByTestId('where').textContent).toBe('/nodes?type=cellular')
+        expect(screen.getByTestId('where').textContent).toBe('/nodes?role=gateway')
 
-        await user.selectOptions(screen.getByLabelText('Type'), 'all')
+        await user.selectOptions(screen.getByLabelText('Role'), 'all')
         await user.type(screen.getByLabelText('Search nodes'), 'sen-01')
         await user.click(screen.getByRole('button', { name: 'Search' }))
         expect(await listed()).toEqual(['Ridge sensor'])
@@ -150,7 +150,7 @@ describe('Nodes', () => {
     it('offers to clear filters that match nothing', async () => {
         const user = userEvent.setup()
         stubApi({ [SESSION]: SIGNED_IN, 'GET /v1/nodes': json({ nodes: [RIDGE, BENCH] }) })
-        renderAt('/nodes?type=vision&q=nothing')
+        renderAt('/nodes?role=vision&q=nothing')
 
         expect(await screen.findByText('No nodes match these filters')).toBeDefined()
         await user.click(screen.getByRole('button', { name: 'Clear filters' }))
