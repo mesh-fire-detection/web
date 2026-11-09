@@ -5,6 +5,34 @@ releases are cut is in [RELEASING.md](RELEASING.md).
 
 ## Unreleased
 
+## 0.3.0 — 2026-11-09
+
+Needs backend 0.3.0 for roles, connections and the Connection path. Released
+after it.
+
+### Added
+
+- Node roles on `/nodes`: the Type column and filter become Role, and a node
+  can have several, such as Gateway and Sensor (#27). Old `?type=` links
+  still work.
+- On a node's page: its roles, and **Connects via**, with each connection's
+  network and when it was last used (#27).
+- **Connection path** on a node's page: each route its readings took to Mesh
+  Fire Detection in the last 7 days, in its own card, newest first and three
+  at a time (#30).
+- **Nearby nodes** on a node's page, laid out as on Connect a Node, each
+  linking to its page (#30).
+- `RouteTrail` in the UI kit, with an example on `/design`, and a Wi-Fi
+  icon (#30).
+
+### Changed
+
+- Every section of a node's page sits in its own tile, as on Connect a Node
+  (#30).
+- The header shows Map, Connect and About, with Nodes after Map for members.
+  Build is left to the Build a Node button, and Connect is marked as opening
+  in a new tab (#31).
+
 ## 0.2.1 — 2026-11-08
 
 ### Changed
