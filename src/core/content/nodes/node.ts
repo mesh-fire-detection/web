@@ -44,10 +44,10 @@ export const nodeContent = {
     },
     path: {
         title: 'Connection path',
-        lede: 'The route this node’s readings took in the last 7 days. We can see how many nodes passed a reading along, but not which ones.',
+        lede: 'The route this node’s readings took in the last 30 days. We can see how many nodes passed a reading along, but not which ones.',
         loading: 'Loading the path…',
         failed: 'The path could not be loaded.',
-        none: 'Nothing from this node has reached Mesh Fire Detection in the last 7 days.',
+        none: 'Nothing from this node has reached Mesh Fire Detection in the last 30 days.',
         self: 'This node',
         server: 'Mesh Fire Detection',
         notehub: 'Notehub (Blues cloud)',
@@ -71,9 +71,9 @@ export const nodeContent = {
         fewerRoutes: 'Show fewer routes',
         nearby: {
             title: 'Nearby nodes',
-            lede: 'Strongest signal first, from the last 7 days. Select a node to open it.',
+            lede: 'Strongest signal first, from the last 30 days. Select a node to open it.',
             theyHear: 'they hear it',
-            none: 'No neighbours reported in the last 7 days.',
+            none: 'No neighbours reported in the last 30 days.',
         },
     },
     record: {
