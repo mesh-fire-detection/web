@@ -73,6 +73,15 @@ export const nearbyDetailsContent = {
         span: 'Covers',
         reading: 'reading',
         readings: 'readings',
+        latest: 'Latest',
+        chart: 'Chart of',
+        drain: {
+            over: 'Average change over',
+            perDay: 'a day',
+            left: 'At this rate it reaches 0 % in about',
+            days: 'days',
+            volts: 'By voltage, that is about',
+        },
         empty: 'No history for this reading yet. It builds up while a node is connected.',
         source: {
             browser:

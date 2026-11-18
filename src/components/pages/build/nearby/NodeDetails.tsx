@@ -103,7 +103,7 @@ export function NodeDetails({ node }: { readonly node: NearbyNode }) {
                     <Text size='sm' tone='muted' className='nearby_details_status'>
                         {status}
                     </Text>
-                    <Vitals node={node} />
+                    <Vitals node={node} active={activeMetric} onSelect={setActiveMetric} />
                 </Stack>
             </Box>
             <Box tone='surface' padding={5} radius='md'>

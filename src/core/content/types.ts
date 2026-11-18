@@ -895,6 +895,9 @@ export type NearbyDetailsContent = {
         readonly span: string
         readonly reading: string
         readonly readings: string
+        readonly latest: string
+        readonly chart: string
+        readonly drain: Readonly<Record<'over' | 'perDay' | 'left' | 'days' | 'volts', string>>
         readonly empty: string
         readonly source: Readonly<Record<'browser' | 'server', string>>
     }

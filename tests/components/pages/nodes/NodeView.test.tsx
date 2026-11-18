@@ -118,6 +118,38 @@ describe('Node view', () => {
         expect(readingCalls).toHaveLength(2)
     })
 
+    it('charts battery history and how fast it drains when the battery tile is picked', async () => {
+        const user = userEvent.setup()
+        // 80 % falling to 74 % over 12 hours: 12 % a day, about 6 days left.
+        const metrics = Array.from({ length: 13 }, (_, hour) => ({
+            batteryPct: 80 - hour * 0.5,
+            voltage: 4 - hour * 0.01,
+            uptimeS: 60,
+            recordedAt: minutesAgo((12 - hour) * 60 + 1),
+        }))
+        stubApi({
+            [SESSION]: SIGNED_IN,
+            'GET /v1/nodes/sen-01': json({ node: RIDGE }),
+            'GET /v1/nodes/sen-01/readings': NO_READINGS,
+            'GET /v1/nodes/sen-01/metrics': json({ from: '', to: '', truncated: false, metrics }),
+        })
+        renderAt('/nodes/sen-01')
+
+        await user.click(await screen.findByRole('button', { name: 'Battery' }))
+        expect(screen.getByRole('heading', { name: 'History · Battery' })).toBeDefined()
+        expect(screen.getByRole('img', { name: 'Chart of Battery' })).toBeDefined()
+        expect(screen.getByText('13 readings')).toBeDefined()
+        expect(screen.getByText('−12 % a day')).toBeDefined()
+        expect(screen.getByText(/reaches 0 % in about 6\.2 days/)).toBeDefined()
+
+        await user.click(screen.getByRole('button', { name: 'Voltage' }))
+        expect(screen.getByRole('heading', { name: 'History · Voltage' })).toBeDefined()
+        expect(screen.getByText('−0.24 V a day')).toBeDefined()
+        // 4.00 V (≈ 82 %) to 3.88 V (≈ 69 %) in 12 hours: about 25 % a day.
+        expect(screen.getByText(/By voltage, that is about −24\.8 % a day/)).toBeDefined()
+        expect(screen.getByText('Latest 3.88 V (≈ 69 %) ·', { exact: false })).toBeDefined()
+    })
+
     it('opens more details, with server telemetry and what this browser saved', async () => {
         const user = userEvent.setup()
         stubApi({

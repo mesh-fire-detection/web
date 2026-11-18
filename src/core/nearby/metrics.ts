@@ -117,6 +117,78 @@ export type MetricStats = {
  */
 const RATE_MIN_GAP_MS = 4 * 60 * 1000
 
+/** Battery and voltage: the readings a power test is about. */
+export const POWER_METRICS = ['deviceMetrics.batteryLevel', 'deviceMetrics.voltage'] as const
+
+/** Meshtastic reports a battery level above 100 when a node runs on external power. */
+const POWERED_LEVEL = 100
+
+/**
+ * A value as the history shows it: `Powered` for a battery on external power,
+ * and a voltage with the charge it stands for, e.g. `3.95 V (≈ 74 %)`.
+ */
+export function historyValue(metric: string, value: number): string {
+    if (metric === 'deviceMetrics.batteryLevel' && value > POWERED_LEVEL) return 'Powered'
+    const shown = metricValue(metric, value)
+    if (metric !== 'deviceMetrics.voltage') return shown
+    // From the voltage as shown, so two values that read the same give the same charge.
+    const percent = batteryFromVoltage(Math.round(value * 100) / 100)
+    return percent === null ? shown : `${shown} (≈ ${String(percent)} %)`
+}
+
+export type AverageRate = {
+    /** Change per day, from a straight line through every sample. */
+    readonly perDay: number
+    readonly spanMs: number
+    /** For a falling battery: days until it reads 0 % at this rate. */
+    readonly daysLeft: number | null
+    /** For voltage: the same rate in battery percent, estimated from each reading. */
+    readonly percent: AverageRate | null
+}
+
+/** Below this, a battery's straight-line rate is mostly measurement noise. */
+const AVERAGE_RATE_MIN_SPAN_MS = 60 * 60 * 1000
+const DAY_MS = 24 * 60 * 60 * 1000
+
+/**
+ * The overall rate of a power reading, as a least-squares slope rather than
+ * first-to-last, so one noisy reading at either end does not swing it. Battery
+ * readings taken on external power are left out: they say nothing about drain.
+ */
+export function averageRate(metric: string, samples: readonly Sample[]): AverageRate | null {
+    const battery = metric === 'deviceMetrics.batteryLevel'
+    const kept = battery ? samples.filter((sample) => sample.value <= POWERED_LEVEL) : samples
+    const first = kept[0]
+    const last = kept.at(-1)
+    if (!first || !last || kept.length < 3 || last.at - first.at < AVERAGE_RATE_MIN_SPAN_MS)
+        return null
+    const meanAt = kept.reduce((sum, sample) => sum + (sample.at - first.at), 0) / kept.length
+    const meanValue = kept.reduce((sum, sample) => sum + sample.value, 0) / kept.length
+    let covariance = 0
+    let variance = 0
+    for (const sample of kept) {
+        const at = sample.at - first.at - meanAt
+        covariance += at * (sample.value - meanValue)
+        variance += at * at
+    }
+    const perDay = (covariance / variance) * DAY_MS
+    const estimated = battery
+        ? []
+        : kept.flatMap((sample) => {
+              const percent = batteryFromVoltage(sample.value)
+              return percent === null ? [] : [{ value: percent, at: sample.at }]
+          })
+    return {
+        perDay,
+        spanMs: last.at - first.at,
+        daysLeft: battery && perDay < 0 ? last.value / -perDay : null,
+        percent:
+            metric === 'deviceMetrics.voltage'
+                ? averageRate('deviceMetrics.batteryLevel', estimated)
+                : null,
+    }
+}
+
 export function metricStats(samples: readonly Sample[]): MetricStats | null {
     const first = samples[0]
     const last = samples.at(-1)

@@ -95,6 +95,10 @@ and groups. Keep field values controlled and validation in the owning feature.
 it on a shared surface. `CodeBlock` formats long preformatted payloads and
 snippets. Use `Icon` with the closed `IconName` set so icon shape and
 accessibility behavior stay consistent.
+`LineChart` draws one series over time: a 2px line in the fire accent on
+recessive grid lines, the highest and lowest values on the left, the first and
+last times below, and a readout above that follows the pointer. Gaps much longer
+than the usual spacing break the line, so missing data shows as missing.
 
 ### Content and page patterns
 

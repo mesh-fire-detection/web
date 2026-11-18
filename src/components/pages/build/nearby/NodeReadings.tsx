@@ -7,21 +7,26 @@ import { Pressable } from '@components/shared/primitives/Pressable'
 import { Heading } from '@components/shared/typography/Heading'
 import { Text } from '@components/shared/typography/Text'
 import { Metric } from '@components/shared/widgets/Badge'
+import { LineChart } from '@components/shared/widgets/LineChart'
 import { nearbyDetailsContent as copy } from '@core/content/build/nearby/nodeDetails'
 import { sensorGuideContent as guide } from '@core/content/build/nearby/sensorGuide'
 import { cx } from '@core/format/cx'
 import { plural } from '@core/format/format'
 import { toneSegments } from '@core/format/tones'
 import {
+    averageRate,
     batteryCharge,
     batteryTone,
     bestLink,
     duration,
     EXPECTED_SENSOR_METRICS,
     formatNumber,
+    historyValue,
+    localTime,
     metricLabel,
     metricStats,
     metricValue,
+    POWER_METRICS,
     readingValue,
     SIGNAL_TONE,
     signedChange,
@@ -67,13 +72,47 @@ const TREND_TONE = { rising: 'live', falling: 'warn', steady: 'default' } as con
  * Battery, solar charging and LoRa signal: the first things checked on a node.
  * The server keeps no neighbours per node, so its view leaves the signal out.
  */
+/** A tile that, given `onSelect`, picks its metric for the history below. */
+function Selectable({
+    metric,
+    active,
+    onSelect,
+    children,
+}: {
+    readonly metric: string
+    readonly active: string | undefined
+    readonly onSelect: ((metric: string) => void) | undefined
+    readonly children: ReactNode
+}) {
+    return onSelect === undefined ? (
+        children
+    ) : (
+        <Pressable
+            className='bare nearby_reading'
+            pressed={active === metric}
+            accessibleLabel={metricLabel(metric)}
+            onActivate={() => {
+                onSelect(metric)
+            }}
+        >
+            {children}
+        </Pressable>
+    )
+}
+
 export function Vitals({
     node,
     source = 'browser',
+    active,
+    onSelect,
 }: {
     readonly node: NearbyNode
     readonly source?: MetricHistory['source']
+    /** With `onSelect`, battery and voltage pick the metric the history shows. */
+    readonly active?: string
+    readonly onSelect?: (metric: string) => void
 }) {
+    const [batteryMetric, voltageMetric] = POWER_METRICS
     const battery = node.readings['deviceMetrics.batteryLevel']
     const voltage = node.readings['deviceMetrics.voltage']
     const { powered, percent } = batteryCharge(node)
@@ -87,59 +126,63 @@ export function Vitals({
     const quality = link?.snr == null ? null : signalQuality(link.snr)
     return (
         <Grid minColumnWidth={140} gap={3} className='nearby_vitals'>
-            <Tile
-                label={copy.battery}
-                value={
-                    percent === null
-                        ? battery
-                            ? readingValue(battery)
-                            : '—'
-                        : `${powered ? '≈' : ''}${String(percent)} %`
-                }
-                tone={percent === null ? (battery ? 'default' : 'muted') : batteryTone(percent)}
-            >
-                {powered ? (
-                    <Text as='span' size='inherit' tone='inherit' weight={600}>
-                        {copy.externalPower}
-                        {percent === null ? null : `, ${copy.byVoltage}`}
-                    </Text>
-                ) : null}
-                {voltage ? `${readingValue(voltage)} · ` : null}
-                {battery ? <Age time={battery.receivedAt} /> : copy.notReported}
-            </Tile>
-            <Tile
-                label={powered ? copy.charging : copy.solar}
-                value={
-                    voltageChange
-                        ? `${TREND_ARROW[voltageChange.direction]} ${signedChange('deviceMetrics.voltage', voltageChange.change)}`
-                        : latestVoltage
-                          ? formatNumber(latestVoltage.value, 'V')
-                          : '—'
-                }
-                tone={
-                    voltageChange
-                        ? TREND_TONE[voltageChange.direction]
-                        : latestVoltage
-                          ? 'default'
-                          : 'muted'
-                }
-            >
-                {voltageChange ? (
-                    <>
-                        {formatNumber(voltageChange.reference.value, 'V')} →{' '}
-                        {formatNumber(voltageChange.latest.value, 'V')} {copy.voltageOver}{' '}
-                        {duration(voltageChange.latest.at - voltageChange.reference.at)}
-                        <div>
-                            {voltages.length}{' '}
-                            {source === 'browser' ? copy.voltageSaved : copy.voltageSavedServer}
-                        </div>
-                    </>
-                ) : latestVoltage ? (
-                    copy.voltageWaiting
-                ) : (
-                    copy.voltageNone
-                )}
-            </Tile>
+            <Selectable metric={batteryMetric} active={active} onSelect={onSelect}>
+                <Tile
+                    label={copy.battery}
+                    value={
+                        percent === null
+                            ? battery
+                                ? readingValue(battery)
+                                : '—'
+                            : `${powered ? '≈' : ''}${String(percent)} %`
+                    }
+                    tone={percent === null ? (battery ? 'default' : 'muted') : batteryTone(percent)}
+                >
+                    {powered ? (
+                        <Text as='span' size='inherit' tone='inherit' weight={600}>
+                            {copy.externalPower}
+                            {percent === null ? null : `, ${copy.byVoltage}`}
+                        </Text>
+                    ) : null}
+                    {voltage ? `${readingValue(voltage)} · ` : null}
+                    {battery ? <Age time={battery.receivedAt} /> : copy.notReported}
+                </Tile>
+            </Selectable>
+            <Selectable metric={voltageMetric} active={active} onSelect={onSelect}>
+                <Tile
+                    label={powered ? copy.charging : copy.solar}
+                    value={
+                        voltageChange
+                            ? `${TREND_ARROW[voltageChange.direction]} ${signedChange('deviceMetrics.voltage', voltageChange.change)}`
+                            : latestVoltage
+                              ? formatNumber(latestVoltage.value, 'V')
+                              : '—'
+                    }
+                    tone={
+                        voltageChange
+                            ? TREND_TONE[voltageChange.direction]
+                            : latestVoltage
+                              ? 'default'
+                              : 'muted'
+                    }
+                >
+                    {voltageChange ? (
+                        <>
+                            {formatNumber(voltageChange.reference.value, 'V')} →{' '}
+                            {formatNumber(voltageChange.latest.value, 'V')} {copy.voltageOver}{' '}
+                            {duration(voltageChange.latest.at - voltageChange.reference.at)}
+                            <div>
+                                {voltages.length}{' '}
+                                {source === 'browser' ? copy.voltageSaved : copy.voltageSavedServer}
+                            </div>
+                        </>
+                    ) : latestVoltage ? (
+                        copy.voltageWaiting
+                    ) : (
+                        copy.voltageNone
+                    )}
+                </Tile>
+            </Selectable>
             {source === 'browser' ? (
                 <Tile
                     label={copy.signal}
@@ -310,6 +353,8 @@ export function MetricHistoryStats({
 }) {
     const stats = metricStats(history.samples)
     const labels = copy.history
+    const power: readonly string[] = POWER_METRICS
+    const average = power.includes(metric) ? averageRate(metric, history.samples) : null
     const rate = (value: Rate | null) =>
         value === null ? '—' : signedChange(metric, value.to.value - value.from.value)
     const interval = (value: Rate | null) =>
@@ -330,6 +375,28 @@ export function MetricHistoryStats({
                     {plural(history.samples.length, labels.reading, labels.readings)}
                 </Text>
             </Row>
+            {history.samples.length === 0 ? null : (
+                <LineChart
+                    points={history.samples}
+                    label={`${labels.chart} ${metricLabel(metric)}`}
+                    latestLabel={labels.latest}
+                    formatValue={(value) => historyValue(metric, value)}
+                    formatTime={(at) => localTime(at)}
+                />
+            )}
+            {average === null ? null : (
+                <Text size='sm'>
+                    {labels.drain.over} {duration(average.spanMs)}:{' '}
+                    <Text as='span' size='inherit' weight={600}>
+                        {signedChange(metric, roundRate(metric, average.perDay))}{' '}
+                        {labels.drain.perDay}
+                    </Text>
+                    {average.percent === null
+                        ? null
+                        : `. ${labels.drain.volts} ${signedChange('deviceMetrics.batteryLevel', roundRate('deviceMetrics.batteryLevel', average.percent.perDay))} ${labels.drain.perDay}`}
+                    <DaysLeft days={(average.percent ?? average).daysLeft} />
+                </Text>
+            )}
             <div className='nearby_stats'>
                 <StatCell
                     label={labels.lowest}
@@ -368,6 +435,20 @@ export function MetricHistoryStats({
         </Stack>
     )
 }
+
+/** How long a falling battery lasts at its average rate, ending the drain sentence. */
+function DaysLeft({ days }: { readonly days: number | null }) {
+    const labels = copy.history.drain
+    return days === null
+        ? '.'
+        : `. ${labels.left} ${formatNumber(Math.round(days * 10) / 10)} ${labels.days}.`
+}
+
+/** Battery percentages to a tenth; voltage to the hundredth the node reports. */
+const roundRate = (metric: string, perDay: number): number =>
+    metric === 'deviceMetrics.batteryLevel'
+        ? Math.round(perDay * 10) / 10
+        : Math.round(perDay * 100) / 100
 
 /** Every entry is laid out in the same cell, so the block keeps the tallest one's height. */
 export function SensorGuide({ active }: { readonly active: string }) {
