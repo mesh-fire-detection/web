@@ -5,6 +5,11 @@ releases are cut is in [RELEASING.md](RELEASING.md).
 
 ## Unreleased
 
+## 0.4.0 — 2026-11-17
+
+Needs backend 0.3.1 for Connection path routes timed per way in. Released
+after it.
+
 ### Added
 
 - **Battery history** on a node's page and on Connect a Node: the Battery and
