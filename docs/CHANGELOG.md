@@ -5,6 +5,18 @@ releases are cut is in [RELEASING.md](RELEASING.md).
 
 ## Unreleased
 
+### Added
+
+- **Battery history** on a node's page and on Connect a Node: the Battery and
+  Voltage tiles open their history like a sensor tile, with a chart, the
+  average change per day, and for a falling battery the days left at that
+  rate. A voltage shows the charge it stands for, such as 3.88 V (≈ 69 %), and
+  its drain is given in battery percent too. Readings on external power are
+  left out of the drain.
+- `LineChart` in the UI kit: one series over time, with a readout that follows
+  the pointer, and a break in the line where data is missing.
+- Battery and Voltage entries in the sensor guide.
+
 ### Fixed
 
 - **Connection path**: each route's "Last used" and its radio step now show when

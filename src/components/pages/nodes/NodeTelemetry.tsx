@@ -72,7 +72,12 @@ export function NodeTelemetry({ node }: { readonly node: Node }) {
 
     return (
         <Stack gap={4} minWidth0>
-            <Vitals node={nearby} source='server' />
+            <Vitals
+                node={nearby}
+                source='server'
+                active={activeMetric}
+                onSelect={setActiveMetric}
+            />
             <Box tone='surface' padding={5} radius='md'>
                 <Stack gap={4}>
                     <Heading level={2} size='sm'>

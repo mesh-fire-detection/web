@@ -153,6 +153,36 @@ export const sensorGuideContent = {
                 },
             ],
         },
+        'deviceMetrics.batteryLevel': {
+            title: 'Battery',
+            summary:
+                'The firmware estimates the charge from the battery voltage, so it moves in steps and can jump when the radio transmits. On external power it reads Powered instead of a percentage.',
+            rows: [
+                {
+                    term: 'Drain',
+                    value: 'The average change per day comes from every reading in the history, not just the first and last. {fair|An estimate of days left} assumes the node keeps using power the way it has so far.',
+                },
+                {
+                    term: 'Restarts',
+                    value: 'A node that {bad|restarts as its battery runs low} is browning out: the voltage sags while it transmits. Watch for uptime starting over.',
+                },
+            ],
+        },
+        'deviceMetrics.voltage': {
+            title: 'Voltage',
+            summary:
+                'The battery’s voltage, measured on the node. It is the most direct reading of charge, and the one the battery percentage is worked out from.',
+            rows: [
+                {
+                    term: 'Lithium cell',
+                    value: '{good|About 4.2 V} is full and about 3.7 V is half. {bad|Below about 3.4 V} little is left and a node may restart under load.',
+                },
+                {
+                    term: 'Solar',
+                    value: 'A {good|rise during the day} means the panel is charging the battery. A fall through the day means it cannot keep up.',
+                },
+            ],
+        },
     },
     unknown: {
         title: 'Other reading',

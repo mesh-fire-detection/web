@@ -410,3 +410,81 @@
 .dlist_dd {
     margin: 0;
 }
+
+/* ----------------------------------------------------------- Line chart --- */
+.line_chart {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: var(--s_1) var(--s_2);
+}
+
+.line_chart_readout {
+    grid-column: 2;
+}
+
+.line_chart_axis {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: space-between;
+    height: var(--chart_height);
+}
+
+.line_chart_axis:has(> :only-child) {
+    justify-content: center;
+}
+
+.line_chart_plot {
+    height: var(--chart_height);
+    cursor: crosshair;
+    touch-action: pan-y;
+}
+
+.line_chart_plot svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+}
+
+.line_chart_times {
+    display: flex;
+    grid-column: 2;
+    justify-content: space-between;
+    gap: var(--s_2);
+}
+
+.line_chart_grid,
+.line_chart_line,
+.line_chart_cursor,
+.line_chart_ring,
+.line_chart_dot {
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.line_chart_grid {
+    stroke: var(--line);
+    stroke-width: 1px;
+}
+
+.line_chart_line {
+    stroke: var(--fire);
+    stroke-width: var(--chart_stroke);
+}
+
+.line_chart_cursor {
+    stroke: var(--line_strong);
+    stroke-width: 1px;
+}
+
+.line_chart_ring {
+    stroke: var(--surface);
+    stroke-width: var(--chart_ring);
+}
+
+.line_chart_dot {
+    stroke: var(--fire);
+    stroke-width: var(--chart_dot);
+}

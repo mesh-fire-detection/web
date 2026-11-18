@@ -74,7 +74,8 @@ These rules are enforced by ESLint (`no-restricted-syntax` plus `jsx-a11y`).
   `primitives/Pressable.tsx` and `page/DataTable.tsx`; headings in
   `typography/Heading.tsx`; form controls and submission in `shared/forms/`;
   tables in `page/DataTable.tsx`; lists in `page/List.tsx`, `StepList.tsx`, and
-  `Timeline.tsx`; code blocks in `typography/Text.tsx`. Reset default
+  `Timeline.tsx`; code blocks in `typography/Text.tsx`; `svg` and `path` in
+  `widgets/LineChart.tsx`. Reset default
   presentation in component CSS.
 - Any remaining non-native interactive element must carry a literal `role`,
   `tabIndex={0}`, and keyboard handling for its role.

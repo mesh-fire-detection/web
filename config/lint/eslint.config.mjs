@@ -388,6 +388,18 @@ export default tseslint.config(
     },
 
     {
+        files: ['src/components/shared/widgets/LineChart.tsx'],
+        rules: {
+            'no-restricted-syntax': [
+                'error',
+                hostElementRule([...ALLOWED_ELEMENTS, 'svg', 'path']),
+                hrefRule,
+                inlineStyleRule,
+            ],
+        },
+    },
+
+    {
         files: ['src/components/layout/Wordmark.tsx'],
         rules: {
             'no-restricted-syntax': [
