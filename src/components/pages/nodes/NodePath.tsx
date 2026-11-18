@@ -27,6 +27,8 @@ type Route = {
     readonly key: string
     /** What sets this route apart: the gateway it went through, or the browser. */
     readonly title: string
+    /** When this node's data last went this whole way. */
+    readonly at: string | null
     readonly start: Stop
     readonly legs: readonly (readonly [Link, Stop])[]
 }
@@ -42,35 +44,38 @@ function hopsLabel(hops: number | null): string {
 
 const NETWORK_ICON = { wifi: 'wifi', cellular: 'cell', satellite: 'radio' } as const
 
-/** "Cellular (Notecard)", or "Wi-Fi" for the gateway's own internet, with its icon. */
-function gatewayLink(connection: NodeConnection): Link {
+/**
+ * "Cellular (Notecard)", or "Wi-Fi" for the gateway's own internet, with its
+ * icon. `at` is left off when the route's first leg already says it.
+ */
+function gatewayLink(connection: NodeConnection, at: string | null): Link {
     if (connection.via !== 'notecard') {
-        return { label: connectionWords.network.wifi, at: connection.lastUsedAt, icon: 'wifi' }
+        return { label: connectionWords.network.wifi, at, icon: 'wifi' }
     }
     return connection.network === null
-        ? { label: words.notecard, at: connection.lastUsedAt }
+        ? { label: words.notecard, at }
         : {
               label: `${connectionWords.network[connection.network]} (${words.notecard})`,
-              at: connection.lastUsedAt,
+              at,
               icon: NETWORK_ICON[connection.network],
           }
 }
 
 /** The gateway's legs to Mesh Fire Detection: through the message relay or Notehub. */
-function serverLegs(connection: NodeConnection): readonly (readonly [Link, Stop])[] {
+function serverLegs(
+    connection: NodeConnection,
+    at: string | null
+): readonly (readonly [Link, Stop])[] {
     const relay = connection.via === 'notecard' ? words.notehub : words.broker
     return [
-        [gatewayLink(connection), { label: relay }],
+        [gatewayLink(connection, at), { label: relay }],
         [{ label: words.internet, at: null }, { label: words.server }],
     ]
 }
 
-/** When a route was last used: its first link, the one this node's data took. */
-const usedAt = (route: Route): string => route.legs[0]?.[0].at ?? ''
-
 /** Newest first, so the routes in use now come before the ones a node used to take. */
 function routesFor(node: Node, path: NodePath): Route[] {
-    return allRoutes(node, path).toSorted((a, b) => usedAt(b).localeCompare(usedAt(a)))
+    return allRoutes(node, path).toSorted((a, b) => (b.at ?? '').localeCompare(a.at ?? ''))
 }
 
 function allRoutes(node: Node, path: NodePath): Route[] {
@@ -80,29 +85,36 @@ function allRoutes(node: Node, path: NodePath): Route[] {
             delivery.signal === null
                 ? ''
                 : ` · ${peerWords.quality[signalQuality(delivery.signal.snr)]} ${words.signal}`
-        const mesh: readonly (readonly [Link, Stop])[] = self
-            ? []
-            : [
-                  [
-                      {
-                          label: `${words.lora} · ${hopsLabel(delivery.hops)}${signal}`,
-                          at: delivery.lastAt,
-                          icon: 'radio',
-                      },
-                      {
-                          label: delivery.gateway.name,
-                          to: `/nodes/${encodeURIComponent(delivery.gateway.id)}`,
-                      },
-                  ],
-              ]
-        return delivery.connections.map((connection) => ({
-            key: `${delivery.gateway.id}-${connection.via}`,
-            title: self
-                ? `${words.fromGateway} · ${gatewayLink(connection).label}`
-                : `${words.through} ${delivery.gateway.name} · ${gatewayLink(connection).label}`,
-            start: { label: self ? words.self : node.name },
-            legs: [...mesh, ...serverLegs(connection)],
-        }))
+        return delivery.connections.map((connection) => {
+            // Each connection is timed by this node's own packets that way, so the
+            // radio leg of a route is as recent as the route, not the gateway.
+            const at = connection.lastUsedAt ?? (self ? null : delivery.lastAt)
+            const mesh: readonly (readonly [Link, Stop])[] = self
+                ? []
+                : [
+                      [
+                          {
+                              label: `${words.lora} · ${hopsLabel(delivery.hops)}${signal}`,
+                              at,
+                              icon: 'radio',
+                          },
+                          {
+                              label: delivery.gateway.name,
+                              to: `/nodes/${encodeURIComponent(delivery.gateway.id)}`,
+                          },
+                      ],
+                  ]
+            const link = gatewayLink(connection, at).label
+            return {
+                key: `${delivery.gateway.id}-${connection.via}`,
+                title: self
+                    ? `${words.fromGateway} · ${link}`
+                    : `${words.through} ${delivery.gateway.name} · ${link}`,
+                at,
+                start: { label: self ? words.self : node.name },
+                legs: [...mesh, ...serverLegs(connection, self ? at : null)],
+            }
+        })
     })
     const browser = node.connections.find((connection) => connection.via === 'browser')
     return browser === undefined
@@ -112,6 +124,7 @@ function allRoutes(node: Node, path: NodePath): Route[] {
               {
                   key: 'browser',
                   title: words.fromBrowser,
+                  at: browser.lastUsedAt,
                   start: { label: node.name },
                   legs: [
                       [
@@ -148,7 +161,6 @@ const describe = (route: Route): string =>
 
 /** One route in its own card: what sets it apart and when it was used, then the trail. */
 function RouteCard({ route, now }: { readonly route: Route; readonly now: number }) {
-    const last = route.legs[0]?.[0].at ?? null
     return (
         <Box tone='surface-2' padding={4} radius='md'>
             <Stack gap={3}>
@@ -157,7 +169,7 @@ function RouteCard({ route, now }: { readonly route: Route; readonly now: number
                         {route.title}
                     </Text>
                     <Text as='span' size='xs' tone='faint'>
-                        {words.lastUsed} {ago(last, now)}
+                        {words.lastUsed} {ago(route.at, now)}
                     </Text>
                 </Row>
                 <RouteTrail label={describe(route)}>

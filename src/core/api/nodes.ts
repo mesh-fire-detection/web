@@ -19,7 +19,7 @@ type NodeRef = { readonly id: string; readonly name: string }
 
 /**
  * How one node's packets reach the server, and the nodes around it, from the
- * last 7 days. The mesh records how many hops a packet took, not which relays.
+ * last 30 days. The mesh records how many hops a packet took, not which relays.
  */
 export type NodePath = {
     readonly deliveries: readonly {

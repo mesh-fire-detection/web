@@ -5,6 +5,17 @@ releases are cut is in [RELEASING.md](RELEASING.md).
 
 ## Unreleased
 
+### Fixed
+
+- **Connection path**: each route's "Last used" and its radio step now show when
+  this node's readings last went that way, not when the gateway was last used
+  by anyone. The duplicate time on the gateway's internet step is gone (needs
+  backend 0.3.1 for routes timed per way in).
+
+### Changed
+
+- **Connection path** and **Nearby nodes** cover the last 30 days.
+
 ## 0.3.0 — 2026-11-09
 
 Needs backend 0.3.0 for roles, connections and the Connection path. Released

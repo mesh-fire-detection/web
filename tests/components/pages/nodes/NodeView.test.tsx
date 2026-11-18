@@ -230,6 +230,41 @@ describe('Node view', () => {
         expect(screen.getByText('Battery 92 %')).toBeDefined()
     })
 
+    it('times each route by the way this node’s data went, newest first', async () => {
+        stubApi({
+            [SESSION]: SIGNED_IN,
+            'GET /v1/nodes/sen-01': json({ node: RIDGE }),
+            'GET /v1/nodes/sen-01/readings': NO_READINGS,
+            'GET /v1/nodes/sen-01/metrics': NO_METRICS,
+            'GET /v1/nodes/sen-01/path': json({
+                deliveries: [
+                    {
+                        gateway: { id: 'cel-01', name: 'Truck Road Gate' },
+                        hops: 0,
+                        lastAt: minutesAgo(2),
+                        signal: null,
+                        connections: [
+                            { via: 'notecard', network: 'cellular', lastUsedAt: minutesAgo(2) },
+                            { via: 'mqtt', network: 'wifi', lastUsedAt: minutesAgo(3 * 24 * 60) },
+                        ],
+                    },
+                ],
+                nearby: [],
+            }),
+        })
+        renderAt('/nodes/sen-01')
+
+        const cellular = await screen.findByText('Through Truck Road Gate · Cellular (Notecard)')
+        const wifi = screen.getByText('Through Truck Road Gate · Wi-Fi')
+        expect(screen.getByText('Last used 2 min ago')).toBeDefined()
+        expect(screen.getByText('Last used 3 d ago')).toBeDefined()
+        expect(screen.getAllByText('2 min ago')).toHaveLength(1)
+        expect(screen.getAllByText('3 d ago')).toHaveLength(1)
+        expect(
+            cellular.compareDocumentPosition(wifi) & Node.DOCUMENT_POSITION_FOLLOWING
+        ).toBeTruthy()
+    })
+
     it('shows what a node does and how it connects, most recent first', async () => {
         stubApi({
             [SESSION]: SIGNED_IN,
