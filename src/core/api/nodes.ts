@@ -45,7 +45,36 @@ export type NodePath = {
         readonly heardBy: Signal | null
     }[]
 }
-export type NodeStatus = 'online' | 'degraded' | 'offline'
+/** Whether the node is reaching the server, by when it was last heard by any path. */
+export type NodeStatus = 'online' | 'late' | 'offline'
+
+/**
+ * The path a node was last heard by. `browser` only reaches its people and
+ * admins; `gateway` names the node a mesh packet came through; `mqtt` and
+ * `notecard` are a gateway's own link to the server.
+ */
+type HeardVia = {
+    readonly via: 'browser' | 'gateway' | 'mqtt' | 'notecard'
+    readonly gateway: NodeRef | null
+    readonly network: 'wifi' | 'cellular' | 'satellite' | null
+}
+
+/** What its people say powers a node. `mains` means always plugged in. */
+export type PowerSource = 'battery' | 'solar' | 'mains'
+
+/**
+ * What powers a node. Plugged in and a battery level can both be true. The
+ * battery is `low` only when nothing else powers the node, `none` when the
+ * voltage says there is none. `charging` is a rising voltage on a node that
+ * did not say it is plugged in: USB or solar.
+ */
+export type Power = {
+    readonly pluggedIn: boolean
+    readonly charging: boolean
+    readonly batteryPct: number | null
+    readonly battery: 'ok' | 'low' | 'none' | 'unknown'
+    readonly at: string | null
+}
 /** [longitude, latitude], GeoJSON order. */
 type Position = readonly [number, number]
 
@@ -64,6 +93,8 @@ export type Node = {
     readonly roles: readonly NodeRole[]
     readonly connections: readonly NodeConnection[]
     readonly status: NodeStatus
+    readonly heardVia: HeardVia | null
+    readonly power: Power | null
     readonly position: Position | null
     readonly approximate: boolean
     readonly elevationM: number | null
@@ -87,6 +118,7 @@ export type Node = {
         readonly shortName: string | null
         readonly settings: Readonly<Record<string, string>> | null
         readonly settingsReportedAt: string | null
+        readonly powerSource: PowerSource | null
         /** Display names, for the people on the node and admins. */
         readonly owners: readonly {
             readonly name: string
@@ -117,6 +149,7 @@ export type NodeChanges = {
     readonly deployedOn: string | null
     readonly note: string | null
     readonly exactPosition: boolean
+    readonly powerSource: PowerSource | null
 }
 
 export type Reading = {
@@ -161,14 +194,24 @@ export type UploadResult = {
     readonly skipped: number
 }
 
-/** A node as a backend from before roles (backend#51) sends it. */
-type ServerNode = Omit<Node, 'roles' | 'connections'> & Partial<Pick<Node, 'roles' | 'connections'>>
+/** A node as an older backend sends it: before roles (backend#51), or before power. */
+type ServerNode = Omit<Node, 'roles' | 'connections' | 'heardVia' | 'power' | 'status'> &
+    Partial<Pick<Node, 'roles' | 'connections' | 'heardVia' | 'power'>> & {
+        readonly status: NodeStatus | 'degraded'
+    }
 
-/** Roles from the chosen type, until the backend that sends them is deployed. */
+/** Fills what an older backend leaves out, so the page can rely on every field. */
 function withRoles(node: ServerNode): Node {
     const chosen: readonly NodeRole[] =
         node.type === null ? [] : [node.type === 'cellular' ? 'gateway' : node.type]
-    return { ...node, roles: node.roles ?? chosen, connections: node.connections ?? [] }
+    return {
+        ...node,
+        status: node.status === 'degraded' ? 'late' : node.status,
+        roles: node.roles ?? chosen,
+        connections: node.connections ?? [],
+        heardVia: node.heardVia ?? null,
+        power: node.power ?? null,
+    }
 }
 
 export async function fetchNodes(): Promise<ApiResult<readonly Node[]>> {

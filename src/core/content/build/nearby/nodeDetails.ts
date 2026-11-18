@@ -2,13 +2,18 @@ import type { NearbyDetailsContent } from '@core/content/types'
 
 export const nearbyDetailsContent = {
     battery: 'Battery',
-    solar: 'Solar charging',
-    /** On external power the voltage trend tracks the charger, not the panel. */
-    charging: 'Charging',
     externalPower: 'On external power',
     byVoltage: 'estimated from voltage',
     signal: 'Signal',
-    readings: 'Sensor readings',
+    readings: 'Readings',
+    /** The Readings panel: what to do with it, its power group, and when it is empty. */
+    panel: {
+        pick: 'Select any tile to see its history in the chart below.',
+        power: 'Power',
+        noBattery: 'No battery',
+        noBatteryNote: 'No battery connected, or it is flat',
+        groupEmpty: 'No readings from this node yet.',
+    },
     nearest: 'Nearest nodes',
     more: 'More details',
     otherTelemetry: 'Other reported telemetry',
@@ -17,10 +22,6 @@ export const nearbyDetailsContent = {
     notReported: 'Not reported',
     voltageOver: 'over',
     trendWaiting: 'Trend: next reading',
-    voltageSaved: 'readings kept in this browser',
-    voltageSavedServer: 'readings on the server',
-    voltageWaiting: 'Needs a second voltage reading to show a trend.',
-    voltageNone: 'No voltage reported yet.',
     signalMissing: 'No direct LoRa neighbour heard yet.',
     bestLink: 'Best link',
     channelUse: 'Channel use',

@@ -377,8 +377,10 @@ export type NodesContent = PageHeading & {
         readonly network: Words<'wifi' | 'cellular' | 'satellite'>
         readonly never: string
     }
-    readonly statuses: Words<'online' | 'degraded' | 'offline'>
-    readonly table: Words<'caption' | 'node' | 'role' | 'status' | 'battery' | 'heard'>
+    readonly statuses: Words<'online' | 'late' | 'offline'>
+    readonly table: Words<'caption' | 'node' | 'role' | 'status' | 'power' | 'heard'>
+    readonly power: Words<'plugged' | 'charging' | 'low' | 'none' | 'via' | 'browser'>
+    readonly sources: Words<'label' | 'hint' | 'battery' | 'solar' | 'mains'>
     readonly viewOnMap: string
     readonly yours: string
     readonly disabled: string
@@ -403,7 +405,9 @@ export type NodeContent = {
     readonly yours: string
     readonly disabled: string
     readonly unset: string
-    readonly use: Readonly<Record<'field' | 'quiet' | 'unused', Words<'label' | 'body'>>>
+    readonly use: Readonly<
+        Record<'field' | 'computer' | 'recent' | 'quiet' | 'unused', Words<'label' | 'body'>>
+    >
     readonly connectedHere: string
     readonly openConnect: string
     readonly viewOnMap: string
@@ -823,12 +827,11 @@ export type NearbySensorGuideContent = {
 
 export type NearbyDetailsContent = {
     readonly battery: string
-    readonly solar: string
-    readonly charging: string
     readonly externalPower: string
     readonly byVoltage: string
     readonly signal: string
     readonly readings: string
+    readonly panel: Words<'pick' | 'power' | 'noBattery' | 'noBatteryNote' | 'groupEmpty'>
     readonly nearest: string
     readonly more: string
     readonly otherTelemetry: string
@@ -837,10 +840,6 @@ export type NearbyDetailsContent = {
     readonly notReported: string
     readonly voltageOver: string
     readonly trendWaiting: string
-    readonly voltageSaved: string
-    readonly voltageSavedServer: string
-    readonly voltageWaiting: string
-    readonly voltageNone: string
     readonly signalMissing: string
     readonly bestLink: string
     readonly channelUse: string

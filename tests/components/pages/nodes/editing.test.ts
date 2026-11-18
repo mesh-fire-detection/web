@@ -20,6 +20,7 @@ describe('editing a node', () => {
                 deployedOn: null,
                 note: 'On the shelf above the bench.',
                 exactPosition: false,
+                powerSource: null,
             },
         })
     })

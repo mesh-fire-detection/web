@@ -24,7 +24,7 @@ export const HAS_BASEMAP = typeof BASEMAP_STYLE === 'string'
 
 export const NODE_COLORS = {
     online: '#4ade80',
-    degraded: '#fbbf24',
+    late: '#fbbf24',
     offline: '#f4574f',
 } as const
 

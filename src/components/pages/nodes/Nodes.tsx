@@ -5,6 +5,7 @@ import { signInToSee } from '@components/account/flow'
 import { useSession } from '@components/app/SessionProvider'
 import { Page } from '@components/layout/Page'
 import {
+    heardViaText,
     isFiltered,
     isSortKey,
     listNodes,
@@ -12,6 +13,7 @@ import {
     minutesSince,
     NODE_ROLES,
     NODE_STATUSES,
+    powerText,
     readFilters,
     sortValue,
     STATUS_KIND,
@@ -102,33 +104,34 @@ function columnsFor(now: number): readonly Column<Node>[] {
             key: 'status',
             header: copy.table.status,
             sortValue: (node) => sortValue(node, 'status', now),
-            render: (node) => (
-                <StatusLabel kind={STATUS_KIND[node.status]} pulse={node.status === 'online'}>
-                    {copy.statuses[node.status]}
-                </StatusLabel>
-            ),
+            render: (node) => {
+                const via = heardViaText(node.heardVia)
+                return (
+                    <Stack gap={1} align='start'>
+                        <StatusLabel
+                            kind={STATUS_KIND[node.status]}
+                            pulse={node.status === 'online'}
+                        >
+                            {copy.statuses[node.status]}
+                        </StatusLabel>
+                        {via === null ? null : (
+                            <Text as='span' size='2xs' tone='faint'>
+                                {via}
+                            </Text>
+                        )}
+                    </Stack>
+                )
+            },
         },
         {
             key: 'battery',
-            header: copy.table.battery,
+            header: copy.table.power,
             sortValue: (node) => sortValue(node, 'battery', now),
             align: 'end',
-            render: (node) =>
-                node.batteryPct === null ? (
-                    <Value tone='faint'>—</Value>
-                ) : (
-                    <Value
-                        tone={
-                            node.batteryPct < 25
-                                ? 'dead'
-                                : node.batteryPct < 50
-                                  ? 'warn'
-                                  : 'default'
-                        }
-                    >
-                        {node.batteryPct}%
-                    </Value>
-                ),
+            render: (node) => {
+                const { text, tone } = powerText(node.power)
+                return <Value tone={tone}>{text}</Value>
+            },
         },
         {
             key: 'heard',

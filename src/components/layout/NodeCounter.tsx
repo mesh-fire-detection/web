@@ -10,7 +10,7 @@ import { plural } from '@core/format/format'
  */
 export function NodeCounter({ tone = 'footer' }: { tone?: 'footer' | 'inline' }) {
     const counts = countByStatus()
-    const down = counts.offline + counts.degraded
+    const down = counts.offline + counts.late
 
     return (
         <Row gap={3} wrap>

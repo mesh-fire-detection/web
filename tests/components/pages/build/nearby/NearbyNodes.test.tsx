@@ -126,8 +126,8 @@ describe('Connect a Node page', () => {
         expect(
             within(screen.getByRole('button', { name: 'Temperature' })).getByText('24.5 °C')
         ).toBeDefined()
-        // Expected sensors keep their tile before any value arrives.
-        expect(screen.getByRole('button', { name: 'Relative humidity' })).toBeDefined()
+        // Only what the node has sent gets a tile.
+        expect(screen.queryByRole('button', { name: 'Relative humidity' })).toBeNull()
         fireEvent.click(screen.getByRole('button', { name: /Disconnect:/ }))
         expect(screen.getByText('Disconnected. Showing previously received data.')).toBeDefined()
         expect(
@@ -172,7 +172,7 @@ describe('Connect a Node page', () => {
         })
         expect(screen.getByText('1 added · 0 connected')).toBeDefined()
         expect(screen.queryByRole('button', { name: 'Previously added (1)' })).toBeNull()
-        expect(screen.getByRole('heading', { name: 'Sensor readings' })).toBeDefined()
+        expect(screen.getByRole('heading', { name: 'Readings' })).toBeDefined()
         expect(screen.queryByText('Connected')).toBeNull()
         const card = screen.getByRole('button', { name: /Reconnect:/ }).closest('.nearby_card')
         expect(card?.classList.contains('nearby_recent')).toBe(true)
@@ -214,11 +214,13 @@ describe('Connect a Node page', () => {
         vi.mocked(knownBluetoothDevices).mockResolvedValue(null)
         renderPage()
         await waitFor(() => {
-            expect(screen.getByRole('heading', { name: 'Sensor readings' })).toBeDefined()
+            expect(screen.getByRole('heading', { name: 'Readings' })).toBeDefined()
         })
         expect(screen.getByText('RAK4631')).toBeDefined()
-        expect(screen.getByText('Needs a second voltage reading to show a trend.')).toBeDefined()
-        expect(screen.queryByText('No voltage reported yet.')).toBeNull()
+        // One voltage reading: the tile shows it and waits for a second to show a trend.
+        const voltageTile = screen.getByRole('button', { name: 'Voltage' })
+        expect(voltageTile.textContent).toContain('Trend: next reading')
+        expect(voltageTile.textContent).not.toContain('Not reported')
         const card = screen.getByRole('button', { name: /Reconnect:/ }).closest('.nearby_card')
         expect(card?.textContent).toContain('Last packet')
         expect(card?.textContent).not.toContain('Last packet —')
@@ -313,7 +315,7 @@ describe('Connect a Node page', () => {
         })
         // Once on the card and once on the Battery tile, both green above 80 %.
         expect(screen.getAllByText('87 %')).toHaveLength(2)
-        expect(screen.getByText('No voltage reported yet.')).toBeDefined()
+        expect(screen.queryByRole('button', { name: 'Voltage' })).toBeNull()
         act(() => {
             radio.send(
                 telemetryPacket(123, {
@@ -326,7 +328,7 @@ describe('Connect a Node page', () => {
             )
         })
         expect(screen.getAllByText('≈5 %')).toHaveLength(2)
-        expect(screen.getByText('On external power, estimated from voltage')).toBeDefined()
+        expect(screen.getByText(/^On external power, estimated from voltage/)).toBeDefined()
         expect(screen.getByText('Good')).toBeDefined()
         expect(screen.getByText('Good · 6 dB · -90 dBm')).toBeDefined()
         expect(screen.queryByText('View details')).toBeNull()
@@ -379,8 +381,8 @@ describe('Connect a Node page', () => {
                 )
             )
         })
-        expect(screen.getByText('↑ +0.05 V')).toBeDefined()
-        expect(screen.getByText(/3.5 V → 3.55 V over 1 min/)).toBeDefined()
+        expect(screen.getByRole('button', { name: 'Voltage' }).textContent).toContain('3.55 V')
+        expect(screen.getByText('↑ +0.05 V over 1 min')).toBeDefined()
         expect(screen.queryByText(/INA219/)).toBeNull()
         expect(screen.queryByText('Needs a second voltage reading to show a trend.')).toBeNull()
         expect(

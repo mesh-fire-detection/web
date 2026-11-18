@@ -9,7 +9,7 @@ import { findNode, LINKS, linkQuality, type MeshNode } from '@core/content/netwo
 import { coordinate, sinceMinutes } from '@core/format/format'
 import { formatDistance, formatLength } from '@core/format/units'
 
-const STATUS_KIND = { online: 'live', degraded: 'warn', offline: 'dead' } as const
+const STATUS_KIND = { online: 'live', late: 'warn', offline: 'dead' } as const
 
 export function NodePanel({ node, onClose }: { node: MeshNode; onClose: () => void }) {
     const { system } = useUnitSystem()

@@ -80,10 +80,10 @@ describe('Nodes', () => {
 
     it('reads its filters from the URL, so a shared link shows the same view', async () => {
         stubApi({ [SESSION]: SIGNED_IN, 'GET /v1/nodes': json({ nodes: [RIDGE, BENCH, GATE] }) })
-        renderAt('/nodes?status=degraded')
+        renderAt('/nodes?status=late')
 
         expect(await listed()).toEqual(['Truck Road Gate'])
-        expect(screen.getByLabelText<HTMLSelectElement>('Status').value).toBe('degraded')
+        expect(screen.getByLabelText<HTMLSelectElement>('Status').value).toBe('late')
     })
 
     it('writes each filter into the URL as it is applied', async () => {

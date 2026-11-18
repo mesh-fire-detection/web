@@ -1,13 +1,60 @@
 import type { Node, NodeRole, NodeStatus, NodeType } from '@core/api/nodes'
+import { nodesContent } from '@core/content/nodes/nodes'
 
 export const NODE_TYPES = ['base', 'cellular', 'sensor', 'vision'] as const satisfies NodeType[]
 export const NODE_ROLES = ['gateway', 'sensor', 'base', 'vision'] as const satisfies NodeRole[]
-export const NODE_STATUSES = ['online', 'degraded', 'offline'] as const satisfies NodeStatus[]
+export const NODE_STATUSES = ['online', 'late', 'offline'] as const satisfies NodeStatus[]
 const SORT_KEYS = ['name', 'role', 'status', 'battery', 'heard'] as const
 export type SortKey = (typeof SORT_KEYS)[number]
 type Direction = 'ascending' | 'descending'
 
-export const STATUS_KIND = { online: 'live', degraded: 'warn', offline: 'dead' } as const
+export const STATUS_KIND = { online: 'live', late: 'warn', offline: 'dead' } as const
+
+/**
+ * How the node was last heard, for beside its status: `via browser`, `via
+ * Ridge gateway`, or a gateway's own `via Wi-Fi`. Null before it is heard.
+ */
+export function heardViaText(heardVia: Node['heardVia']): string | null {
+    if (heardVia === null) return null
+    const { power, connections } = nodesContent
+    const path =
+        heardVia.via === 'browser'
+            ? power.browser
+            : heardVia.via === 'gateway'
+              ? (heardVia.gateway?.name ?? null)
+              : heardVia.network === null
+                ? connections.via[heardVia.via]
+                : connections.network[heardVia.network]
+    return path === null ? null : `${power.via} ${path}`
+}
+
+type PowerTone = 'live' | 'warn' | 'dead' | 'default' | 'faint'
+
+/**
+ * What powers a node, in a few words: `Plugged in · 95%`, `Battery low · 12%`,
+ * `Plugged in · No battery`. Plugged in and a battery level can both be shown.
+ */
+export function powerText(power: Node['power']): {
+    readonly text: string
+    readonly tone: PowerTone
+} {
+    if (power === null) return { text: '—', tone: 'faint' }
+    const words = nodesContent.power
+    const parts = [
+        power.pluggedIn ? words.plugged : power.charging ? words.charging : null,
+        power.battery === 'none' ? words.none : power.battery === 'low' ? words.low : null,
+        power.batteryPct === null ? null : `${String(power.batteryPct)}%`,
+    ].filter((part) => part !== null)
+    const tone: PowerTone =
+        power.battery === 'low'
+            ? 'dead'
+            : power.pluggedIn || power.charging
+              ? 'live'
+              : power.battery === 'none' || (power.batteryPct !== null && power.batteryPct < 50)
+                ? 'warn'
+                : 'default'
+    return { text: parts.length === 0 ? '—' : parts.join(' · '), tone }
+}
 
 /** The map focused on these nodes; only those with a position can be shown there. */
 export function mapLink(nodes: readonly Pick<Node, 'id' | 'position'>[]): string | null {
@@ -17,16 +64,24 @@ export function mapLink(nodes: readonly Pick<Node, 'id' | 'position'>[]): string
         : `/map?nodes=${placed.map((node) => encodeURIComponent(node.id)).join(',')}`
 }
 
-type NodeUse = 'field' | 'quiet' | 'unused'
+type NodeUse = 'field' | 'computer' | 'recent' | 'quiet' | 'unused'
 
-/** What the network knows of a node: hearing it is the only evidence it is out there. */
-export function nodeUse(node: Pick<Node, 'enabled' | 'lastHeardAt' | 'status'>): NodeUse {
+/**
+ * What the network knows of a node. Heard through a gateway, it is out there;
+ * last heard through a browser, it is on a computer, not in the field. Someone
+ * not on the node is not told about the browser, so they get `recent`.
+ */
+export function nodeUse(
+    node: Pick<Node, 'enabled' | 'lastHeardAt' | 'status' | 'heardVia'>
+): NodeUse {
     if (!node.enabled || node.lastHeardAt === null) return 'unused'
-    return node.status === 'offline' ? 'quiet' : 'field'
+    if (node.status === 'offline') return 'quiet'
+    if (node.heardVia === null) return 'recent'
+    return node.heardVia.via === 'browser' ? 'computer' : 'field'
 }
 
 /** Quietest first when ascending, so the nodes that need a visit come to the top. */
-const STATUS_RANK: Record<NodeStatus, number> = { offline: 0, degraded: 1, online: 2 }
+const STATUS_RANK: Record<NodeStatus, number> = { offline: 0, late: 1, online: 2 }
 
 /** The list's filters and sort, all kept in the URL so a filtered view can be shared. */
 export type Filters = {
@@ -104,7 +159,8 @@ export function sortValue(node: Node, key: SortKey, now: number): string | numbe
             return STATUS_RANK[node.status]
         }
         case 'battery': {
-            return node.batteryPct
+            // Plugged in ranks above any battery level.
+            return node.power?.pluggedIn === true ? 101 : (node.power?.batteryPct ?? null)
         }
         case 'heard': {
             // Never heard is the quietest of all.

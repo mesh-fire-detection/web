@@ -101,7 +101,7 @@ export function HomePage() {
 
                     <Grid columns={4} minColumnWidth={160} gap={5}>
                         <Metric label='Online' value={counts.online} tone='live' size='lg' />
-                        <Metric label='Degraded' value={counts.degraded} tone='warn' size='lg' />
+                        <Metric label='Late' value={counts.late} tone='warn' size='lg' />
                         <Metric label='Offline' value={counts.offline} tone='dead' size='lg' />
                         <Metric
                             label='Hardware cost'

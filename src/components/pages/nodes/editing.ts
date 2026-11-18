@@ -1,4 +1,4 @@
-import type { Node, NodeChanges, NodeType } from '@core/api/nodes'
+import type { Node, NodeChanges, NodeType, PowerSource } from '@core/api/nodes'
 import { nodeContent } from '@core/content/nodes/node'
 
 const invalid = nodeContent.edit.invalid
@@ -14,6 +14,7 @@ export type Draft = {
     readonly deployedOn: string
     readonly note: string
     readonly exactPosition: boolean
+    readonly powerSource: PowerSource | 'none'
 }
 
 export type DraftErrors = Partial<Record<keyof Draft, string>>
@@ -34,6 +35,7 @@ export function draftOf(node: Node): Draft {
         deployedOn: node.deployedOn ?? '',
         note: node.details?.note ?? '',
         exactPosition: node.details?.exactPosition ?? false,
+        powerSource: node.details?.powerSource ?? 'none',
     }
 }
 
@@ -95,6 +97,7 @@ export function parseDraft(
                   deployedOn,
                   note: orNull(draft.note),
                   exactPosition: draft.exactPosition,
+                  powerSource: draft.powerSource === 'none' ? null : draft.powerSource,
               },
           }
 }

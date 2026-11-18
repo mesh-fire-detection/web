@@ -5,6 +5,31 @@ releases are cut is in [RELEASING.md](RELEASING.md).
 
 ## Unreleased
 
+Needs backend 0.4.0 for status, how a node was heard, and power.
+
+### Changed
+
+- **Readings** on a node's page and on Connect a Node are one panel: sensor
+  groups first, then Power, each tile with a sparkline of its history, and the
+  history chart under them. Only what a node has reported gets a tile.
+- Node status is **Online**, **Late** or **Offline**, by when the node was last
+  heard by any path, including a browser. Beside it, how: `via browser` (for
+  its people and admins), `via` a named gateway, or a gateway's own Wi-Fi or
+  Cellular.
+- The **Battery** column on `/nodes` is **Power**: plugged in and a battery
+  level together, such as `Plugged in · 95%`, `Battery low · 12%` or `Plugged in
+· No battery`. The Battery tile on a node's page agrees with it.
+
+### Added
+
+- **Power source** in a node's edit form: Battery, Solar and battery, or Always
+  plugged in, for boards that cannot tell USB is connected.
+- Readable names for the particle counts, sorted by size.
+
+### Fixed
+
+- A voltage just under zero no longer shows as `-0 V`.
+
 ## 0.4.0 — 2026-11-17
 
 Needs backend 0.3.1 for Connection path routes timed per way in. Released

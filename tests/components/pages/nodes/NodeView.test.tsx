@@ -74,7 +74,7 @@ describe('Node view', () => {
         expect(screen.queryByText('Details')).toBeNull()
         expect(screen.queryByText('Yours')).toBeNull()
         expect(screen.queryByRole('heading', { name: 'Owners' })).toBeNull()
-        expect(await screen.findByText('Sensor readings')).toBeDefined()
+        expect(await screen.findByRole('heading', { name: 'Readings' })).toBeDefined()
         expect(screen.queryByRole('link', { name: 'Open in Connect' })).toBeNull()
     })
 
@@ -110,12 +110,58 @@ describe('Node view', () => {
         expect(await screen.findAllByText('12.25 °C')).not.toHaveLength(0)
         expect(screen.getByText('88 %')).toBeDefined()
         expect(screen.queryByText('Signal')).toBeNull()
+        // Sensors first, then power, and only what the node reported.
+        const tiles = screen
+            .getAllByRole('button')
+            .map((button) => button.getAttribute('aria-label'))
+            .filter((label) => ['Temperature', 'Battery', 'Voltage', 'IAQ'].includes(label ?? ''))
+        expect(tiles).toEqual(['Temperature', 'Battery', 'Voltage'])
         await user.click(screen.getByRole('button', { name: 'Temperature' }))
         expect(screen.getByText('2 readings')).toBeDefined()
         expect(screen.getByText('From the Mesh Fire Detection server.')).toBeDefined()
         // A truncated range is missing its newest rows, so it asks for a shorter one.
         const readingCalls = api.mock.calls.filter(([url]) => url.includes('/readings'))
         expect(readingCalls).toHaveLength(2)
+    })
+
+    it('shows a gateway without sensors as power only, with no battery and no -0 V', async () => {
+        // A gateway on USB with its battery gone: 101 stored as 100, voltage just under zero.
+        const metrics = [3, 2, 1].map((minutes) => ({
+            batteryPct: 100,
+            voltage: -0.001,
+            uptimeS: 60,
+            recordedAt: minutesAgo(minutes * 5),
+        }))
+        stubApi({
+            [SESSION]: SIGNED_IN,
+            'GET /v1/nodes/sen-01': json({
+                node: {
+                    ...RIDGE,
+                    power: {
+                        pluggedIn: true,
+                        charging: false,
+                        batteryPct: null,
+                        battery: 'none',
+                        at: minutesAgo(5),
+                    },
+                },
+            }),
+            'GET /v1/nodes/sen-01/readings': NO_READINGS,
+            'GET /v1/nodes/sen-01/metrics': json({ from: '', to: '', truncated: false, metrics }),
+        })
+        renderAt('/nodes/sen-01')
+
+        expect(await screen.findByRole('heading', { name: 'History · Battery' })).toBeDefined()
+        expect(
+            screen.getByText('Select any tile to see its history in the chart below.')
+        ).toBeDefined()
+        expect(screen.getByText('No battery')).toBeDefined()
+        expect(screen.getByText('No battery connected, or it is flat')).toBeDefined()
+        // Sensors it never reported are left out.
+        expect(screen.queryByText('Environment · BME680')).toBeNull()
+        expect(screen.queryByText('Particles · PMSA003I')).toBeNull()
+        expect(screen.queryByRole('button', { name: 'Temperature' })).toBeNull()
+        expect(document.body.textContent).not.toContain('-0 V')
     })
 
     it('charts battery history and how fast it drains when the battery tile is picked', async () => {
@@ -363,6 +409,7 @@ describe('Node view', () => {
                 deployedOn: null,
                 note: 'On the shelf above the bench.',
                 exactPosition: false,
+                powerSource: null,
             },
         ])
     })

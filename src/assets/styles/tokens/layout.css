@@ -36,4 +36,6 @@
     --chart_stroke: 2px;
     --chart_dot: 8px;
     --chart_ring: 12px;
+    --sparkline_height: 1.75rem;
+    --sparkline_stroke: 1.5px;
 }

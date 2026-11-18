@@ -16,11 +16,11 @@ import { NODES, type MeshNode } from '@core/content/network/network'
 import { coordinate, sinceMinutes } from '@core/format/format'
 import { formatLength } from '@core/format/units'
 
-const STATUS_KIND = { online: 'live', degraded: 'warn', offline: 'dead' } as const
+const STATUS_KIND = { online: 'live', late: 'warn', offline: 'dead' } as const
 const STATUS_OPTIONS = [
     { value: 'all', label: 'All statuses' },
     { value: 'online', label: 'Online' },
-    { value: 'degraded', label: 'Degraded' },
+    { value: 'late', label: 'Late' },
     { value: 'offline', label: 'Offline' },
 ] as const
 type NodeSortKey = 'name' | 'type' | 'battery' | 'heard' | 'antenna' | 'deployed'
