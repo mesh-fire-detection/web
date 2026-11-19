@@ -3,6 +3,35 @@
 Status: implemented at `/nodes` and `/nodes/:id`. Tracks web#5; the decisions
 behind it are backend#11, backend#15 and backend `docs/plans/nodes.md`.
 
+## Staying current
+
+`/nodes`, a node's page and its path keep themselves current without a reload:
+
+- They ask the server again every minute while the tab is in view, at once on
+  coming back to the tab or back online, and as soon as this browser has copied
+  new readings there. A hidden tab asks nothing.
+- A refresh that fails keeps what is shown; only a first load shows the error.
+  Data that has not changed keeps its place, so nothing below it reloads.
+- Ages keep counting, and **Updated 1 min ago** says how fresh the page is.
+- A node's page holds its refreshes while its edit form is open.
+- If the session ends while a page is open, the next refresh is refused. The
+  site checks the session once, then signs out and sends the person to sign in
+  with **You were signed out**, and back to the same page afterwards. A refusal
+  the session check does not confirm changes nothing.
+- Ages of server data count from the server's clock, read from each response's
+  `Date` header, so a computer whose clock is wrong still shows a node heard
+  just now as **just now**. What `/connect` heard itself counts from this
+  browser's clock, which stamped it.
+- **Expected** on a node's page says when the server expects to hear it and
+  when it turns late: `Every 30 min, as set on the node · late after 1 h 15 min
+· cellular delay 2 min`. The interval is the one set on the node, how often
+  it has been reporting when that disagrees, or assumed; the backend works it
+  out (backend `docs/SPEC.md`, Node status).
+- **Present tense only while heard.** Plugged in, charging, a low battery and
+  `via` describe a node now, so an offline node gets none of them: Power shows
+  the level it last reported and when, and its path reads `last via Ridge
+gateway`. Late nodes keep them; they are still being heard, just slowly.
+
 ## Who sees it
 
 Signed-in people only. Signed out, both routes send the person to sign in,
@@ -25,9 +54,13 @@ under the facts.
 
 ## The list, `/nodes`
 
-- Columns: node (name, ID and position), type, status, battery, last heard.
+- Columns: node (name, ID and position), role, status, power, last heard.
   Every column sorts; status puts offline first, and last heard pressed twice
   puts the quietest first, never-heard nodes before all others.
+- Power says **Plugged in**, **Charging** and **Battery low** only while a node
+  is heard: they are about now. An offline node shows the battery level it last
+  reported and how long ago, such as `100% · 3 h ago`, and its page's Battery
+  tile drops "external power" the same way.
 - Filters: **Show** (all or yours), **Type**, **Status**, and a search over ID
   and name. Filters and sort live in the URL (`mine=1`, `type`, `status`, `q`,
   `sort`, `dir=desc`), so a view survives a reload and can be shared. Changes
@@ -89,10 +122,12 @@ under the facts.
 
 ## Backing up what a browser saved
 
-Opening `/account` or your own node's page copies what `/connect` saved in this
-browser to the server, automatically, for nodes on your account. Adding a node to
-an account is the deliberate act; nothing about a node outside your account is
-sent, and `/connect` itself sends nothing. The browser keeps its copy.
+While this tab is connected to a node and you are signed in, what `/connect`
+saved in this browser is copied to the server once a minute, on whatever page
+you are on, and pages showing nodes ask the server again as soon as something
+new arrives. Opening `/account` or your own node's page copies it too. Only
+nodes on your account are sent: adding a node to an account is the deliberate
+act. The browser keeps its copy.
 
 - **Sent:** saved readings, connections, restarts, malformed packets, the short
   name and settings from the newest connection. Most nodes without a set clock

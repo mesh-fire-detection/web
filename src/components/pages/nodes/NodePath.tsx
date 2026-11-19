@@ -1,5 +1,6 @@
-import { Fragment, useEffect, useState } from 'react'
+import { Fragment, useState } from 'react'
 
+import { useLive, useNow } from '@components/app/Live'
 import { Age, NodeTag } from '@components/pages/build/nearby/Indicators'
 import { minutesSince } from '@components/pages/nodes/listing'
 import { RouteLeg, RouteStop, RouteTrail } from '@components/shared/page/Timeline'
@@ -322,19 +323,8 @@ function NearbyList({ nearby }: { readonly nearby: readonly Nearby[] }) {
 
 /** Path to the server and the nodes around it, from backend `/v1/nodes/:id/path`. */
 export function NodePathView({ node }: { readonly node: Node }) {
-    const [loaded, setLoaded] = useState<
-        'failed' | { readonly path: NodePath; readonly at: number } | null
-    >(null)
-
-    useEffect(() => {
-        let current = true
-        void fetchNodePath(node.id).then((result) => {
-            if (current) setLoaded(result.ok ? { path: result.data, at: Date.now() } : 'failed')
-        })
-        return () => {
-            current = false
-        }
-    }, [node.id])
+    const { live } = useLive(`path:${node.id}`, () => fetchNodePath(node.id))
+    const clock = useNow(15_000)
 
     return (
         <>
@@ -348,20 +338,23 @@ export function NodePathView({ node }: { readonly node: Node }) {
                             {words.lede}
                         </Text>
                     </Stack>
-                    {loaded === null ? (
+                    {live.kind === 'loading' ? (
                         <Text role='status' size='sm' tone='muted'>
                             {words.loading}
                         </Text>
-                    ) : loaded === 'failed' ? (
+                    ) : live.kind === 'failed' ? (
                         <Text size='sm' tone='muted'>
                             {words.failed}
                         </Text>
                     ) : (
-                        <Diagram now={loaded.at} routes={routesFor(node, loaded.path)} />
+                        <Diagram
+                            now={Math.max(clock, live.at)}
+                            routes={routesFor(node, live.data)}
+                        />
                     )}
                 </Stack>
             </Box>
-            {loaded === null || loaded === 'failed' ? null : (
+            {live.kind === 'ready' ? (
                 <Box tone='surface' padding={5} radius='md'>
                     <Stack gap={3}>
                         <Stack gap={1}>
@@ -372,10 +365,10 @@ export function NodePathView({ node }: { readonly node: Node }) {
                                 {words.nearby.lede}
                             </Text>
                         </Stack>
-                        <NearbyList nearby={loaded.path.nearby} />
+                        <NearbyList nearby={live.data.nearby} />
                     </Stack>
                 </Box>
-            )}
+            ) : null}
         </>
     )
 }

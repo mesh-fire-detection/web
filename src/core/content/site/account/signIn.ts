@@ -3,6 +3,7 @@ import type { SignInContent } from '@core/content/types'
 export const signInContent = {
     title: 'Sign in',
     membersOnly: 'That page is for members. Sign in to see it.',
+    ended: 'You were signed out. Sign in again to go back to where you were.',
     email: {
         lede: "We'll email you a six-digit code.",
         label: 'Email',
