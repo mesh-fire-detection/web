@@ -9,6 +9,7 @@ import {
 } from 'react'
 
 import { fetchSession, signOut as requestSignOut, type SessionUser } from '@core/api/auth'
+import { onSignedOutAnswer } from '@core/api/client'
 
 /**
  * `loading` until the API has answered once. The header shows neither "Sign in"
@@ -17,7 +18,11 @@ import { fetchSession, signOut as requestSignOut, type SessionUser } from '@core
  */
 export type Session =
     | { readonly status: 'loading' }
-    | { readonly status: 'signed_out' }
+    | {
+          readonly status: 'signed_out'
+          /** The session ended while the site was open, rather than never having been. */
+          readonly ended?: boolean
+      }
     | { readonly status: 'signed_in'; readonly user: SessionUser }
 
 type SessionValue = {
@@ -51,6 +56,29 @@ export const SessionProvider = ({ children }: SessionProviderProperties) => {
             current = false
         }
     }, [])
+
+    // A page refreshing itself finds out first that the session has gone. One
+    // refusal is checked against the API before anyone is signed out.
+    const signedInNow = session.status === 'signed_in'
+    useEffect(() => {
+        if (!signedInNow) return
+        let current = true
+        let checking = false
+        const unsubscribe = onSignedOutAnswer(() => {
+            if (checking) return
+            checking = true
+            void fetchSession().then((result) => {
+                checking = false
+                if (current && result.ok && result.data === null) {
+                    setSession({ status: 'signed_out', ended: true })
+                }
+            })
+        })
+        return () => {
+            current = false
+            unsubscribe()
+        }
+    }, [signedInNow])
 
     const signedIn = useCallback((user: SessionUser) => {
         setSession({ status: 'signed_in', user })

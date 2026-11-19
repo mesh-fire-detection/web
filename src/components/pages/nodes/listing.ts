@@ -1,6 +1,7 @@
 import type { Node, NodeRole, NodeStatus, NodeType } from '@core/api/nodes'
 import { nodesContent } from '@core/content/nodes/nodes'
 import { sinceMinutes } from '@core/format/format'
+import { duration } from '@core/nearby/metrics'
 
 export const NODE_TYPES = ['base', 'cellular', 'sensor', 'vision'] as const satisfies NodeType[]
 export const NODE_ROLES = ['gateway', 'sensor', 'base', 'vision'] as const satisfies NodeRole[]
@@ -12,10 +13,21 @@ type Direction = 'ascending' | 'descending'
 export const STATUS_KIND = { online: 'live', late: 'warn', offline: 'dead' } as const
 
 /**
- * How the node was last heard, for beside its status: `via browser`, `via
- * Ridge gateway`, or a gateway's own `via Wi-Fi`. Null before it is heard.
+ * Whether what a node last said still describes it now. Plugged in, charging,
+ * a low battery and the path it is heard by are said in the present tense only
+ * while it is heard; an offline node gets what it last said and when.
  */
-export function heardViaText(heardVia: Node['heardVia']): string | null {
+export function isCurrent(node: Pick<Node, 'status'>): boolean {
+    return node.status !== 'offline'
+}
+
+/**
+ * How the node was last heard, for beside its status: `via browser`, `via
+ * Ridge gateway`, or a gateway's own `via Wi-Fi`; `last via` once it is
+ * offline. Null before it is heard.
+ */
+export function heardViaText(node: Pick<Node, 'heardVia' | 'status'>): string | null {
+    const { heardVia } = node
     if (heardVia === null) return null
     const { power, connections } = nodesContent
     const path =
@@ -26,7 +38,7 @@ export function heardViaText(heardVia: Node['heardVia']): string | null {
               : heardVia.network === null
                 ? connections.via[heardVia.via]
                 : connections.network[heardVia.network]
-    return path === null ? null : `${power.via} ${path}`
+    return path === null ? null : `${isCurrent(node) ? power.via : power.lastVia} ${path}`
 }
 
 type PowerTone = 'live' | 'warn' | 'dead' | 'default' | 'faint'
@@ -48,7 +60,7 @@ export function powerText(
     const { power } = node
     if (power === null) return { text: '—', tone: 'faint' }
     const words = nodesContent.power
-    if (node.status === 'offline') {
+    if (!isCurrent(node)) {
         const level =
             power.battery === 'none'
                 ? words.none
@@ -72,6 +84,29 @@ export function powerText(
                 ? 'warn'
                 : 'default'
     return { text: parts.length === 0 ? '—' : parts.join(' · '), tone }
+}
+
+const minutes = (value: number): string => duration(value * 60_000)
+
+/**
+ * When the node is expected, in a line: `Every 30 min, as set on the node ·
+ * late after 1 h 15 min · cellular delay 2 min`. Null from an older backend.
+ */
+export function expectedText(
+    expected: Node['expected'],
+    words: Readonly<
+        Record<'every' | 'configured' | 'observed' | 'default' | 'delay' | 'lateAfter', string>
+    >
+): string | null {
+    return expected === undefined
+        ? null
+        : [
+              `${words.every} ${minutes(expected.intervalMin)}, ${words[expected.source]}`,
+              `${words.lateAfter} ${minutes(expected.lateMin)}`,
+              expected.delayMin >= 1 ? `${words.delay} ${minutes(expected.delayMin)}` : null,
+          ]
+              .filter((part) => part !== null)
+              .join(' · ')
 }
 
 /** The map focused on these nodes; only those with a position can be shown there. */
@@ -178,7 +213,7 @@ export function sortValue(node: Node, key: SortKey, now: number): string | numbe
         }
         case 'battery': {
             // Plugged in ranks above any battery level, while the node is heard.
-            return node.power?.pluggedIn === true && node.status !== 'offline'
+            return node.power?.pluggedIn === true && isCurrent(node)
                 ? 101
                 : (node.power?.batteryPct ?? null)
         }

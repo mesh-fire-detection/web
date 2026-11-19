@@ -5,7 +5,9 @@ import { StrictMode } from 'react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
+import { backUpConnectedNodes } from '@components/account/nodeBackup'
 import { NavMenuProvider } from '@components/app/NavMenuProvider'
+import { RadioBackup } from '@components/app/RadioBackup'
 import { RadioProvider } from '@components/app/RadioProvider'
 import { SessionProvider } from '@components/app/SessionProvider'
 import { UnitsProvider } from '@components/app/UnitsProvider'
@@ -26,6 +28,10 @@ vi.mock('@core/nearby/transport/bluetooth', () => ({
     knownBluetoothDevices: vi.fn(() => Promise.resolve([])),
 }))
 
+vi.mock('@components/account/nodeBackup', () => ({
+    backUpConnectedNodes: vi.fn(() => Promise.resolve(0)),
+}))
+
 vi.mock('@core/nearby/transport/serial', () => ({
     serialSupport: vi.fn(() => 'unsupported'),
     chooseSerialDevice: vi.fn(),
@@ -36,6 +42,7 @@ afterEach(() => {
     cleanup()
     vi.clearAllMocks()
     vi.mocked(knownBluetoothDevices).mockResolvedValue([])
+    vi.mocked(backUpConnectedNodes).mockResolvedValue(0)
     window.localStorage.clear()
 })
 
@@ -68,6 +75,7 @@ function renderSite(path: string) {
                 <SessionProvider>
                     <UnitsProvider>
                         <RadioProvider>
+                            <RadioBackup />
                             <NavMenuProvider>
                                 <Header />
                                 <Routes>
@@ -89,6 +97,8 @@ describe('The radio across pages', () => {
         renderSite('/nodes')
         await screen.findByRole('table')
         expect(knownBluetoothDevices).not.toHaveBeenCalled()
+        // Nothing connected, so nothing to copy to the server.
+        expect(backUpConnectedNodes).not.toHaveBeenCalled()
         expect(screen.queryByRole('link', { name: /^Connected to/ })).toBeNull()
     })
 
@@ -100,6 +110,10 @@ describe('The radio across pages', () => {
         await user.click(screen.getByRole('button', { name: 'Add Bluetooth device' }))
         await waitFor(() => {
             expect(screen.getByText('1 added · 1 connected')).toBeDefined()
+        })
+        // A connected node's readings start going to the server straight away.
+        await waitFor(() => {
+            expect(backUpConnectedNodes).toHaveBeenCalled()
         })
         // On Connect itself the page says it; the header does not repeat it.
         expect(screen.queryByRole('link', { name: /^Connected to/ })).toBeNull()

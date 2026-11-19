@@ -5,8 +5,29 @@ releases are cut is in [RELEASING.md](RELEASING.md).
 
 ## Unreleased
 
+### Added
+
+- `/nodes`, a node's page and its connection path **stay current** without a
+  reload: they ask again every minute while in view, on returning to the tab,
+  and when this browser has sent new readings. Ages keep counting, and
+  **Updated 1 min ago** says how fresh each page is.
+- While a node of yours is connected on **Connect a Node**, its readings go to
+  the server every minute, from any page, not only when you open its page or
+  Account.
+- Ages of server data count from the **server's clock**, so a computer whose
+  clock is wrong no longer shows wrong ages. Needs the backend release that
+  exposes its `Date` header; without it, ages use this computer's clock as
+  before.
+- **Expected** on a node's page: how often the node reports, whether that is
+  its setting or what it has been doing, when it turns late, and its cellular
+  delay. Needs the backend release that gives each node its own interval.
+- A page whose **sign-in expires** while open now signs out and sends you to
+  sign in, then back, instead of quietly showing data that stopped updating.
+
 ### Fixed
 
+- An offline node's status reads **last via** its path, not **via**, since it
+  is no longer being heard that way.
 - An offline node no longer reads **Plugged in**, **Charging** or **Battery
   low** from its last report. Power shows the level it last reported and how
   long ago, such as `100% · 3 h ago`, on `/nodes` and on its page.

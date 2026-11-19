@@ -1,4 +1,4 @@
-import type { NodeContent } from '@core/content/types'
+import type { NodeContent } from '@core/content/nodes/types'
 
 export const nodeContent = {
     title: 'Node',
@@ -49,6 +49,15 @@ export const nodeContent = {
         build: 'Build',
         heard: 'Last heard',
         status: 'Network status',
+    },
+    expected: {
+        label: 'Expected',
+        every: 'Every',
+        configured: 'as set on the node',
+        observed: 'as it has been reporting',
+        default: 'assumed',
+        delay: 'cellular delay',
+        lateAfter: 'late after',
     },
     path: {
         title: 'Connection path',

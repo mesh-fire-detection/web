@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import {
+    expectedText,
     heardViaText,
     listNodes,
     nodeUse,
@@ -10,6 +11,8 @@ import {
     writeFilters,
     type Filters,
 } from '@components/pages/nodes/listing'
+import type { Node } from '@core/api/nodes'
+import { nodeContent } from '@core/content/nodes/node'
 
 import { BENCH, GATE, RIDGE } from './fixtures'
 
@@ -90,14 +93,23 @@ describe('node list filters', () => {
 
 describe('status and power words', () => {
     it('says how a node was last heard', () => {
-        expect(heardViaText(null)).toBeNull()
-        expect(heardViaText({ via: 'browser', gateway: null, network: null })).toBe('via browser')
+        const heard = (heardVia: Node['heardVia']) => heardViaText({ heardVia, status: 'online' })
+        expect(heard(null)).toBeNull()
+        expect(heard({ via: 'browser', gateway: null, network: null })).toBe('via browser')
         expect(
-            heardViaText({ via: 'gateway', gateway: { id: 'n-0005', name: 'Gate' }, network: null })
+            heard({ via: 'gateway', gateway: { id: 'n-0005', name: 'Gate' }, network: null })
         ).toBe('via Gate')
-        expect(heardViaText({ via: 'notecard', gateway: null, network: 'cellular' })).toBe(
-            'via Cellular'
-        )
+        expect(heard({ via: 'notecard', gateway: null, network: 'cellular' })).toBe('via Cellular')
+    })
+
+    it('says an offline node was last heard that way, not that it is now', () => {
+        const heardVia = {
+            via: 'gateway',
+            gateway: { id: 'n-0005', name: 'Gate' },
+            network: null,
+        } as const
+        expect(heardViaText({ heardVia, status: 'late' })).toBe('via Gate')
+        expect(heardViaText({ heardVia, status: 'offline' })).toBe('last via Gate')
     })
 
     it('shows plugged in and a battery level together', () => {
@@ -172,5 +184,31 @@ describe('what a node is doing', () => {
     it('is quiet when offline, and unused when never heard', () => {
         expect(nodeUse({ ...heard, status: 'offline', heardVia: GATE.heardVia })).toBe('quiet')
         expect(nodeUse({ ...heard, lastHeardAt: null, heardVia: null })).toBe('unused')
+    })
+})
+
+describe('when a node is expected', () => {
+    const words = nodeContent.expected
+
+    it('says how often, where that comes from, when it turns late, and any cellular delay', () => {
+        expect(
+            expectedText(
+                {
+                    intervalMin: 30,
+                    source: 'configured',
+                    delayMin: 0,
+                    lateMin: 75,
+                    offlineMin: 180,
+                },
+                words
+            )
+        ).toBe('Every 30 min, as set on the node · late after 1 h 15 min')
+        expect(
+            expectedText(
+                { intervalMin: 5, source: 'observed', delayMin: 2, lateMin: 15, offlineMin: 32 },
+                words
+            )
+        ).toBe('Every 5 min, as it has been reporting · late after 15 min · cellular delay 2 min')
+        expect(expectedText(undefined, words)).toBeNull()
     })
 })

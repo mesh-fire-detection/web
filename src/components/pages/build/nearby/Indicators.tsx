@@ -1,5 +1,4 @@
-import { useSyncExternalStore } from 'react'
-
+import { useNow } from '@components/app/Live'
 import { Text } from '@components/shared/typography/Text'
 import { Badge, StatusDot, StatusLabel } from '@components/shared/widgets/Badge'
 import type { StatusKind } from '@components/shared/widgets/Badge'
@@ -12,37 +11,6 @@ import type { NodeKind } from '@core/nearby/firmware'
 import { age, localTime } from '@core/nearby/metrics'
 import { meshId } from '@core/nearby/model'
 import type { ConnectionState, NearbyNode } from '@core/nearby/model'
-
-// One shared ticker: only the elements that print an age re-render each second.
-const listeners = new Set<() => void>()
-const clock: { now: number; ticker: ReturnType<typeof setInterval> | undefined } = {
-    now: Date.now(),
-    ticker: undefined,
-}
-
-function subscribe(listener: () => void) {
-    listeners.add(listener)
-    if (clock.ticker === undefined) {
-        clock.now = Date.now()
-        clock.ticker = setInterval(() => {
-            clock.now = Date.now()
-            for (const notify of listeners) notify()
-        }, 1000)
-    }
-    return () => {
-        listeners.delete(listener)
-        if (listeners.size > 0) {
-            return
-        }
-
-        clearInterval(clock.ticker)
-        clock.ticker = undefined
-    }
-}
-
-function useNow(): number {
-    return useSyncExternalStore(subscribe, () => clock.now)
-}
 
 /** Relative age; the local time is available on hover. */
 export function Age({ time }: { readonly time: number }) {

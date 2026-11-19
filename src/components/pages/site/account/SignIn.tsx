@@ -68,7 +68,11 @@ export function SignInPage() {
         <Page title={copy.title}>
             <Section width='narrow'>
                 <Stack gap={5}>
-                    {step === 'email' && params.get('why') === 'members' ? (
+                    {step === 'email' && session.status === 'signed_out' && session.ended ? (
+                        <Text role='status' weight={600}>
+                            {copy.ended}
+                        </Text>
+                    ) : step === 'email' && params.get('why') === 'members' ? (
                         <Text weight={600}>{copy.membersOnly}</Text>
                     ) : null}
                     {step === 'email' ? (

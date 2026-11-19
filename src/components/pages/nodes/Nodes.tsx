@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Navigate, useLocation, useSearchParams } from 'react-router-dom'
 
 import { signInToSee } from '@components/account/flow'
+import { ServerTime, Updated, useLive, useNow } from '@components/app/Live'
 import { useRadioSnapshot } from '@components/app/RadioProvider'
 import { useSession } from '@components/app/SessionProvider'
 import { Page } from '@components/layout/Page'
@@ -113,7 +114,7 @@ function columnsFor(now: number, here: ReadonlySet<string>): readonly Column<Nod
             header: copy.table.status,
             sortValue: (node) => sortValue(node, 'status', now),
             render: (node) => {
-                const via = heardViaText(node.heardVia)
+                const via = heardViaText(node)
                 return (
                     <Stack gap={1} align='start'>
                         <StatusLabel
@@ -238,44 +239,27 @@ function ConnectLink() {
 function NodeDirectory() {
     const [params, setParams] = useSearchParams()
     const filters = readFilters(params)
-    const [loaded, setLoaded] = useState<
-        'failed' | { readonly nodes: readonly Node[]; readonly at: number } | null
-    >(null)
-    const [attempt, setAttempt] = useState(0)
+    const { live, retry } = useLive('nodes', fetchNodes)
+    const clock = useNow(15_000)
     const [draft, setDraft] = useState(filters.query)
-    const here = connectedMeshIds(useRadioSnapshot())
+    const radio = useRadioSnapshot()
 
-    useEffect(() => {
-        let current = true
-        void fetchNodes().then((result) => {
-            if (current) setLoaded(result.ok ? { nodes: result.data, at: Date.now() } : 'failed')
-        })
-        return () => {
-            current = false
-        }
-    }, [attempt])
-
-    if (loaded === null) {
+    if (live.kind === 'loading') {
         return (
             <Text role='status' tone='muted'>
                 {copy.loading}
             </Text>
         )
     }
-    if (loaded === 'failed') {
+    if (live.kind === 'failed') {
         return (
-            <ErrorState
-                onRetry={() => {
-                    setLoaded(null)
-                    setAttempt((count) => count + 1)
-                }}
-                title={copy.failed.title}
-            >
+            <ErrorState onRetry={retry} title={copy.failed.title}>
                 {copy.failed.body}
             </ErrorState>
         )
     }
-    if (loaded.nodes.length === 0) {
+    const nodes = live.data
+    if (nodes.length === 0) {
         return (
             <EmptyState action={<ConnectLink />} title={copy.empty.none.title}>
                 {copy.empty.none.body}
@@ -283,14 +267,18 @@ function NodeDirectory() {
         )
     }
 
+    // Never earlier than the answer, so an age is not shown younger than it was.
+    const now = Math.max(clock, live.at)
+    const here = connectedMeshIds(radio)
+
     // Replace rather than push: each filter change is not a step to go back through.
     const apply = (next: Filters) => {
         setParams(writeFilters(next), { replace: true })
     }
 
-    const rows = listNodes(loaded.nodes, filters, loaded.at)
-    const columns = columnsFor(loaded.at, here)
-    const noneMine = filters.mine && loaded.nodes.every((node) => !node.mine)
+    const rows = listNodes(nodes, filters, now)
+    const columns = columnsFor(now, here)
+    const noneMine = filters.mine && nodes.every((node) => !node.mine)
     const onMap = mapLink(rows)
 
     return (
@@ -302,13 +290,14 @@ function NodeDirectory() {
                 filters={filters}
                 setDraft={setDraft}
             />
-            {onMap === null ? null : (
-                <Row justify='end'>
+            <Row justify='between'>
+                <Updated at={live.at} />
+                {onMap === null ? null : (
                     <TextLink size='sm' to={onMap}>
                         {copy.viewOnMap}
                     </TextLink>
-                </Row>
-            )}
+                )}
+            </Row>
             <DataTable
                 caption={copy.table.caption}
                 columns={columns}
@@ -365,7 +354,9 @@ export function NodesPage() {
     ) : (
         <Page lede={copy.lede} title={copy.title}>
             <Section width='wide'>
-                <NodeDirectory />
+                <ServerTime>
+                    <NodeDirectory />
+                </ServerTime>
             </Section>
         </Page>
     )

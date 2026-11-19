@@ -196,6 +196,8 @@ export type SignInContent = {
     readonly title: string
     /** Shown when a members-only page sent the person here. */
     readonly membersOnly: string
+    /** When the session ran out while a page was open. */
+    readonly ended: string
     readonly email: {
         readonly lede: string
         readonly label: string
@@ -349,8 +351,8 @@ export type AccountContent = {
     }
 }
 
-type Words<Key extends string> = Readonly<Record<Key, string>>
-type Notice = Words<'title' | 'body'>
+export type Words<Key extends string> = Readonly<Record<Key, string>>
+export type Notice = Words<'title' | 'body'>
 
 /** `/nodes`: the list of registered nodes, behind the session. */
 export type NodesContent = PageHeading & {
@@ -379,12 +381,14 @@ export type NodesContent = PageHeading & {
     }
     readonly statuses: Words<'online' | 'late' | 'offline'>
     readonly table: Words<'caption' | 'node' | 'role' | 'status' | 'power' | 'heard'>
-    readonly power: Words<'plugged' | 'charging' | 'low' | 'none' | 'via' | 'browser'>
+    readonly power: Words<'plugged' | 'charging' | 'low' | 'none' | 'via' | 'lastVia' | 'browser'>
     readonly sources: Words<'label' | 'hint' | 'battery' | 'solar' | 'mains'>
     readonly viewOnMap: string
     readonly yours: string
     readonly disabled: string
     readonly connectedHere: string
+    /** Before how long ago the page last heard from the server. */
+    readonly updated: string
     readonly noPosition: string
     readonly approximately: string
     readonly empty: {
@@ -393,118 +397,6 @@ export type NodesContent = PageHeading & {
         readonly noResults: Notice
         readonly connect: string
         readonly clear: string
-    }
-}
-
-/** `/nodes/:id`: one node, and editing it for the people on it. */
-export type NodeContent = {
-    readonly title: string
-    readonly back: string
-    readonly loading: string
-    readonly notFound: Notice
-    readonly failed: Notice
-    readonly yours: string
-    readonly disabled: string
-    readonly unset: string
-    readonly use: Readonly<
-        Record<'field' | 'computer' | 'recent' | 'quiet' | 'unused', Words<'label' | 'body'>>
-    >
-    readonly connectedHere: string
-    readonly openConnect: string
-    readonly viewOnMap: string
-    readonly identity: Words<
-        'meshId' | 'roles' | 'connections' | 'hardware' | 'firmware' | 'build' | 'heard' | 'status'
-    >
-    readonly record: Words<'title' | 'lede' | 'position' | 'elevation' | 'antenna' | 'deployed'>
-    readonly path: Words<
-        | 'title'
-        | 'lede'
-        | 'loading'
-        | 'failed'
-        | 'none'
-        | 'self'
-        | 'server'
-        | 'notehub'
-        | 'broker'
-        | 'internet'
-        | 'notecard'
-        | 'signal'
-        | 'relayedBy'
-        | 'allRoutes'
-        | 'through'
-        | 'fromGateway'
-        | 'fromBrowser'
-        | 'lastUsed'
-        | 'fewerRoutes'
-        | 'connect'
-        | 'lora'
-        | 'oneHop'
-        | 'hops'
-        | 'direct'
-        | 'unknownHops'
-        | 'via'
-    > & {
-        readonly nearby: Words<'title' | 'lede' | 'theyHear' | 'none'>
-    }
-    readonly approximate: string
-    readonly details: Words<
-        | 'title'
-        | 'lede'
-        | 'position'
-        | 'elevation'
-        | 'shown'
-        | 'shownExact'
-        | 'shownApproximate'
-        | 'hardwareId'
-        | 'note'
-        | 'reported'
-        | 'registered'
-    >
-    readonly owners: Words<'title' | 'lede' | 'you' | 'added' | 'none'>
-    readonly more: Words<
-        | 'open'
-        | 'other'
-        | 'fromServer'
-        | 'fromBrowser'
-        | 'notConnected'
-        | 'shortName'
-        | 'settingsAsOf'
-        | 'lastConnected'
-        | 'lastBackedUp'
-        | 'notBackedUp'
-        | 'notReported'
-        | 'events'
-        | 'noEvents'
-        | 'eventsFailed'
-        | 'activity'
-        | 'noActivity'
-    > & { readonly eventKinds: Words<'connected' | 'disconnected' | 'restarted' | 'malformed'> }
-    readonly readings: Words<'loading' | 'failed' | 'sensors' | 'range'>
-    readonly edit: Words<
-        | 'open'
-        | 'title'
-        | 'name'
-        | 'type'
-        | 'notSet'
-        | 'latitude'
-        | 'longitude'
-        | 'recordTitle'
-        | 'recordLede'
-        | 'positionHint'
-        | 'elevation'
-        | 'antenna'
-        | 'deployed'
-        | 'deployedHint'
-        | 'note'
-        | 'exactPosition'
-        | 'exactHint'
-        | 'save'
-        | 'cancel'
-        | 'saved'
-    > & {
-        readonly invalid: Words<'name' | 'number' | 'latitude' | 'longitude' | 'pair' | 'date'>
-        /** Keyed by the API's error code, plus our own `rate_limited` and `unreachable`. */
-        readonly errors: Words<'bad_request' | 'rate_limited' | 'unreachable' | 'fallback'>
     }
 }
 

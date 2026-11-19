@@ -50,6 +50,7 @@ export const nodesContent = {
         low: 'Battery low',
         none: 'No battery',
         via: 'via',
+        lastVia: 'last via',
         browser: 'browser',
     },
     /** The power source its people may set: for boards that cannot tell USB is connected. */
@@ -63,6 +64,7 @@ export const nodesContent = {
     yours: 'Yours',
     disabled: 'Disabled',
     connectedHere: 'Connected here',
+    updated: 'Updated',
     noPosition: 'No position yet',
     viewOnMap: 'View these nodes on the map',
     approximately: 'about',

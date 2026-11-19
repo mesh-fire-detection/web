@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { BrowserRouter } from 'react-router-dom'
 
 import { NavMenuProvider } from '@components/app/NavMenuProvider'
+import { RadioBackup } from '@components/app/RadioBackup'
 import { RadioProvider } from '@components/app/RadioProvider'
 import { SessionProvider } from '@components/app/SessionProvider'
 import { UnitsProvider } from '@components/app/UnitsProvider'
@@ -18,6 +19,7 @@ export const AppProviders = ({ children }: AppProvidersProperties) => {
             <SessionProvider>
                 <UnitsProvider>
                     <RadioProvider>
+                        <RadioBackup />
                         <NavMenuProvider>{children}</NavMenuProvider>
                     </RadioProvider>
                 </UnitsProvider>

@@ -1,4 +1,5 @@
 import { SITE } from '@core/config/site'
+import { noteServerDate } from '@core/live/clock'
 
 const configured = import.meta.env['VITE_API_URL'] as string | undefined
 
@@ -39,6 +40,20 @@ const errorCode = (body: unknown): string => {
     return nested ?? codeOf(body) ?? 'unknown'
 }
 
+const refusedListeners = new Set<() => void>()
+
+/**
+ * Called when the API answers a request with 401: the session it was made
+ * with is gone. Sign-in's own calls are left out, since a wrong code is a 401
+ * too and says nothing about a session.
+ */
+export function onSignedOutAnswer(listener: () => void): () => void {
+    refusedListeners.add(listener)
+    return () => {
+        refusedListeners.delete(listener)
+    }
+}
+
 /**
  * A JSON request carrying the session cookie. The API sits on a sibling
  * subdomain, so the cookie is same-site but the request is cross-origin:
@@ -49,6 +64,7 @@ export async function apiRequest<T>(
     init: { readonly method?: 'GET' | 'POST' | 'PATCH' | 'DELETE'; readonly body?: unknown } = {}
 ): Promise<ApiResult<T>> {
     let response: Response
+    const sentAt = Date.now()
     try {
         response = await fetch(`${API_URL}${path}`, {
             method: init.method ?? 'GET',
@@ -60,6 +76,11 @@ export async function apiRequest<T>(
         return { ok: false, error: 'unreachable' }
     }
 
+    noteServerDate(response.headers.get('Date'), sentAt, Date.now())
+
+    if (response.status === 401 && !path.startsWith('/v1/auth/')) {
+        for (const listener of refusedListeners) listener()
+    }
     if (response.status === 429) return { ok: false, error: 'rate_limited' }
     if (response.status >= 500) return { ok: false, error: 'unreachable' }
 

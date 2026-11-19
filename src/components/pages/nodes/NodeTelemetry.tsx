@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { backUpConnectedNodes } from '@components/account/nodeBackup'
 import { FirmwareUpdate } from '@components/build/FirmwareUpdate'
 import { ReadingsPanel, SensorGuide } from '@components/pages/build/nearby/NodeReadings'
+import { isCurrent } from '@components/pages/nodes/listing'
 import { MoreDetails } from '@components/pages/nodes/MoreDetails'
 import { serverNode } from '@components/pages/nodes/serverNode'
 import { Box, Stack } from '@components/shared/primitives/Layout'
@@ -38,10 +39,14 @@ export function NodeTelemetry({ node }: { readonly node: Node }) {
         void Promise.all([fetchReadings(node.id), fetchDeviceMetrics(node.id)]).then(
             ([readings, metrics]) => {
                 if (!current) return
-                setNearby(
+                // The node changes when it reports, so this reloads with it; a failed
+                // reload keeps the readings already shown.
+                setNearby((previous) =>
                     readings.ok && metrics.ok
                         ? serverNode(node, readings.data, metrics.data)
-                        : 'failed'
+                        : previous === null || previous === 'failed'
+                          ? 'failed'
+                          : previous
                 )
             }
         )
@@ -70,7 +75,7 @@ export function NodeTelemetry({ node }: { readonly node: Node }) {
                 node={nearby}
                 title={copy.sensors}
                 power={node.power}
-                offline={node.status === 'offline'}
+                offline={!isCurrent(node)}
                 active={activeMetric}
                 onSelect={setPicked}
                 history={{ source: 'server', samples: nearby.history[activeMetric] ?? [] }}

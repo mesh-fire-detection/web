@@ -1,14 +1,16 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Navigate, useLocation, useParams } from 'react-router-dom'
 
 import { useConnectedNodes } from '@components/account/connectedNodes'
 import { signInToSee } from '@components/account/flow'
+import { ServerTime, Updated, useLive, useNow } from '@components/app/Live'
 import { useRadioSnapshot } from '@components/app/RadioProvider'
 import { useSession } from '@components/app/SessionProvider'
 import { useUnitSystem } from '@components/app/UnitsProvider'
 import { Page } from '@components/layout/Page'
 import { FirmwareBuild, FirmwareVersion } from '@components/pages/build/nearby/Indicators'
 import {
+    expectedText,
     heardViaText,
     mapLink,
     minutesSince,
@@ -35,12 +37,6 @@ import { meshId } from '@core/nearby/model'
 import { connectedMeshIds } from '@core/nearby/radio'
 
 const copy = nodeContent
-
-type Loaded =
-    | { readonly kind: 'loading' }
-    | { readonly kind: 'missing' }
-    | { readonly kind: 'failed' }
-    | { readonly kind: 'ready'; readonly node: Node; readonly at: number }
 
 const shownPosition = (position: readonly [number, number] | null): string =>
     position === null ? copy.unset : coordinate([position[0], position[1]])
@@ -148,10 +144,17 @@ function Identity({ node, now }: { readonly node: Node; readonly now: number }) 
             <Metric
                 label={words.status}
                 size='sm'
-                value={[nodesContent.statuses[node.status], heardViaText(node.heardVia)]
+                value={[nodesContent.statuses[node.status], heardViaText(node)]
                     .filter((part) => part !== null)
                     .join(' · ')}
             />
+            {node.expected === undefined ? null : (
+                <Metric
+                    label={copy.expected.label}
+                    size='sm'
+                    value={expectedText(node.expected, copy.expected)}
+                />
+            )}
             <Metric label={nodesContent.table.power} size='sm' value={powerText(node, now).text} />
         </Grid>
     )
@@ -302,23 +305,14 @@ function Details({ details }: { readonly details: NonNullable<Node['details']> }
 }
 
 function NodeBody({ id }: { readonly id: string }) {
-    const [loaded, setLoaded] = useState<Loaded>({ kind: 'loading' })
     const radio = useRadioSnapshot()
-    const [attempt, setAttempt] = useState(0)
     const [editing, setEditing] = useState(false)
     const [saved, setSaved] = useState(false)
-
-    useEffect(() => {
-        let current = true
-        void fetchNode(id).then((result) => {
-            if (!current) return
-            if (result.ok) setLoaded({ kind: 'ready', node: result.data, at: Date.now() })
-            else setLoaded({ kind: result.error === 'not_found' ? 'missing' : 'failed' })
-        })
-        return () => {
-            current = false
-        }
-    }, [id, attempt])
+    // Held while editing, so a refresh does not move the node under the form.
+    const { live, retry, replace } = useLive(`node:${id}`, () => fetchNode(id), {
+        paused: editing,
+    })
+    const clock = useNow(15_000)
 
     const back = (
         <Row>
@@ -328,28 +322,22 @@ function NodeBody({ id }: { readonly id: string }) {
         </Row>
     )
 
-    if (loaded.kind !== 'ready') {
+    if (live.kind !== 'ready') {
         return (
             <Page title={copy.title}>
                 <Section width='narrow'>
                     <Stack gap={5}>
                         {back}
-                        {loaded.kind === 'loading' ? (
+                        {live.kind === 'loading' ? (
                             <Text role='status' tone='muted'>
                                 {copy.loading}
                             </Text>
-                        ) : loaded.kind === 'missing' ? (
+                        ) : live.error === 'not_found' ? (
                             <EmptyState title={copy.notFound.title}>
                                 {copy.notFound.body}
                             </EmptyState>
                         ) : (
-                            <ErrorState
-                                onRetry={() => {
-                                    setLoaded({ kind: 'loading' })
-                                    setAttempt((count) => count + 1)
-                                }}
-                                title={copy.failed.title}
-                            >
+                            <ErrorState onRetry={retry} title={copy.failed.title}>
                                 {copy.failed.body}
                             </ErrorState>
                         )}
@@ -359,7 +347,9 @@ function NodeBody({ id }: { readonly id: string }) {
         )
     }
 
-    const { node, at } = loaded
+    const node = live.data
+    // Never earlier than the answer, so an age is not shown younger than it was.
+    const now = Math.max(clock, live.at)
     const here = connectedMeshIds(radio).has(node.meshId)
 
     return (
@@ -378,15 +368,14 @@ function NodeBody({ id }: { readonly id: string }) {
                         {here ? <Badge kind='live'>{nodesContent.connectedHere}</Badge> : null}
                     </Row>
                     <Text mono size='sm' tone='faint'>
-                        {[
-                            node.id,
-                            node.meshId,
-                            node.status === 'offline' ? null : heardViaText(node.heardVia),
-                        ]
+                        {[node.id, node.meshId, heardViaText(node)]
                             .filter((part) => part !== null)
                             .join(' · ')}
                     </Text>
-                    {back}
+                    <Row gap={4}>
+                        {back}
+                        <Updated at={live.at} />
+                    </Row>
                 </Stack>
             }
             title={node.name}
@@ -396,7 +385,7 @@ function NodeBody({ id }: { readonly id: string }) {
                     <Box tone='surface' padding={5} radius='md'>
                         <Stack gap={5}>
                             <UseLine node={node} now={here} />
-                            <Identity node={node} now={at} />
+                            <Identity node={node} now={now} />
                         </Stack>
                     </Box>
                     <NodePathView node={node} />
@@ -416,7 +405,7 @@ function NodeBody({ id }: { readonly id: string }) {
                                 setEditing(false)
                             }}
                             onSaved={(updated) => {
-                                setLoaded({ kind: 'ready', node: updated, at: Date.now() })
+                                replace(updated)
                                 setEditing(false)
                                 setSaved(true)
                             }}
@@ -460,6 +449,8 @@ export function NodePage() {
     return session.status === 'loading' ? (
         <Page title={copy.title}>{null}</Page>
     ) : (
-        <NodeBody id={id} key={id} />
+        <ServerTime>
+            <NodeBody id={id} key={id} />
+        </ServerTime>
     )
 }

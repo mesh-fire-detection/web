@@ -79,6 +79,19 @@ export type Power = {
 type Position = readonly [number, number]
 
 /**
+ * When the server expects to hear the node, and so when it turns late and
+ * offline: from the interval set on it, how often it has been reporting, or a
+ * default, plus how late its cellular path usually runs.
+ */
+type NodeExpected = {
+    readonly intervalMin: number
+    readonly source: 'configured' | 'observed' | 'default'
+    readonly delayMin: number
+    readonly lateMin: number
+    readonly offlineMin: number
+}
+
+/**
  * A registered node as any signed-in person sees it. `position` is
  * approximate (about 1 km) unless the node is yours or its people chose to
  * show it exactly; the page shows what it is given and nothing else.
@@ -93,6 +106,8 @@ export type Node = {
     readonly roles: readonly NodeRole[]
     readonly connections: readonly NodeConnection[]
     readonly status: NodeStatus
+    /** Absent from a backend older than 0.5. */
+    readonly expected?: NodeExpected
     readonly heardVia: HeardVia | null
     readonly power: Power | null
     readonly position: Position | null
