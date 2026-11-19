@@ -5,7 +5,10 @@ releases are cut is in [RELEASING.md](RELEASING.md).
 
 ## Unreleased
 
-Needs backend 0.4.0 for status, how a node was heard, and power.
+## 0.5.0 — 2026-11-18
+
+Needs backend 0.4.0 for status, how a node was heard, and power. Released
+after it.
 
 ### Changed
 
