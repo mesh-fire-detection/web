@@ -5,6 +5,11 @@ releases are cut is in [RELEASING.md](RELEASING.md).
 
 ## Unreleased
 
+## 0.6.0 — 2026-11-19
+
+Needs backend 0.5.0 for the Expected line and server-clock ages; works
+without them. Released after it.
+
 ### Added
 
 - `/nodes`, a node's page and its connection path **stay current** without a
