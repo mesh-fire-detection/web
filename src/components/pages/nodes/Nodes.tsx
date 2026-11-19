@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Navigate, useLocation, useSearchParams } from 'react-router-dom'
 
 import { signInToSee } from '@components/account/flow'
+import { useRadioSnapshot } from '@components/app/RadioProvider'
 import { useSession } from '@components/app/SessionProvider'
 import { Page } from '@components/layout/Page'
 import {
@@ -35,6 +36,7 @@ import { EmptyState, ErrorState } from '@components/shared/widgets/Callout'
 import { fetchNodes, type Node } from '@core/api/nodes'
 import { nodesContent } from '@core/content/nodes/nodes'
 import { coordinate, sinceMinutes } from '@core/format/format'
+import { connectedMeshIds } from '@core/nearby/radio'
 
 const copy = nodesContent
 
@@ -60,7 +62,8 @@ function place(node: Node): string {
     return node.approximate ? `${copy.approximately} ${shown}` : shown
 }
 
-function columnsFor(now: number): readonly Column<Node>[] {
+/** `here`: mesh IDs of the nodes this tab is connected to by radio. */
+function columnsFor(now: number, here: ReadonlySet<string>): readonly Column<Node>[] {
     return [
         {
             key: 'name',
@@ -78,6 +81,11 @@ function columnsFor(now: number): readonly Column<Node>[] {
                             </Badge>
                         ) : null}
                         {node.enabled ? null : <Badge size='xs'>{copy.disabled}</Badge>}
+                        {here.has(node.meshId) ? (
+                            <Badge kind='live' size='xs'>
+                                {copy.connectedHere}
+                            </Badge>
+                        ) : null}
                     </Row>
                     <Text as='span' size='2xs' mono tone='faint'>
                         {node.id} · {place(node)}
@@ -235,6 +243,7 @@ function NodeDirectory() {
     >(null)
     const [attempt, setAttempt] = useState(0)
     const [draft, setDraft] = useState(filters.query)
+    const here = connectedMeshIds(useRadioSnapshot())
 
     useEffect(() => {
         let current = true
@@ -280,7 +289,7 @@ function NodeDirectory() {
     }
 
     const rows = listNodes(loaded.nodes, filters, loaded.at)
-    const columns = columnsFor(loaded.at)
+    const columns = columnsFor(loaded.at, here)
     const noneMine = filters.mine && loaded.nodes.every((node) => !node.mine)
     const onMap = mapLink(rows)
 

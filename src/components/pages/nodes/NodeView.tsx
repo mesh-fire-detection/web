@@ -3,6 +3,7 @@ import { Navigate, useLocation, useParams } from 'react-router-dom'
 
 import { useConnectedNodes } from '@components/account/connectedNodes'
 import { signInToSee } from '@components/account/flow'
+import { useRadioSnapshot } from '@components/app/RadioProvider'
 import { useSession } from '@components/app/SessionProvider'
 import { useUnitSystem } from '@components/app/UnitsProvider'
 import { Page } from '@components/layout/Page'
@@ -31,6 +32,7 @@ import { nodesContent } from '@core/content/nodes/nodes'
 import { coordinate, sinceMinutes } from '@core/format/format'
 import { formatLength } from '@core/format/units'
 import { meshId } from '@core/nearby/model'
+import { connectedMeshIds } from '@core/nearby/radio'
 
 const copy = nodeContent
 
@@ -52,16 +54,16 @@ function kindOf(node: Node) {
 }
 
 /** Whether the node is out there, what it can be done with, and whether this computer knows it. */
-function UseLine({ node }: { readonly node: Node }) {
+function UseLine({ node, now }: { readonly node: Node; readonly now: boolean }) {
     const connected = useConnectedNodes()
-    const here = connected.some((report) => meshId(report.nodeNum) === node.meshId)
+    const before = !now && connected.some((report) => meshId(report.nodeNum) === node.meshId)
     const onMap = mapLink([node])
 
     return (
         <Stack gap={3}>
             <Text size='sm' tone='muted'>
                 {copy.use[nodeUse(node)].body}
-                {here ? ` ${copy.connectedHere}.` : null}
+                {before ? ` ${copy.connectedHere}.` : null}
             </Text>
             <Row gap={3}>
                 {onMap === null ? null : (
@@ -301,6 +303,7 @@ function Details({ details }: { readonly details: NonNullable<Node['details']> }
 
 function NodeBody({ id }: { readonly id: string }) {
     const [loaded, setLoaded] = useState<Loaded>({ kind: 'loading' })
+    const radio = useRadioSnapshot()
     const [attempt, setAttempt] = useState(0)
     const [editing, setEditing] = useState(false)
     const [saved, setSaved] = useState(false)
@@ -357,6 +360,7 @@ function NodeBody({ id }: { readonly id: string }) {
     }
 
     const { node, at } = loaded
+    const here = connectedMeshIds(radio).has(node.meshId)
 
     return (
         <Page
@@ -371,6 +375,7 @@ function NodeBody({ id }: { readonly id: string }) {
                         </StatusLabel>
                         {node.mine ? <Badge kind='fire'>{copy.yours}</Badge> : null}
                         {node.enabled ? null : <Badge>{copy.disabled}</Badge>}
+                        {here ? <Badge kind='live'>{nodesContent.connectedHere}</Badge> : null}
                     </Row>
                     <Text mono size='sm' tone='faint'>
                         {[
@@ -390,7 +395,7 @@ function NodeBody({ id }: { readonly id: string }) {
                 <Stack gap={4}>
                     <Box tone='surface' padding={5} radius='md'>
                         <Stack gap={5}>
-                            <UseLine node={node} />
+                            <UseLine node={node} now={here} />
                             <Identity node={node} now={at} />
                         </Stack>
                     </Box>

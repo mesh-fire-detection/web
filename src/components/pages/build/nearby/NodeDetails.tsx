@@ -19,7 +19,7 @@ import { DescriptionItem, DescriptionList } from '@components/shared/page/List'
 import { Box, Row, Stack } from '@components/shared/primitives/Layout'
 import { Heading } from '@components/shared/typography/Heading'
 import { Text } from '@components/shared/typography/Text'
-import { Button } from '@components/shared/widgets/Action'
+import { Button, ButtonLink } from '@components/shared/widgets/Action'
 import { Metric } from '@components/shared/widgets/Badge'
 import { Icon } from '@components/shared/widgets/Icon'
 import { nearbyNodesContent } from '@core/content/build/nearby/nearbyNodes'
@@ -29,7 +29,14 @@ import { isRecentNode } from '@core/nearby/model'
 import type { NearbyNode } from '@core/nearby/model'
 import { browserHistory } from '@core/nearby/storage/nodes'
 
-export function NodeDetails({ node }: { readonly node: NearbyNode }) {
+/** `page`: the node's registered ID, when it has a page here to open. */
+export function NodeDetails({
+    node,
+    page = null,
+}: {
+    readonly node: NearbyNode
+    readonly page?: string | null
+}) {
     const [moreOpen, setMoreOpen] = useState(false)
     /** Null until someone picks a tile: the history opens on what the node reports. */
     const [picked, setPicked] = useState<string | null>(null)
@@ -103,6 +110,18 @@ export function NodeDetails({ node }: { readonly node: NearbyNode }) {
                     <Text size='sm' tone='muted' className='nearby_details_status'>
                         {status}
                     </Text>
+                    {page === null ? null : (
+                        <Row>
+                            <ButtonLink
+                                to={`/nodes/${encodeURIComponent(page)}`}
+                                size='sm'
+                                variant='secondary'
+                                iconAfter={<Icon name='arrow-right' />}
+                            >
+                                {nearbyNodesContent.actions.page}
+                            </ButtonLink>
+                        </Row>
+                    )}
                     <SignalTile node={node} />
                 </Stack>
             </Box>

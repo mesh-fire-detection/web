@@ -384,6 +384,7 @@ export type NodesContent = PageHeading & {
     readonly viewOnMap: string
     readonly yours: string
     readonly disabled: string
+    readonly connectedHere: string
     readonly noPosition: string
     readonly approximately: string
     readonly empty: {
@@ -648,13 +649,8 @@ export type NearbyNodesContent = PageHeading & {
     readonly states: Readonly<
         Record<'disconnected' | 'connecting' | 'initializing' | 'connected', string>
     >
-    readonly actions: {
-        readonly view: string
-        readonly connect: string
-        readonly disconnect: string
-        readonly remove: string
-        readonly undo: string
-    }
+    /** `page` opens the node's own page, `/nodes/:id`, once it is registered. */
+    readonly actions: Words<'view' | 'connect' | 'disconnect' | 'remove' | 'undo' | 'page'>
 }
 
 export type SatelliteReceiverContent = PageHeading & {

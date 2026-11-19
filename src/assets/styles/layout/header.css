@@ -28,6 +28,12 @@
     flex: none;
 }
 
+/* The connected node's name gives way before the actions beside it do. */
+.header_radio {
+    min-width: 0;
+    max-width: var(--header_radio_max);
+}
+
 .header_toggle {
     display: none;
     padding: var(--s_2);

@@ -62,6 +62,7 @@ export const nodesContent = {
     },
     yours: 'Yours',
     disabled: 'Disabled',
+    connectedHere: 'Connected here',
     noPosition: 'No position yet',
     viewOnMap: 'View these nodes on the map',
     approximately: 'about',

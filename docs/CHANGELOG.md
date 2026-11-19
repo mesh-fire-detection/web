@@ -22,6 +22,12 @@ Needs backend 0.4.0 for status, how a node was heard, and power.
 
 ### Added
 
+- A node connected on **Connect a Node** stays connected while you use the
+  rest of the site. The header shows it on every other page and links back,
+  and `/nodes` and the node's page mark it **Connected here**. Connect now
+  opens in the same tab.
+- **Open node page** on a registered node's details on Connect a Node, for
+  members.
 - **Power source** in a node's edit form: Battery, Solar and battery, or Always
   plugged in, for boards that cannot tell USB is connected.
 - Readable names for the particle counts, sorted by size.

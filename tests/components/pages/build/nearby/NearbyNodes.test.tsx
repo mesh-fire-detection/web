@@ -7,6 +7,7 @@ import { StrictMode } from 'react'
 import { MemoryRouter } from 'react-router-dom'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
+import { RadioProvider } from '@components/app/RadioProvider'
 import { SessionProvider } from '@components/app/SessionProvider'
 import { NearbyNodesPage } from '@components/pages/build/nearby/NearbyNodes'
 import { emptyNode } from '@core/nearby/model'
@@ -51,7 +52,9 @@ function renderPage() {
         <StrictMode>
             <MemoryRouter>
                 <SessionProvider>
-                    <NearbyNodesPage />
+                    <RadioProvider>
+                        <NearbyNodesPage />
+                    </RadioProvider>
                 </SessionProvider>
             </MemoryRouter>
         </StrictMode>

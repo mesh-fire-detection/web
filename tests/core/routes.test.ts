@@ -31,9 +31,11 @@ describe('route table', () => {
         expect(navRoutes(true).map((route) => route.id)).not.toContain('open_problems')
     })
 
-    it('opens the node connection page in a new tab, with or without a hash', () => {
-        expect(opensInNewTab('/connect')).toBe(true)
-        expect(opensInNewTab('/connect#nodes')).toBe(true)
+    it('opens the satellite page in a new tab, with or without a hash', () => {
+        expect(opensInNewTab('/satellite')).toBe(true)
+        expect(opensInNewTab('/satellite#setup')).toBe(true)
+        // The radio session outlives the page, so Connect opens in place.
+        expect(opensInNewTab('/connect')).toBe(false)
         expect(opensInNewTab('/build')).toBe(false)
         expect(opensInNewTab('/build#firmware')).toBe(false)
     })

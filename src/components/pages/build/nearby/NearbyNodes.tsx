@@ -6,6 +6,7 @@ import { Page } from '@components/layout/Page'
 import { NodeDetails } from '@components/pages/build/nearby/NodeDetails'
 import { NodeList } from '@components/pages/build/nearby/NodeList'
 import { useNearbyNodes } from '@components/pages/build/nearby/useNearbyNodes'
+import { useNodePages } from '@components/pages/build/nearby/useNodePages'
 import { ExternalLink } from '@components/shared/navigation/ExternalLink'
 import { Row, Section, Stack } from '@components/shared/primitives/Layout'
 import { Heading } from '@components/shared/typography/Heading'
@@ -15,7 +16,7 @@ import { Callout } from '@components/shared/widgets/Callout'
 import { Icon } from '@components/shared/widgets/Icon'
 import { nearbyNodesContent as copy } from '@core/content/build/nearby/nearbyNodes'
 import { cx } from '@core/format/cx'
-import { nodeName, TRANSPORTS } from '@core/nearby/model'
+import { meshId, nodeName, TRANSPORTS } from '@core/nearby/model'
 
 /** In the one-column layout the details sit below every card, out of view. */
 function revealDetails(workspace: HTMLElement | null, details: HTMLElement | null) {
@@ -30,6 +31,9 @@ export function NearbyNodesPage() {
     const workspaceRef = useRef<HTMLDivElement>(null)
     const detailsRef = useRef<HTMLDivElement>(null)
     const selected = snapshot.nodes.find((node) => node.id === snapshot.selectedId)
+    const pages = useNodePages(
+        snapshot.nodes.flatMap((node) => (node.nodeNum === null ? [] : [meshId(node.nodeNum)]))
+    )
     const noSupport = TRANSPORTS.every((transport) => support[transport] !== 'available')
     return (
         <Page
@@ -146,7 +150,14 @@ export function NearbyNodesPage() {
                         />
                         {selected ? (
                             <div ref={detailsRef} className='nearby_details'>
-                                <NodeDetails node={selected} />
+                                <NodeDetails
+                                    node={selected}
+                                    page={
+                                        selected.nodeNum === null
+                                            ? null
+                                            : (pages.get(meshId(selected.nodeNum)) ?? null)
+                                    }
+                                />
                             </div>
                         ) : null}
                     </div>

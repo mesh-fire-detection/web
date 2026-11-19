@@ -149,8 +149,19 @@ its supported-API path is tested with mocked transports.
 
 Explicit **Disconnect** clears the automatic-reconnection preference while
 keeping the entry. Unexpected loss retains it for the next page load; no
-continuous retry runs in the background. Leaving the page closes owned
-connections and removes listeners while retaining saved identities.
+continuous retry runs in the background.
+
+The session belongs to the site, not the page (`RadioProvider`): leaving
+`/connect` for another page keeps the node connected, and `/connect` opens in
+the same tab. The session starts only when `/connect` is first opened in a
+tab, so a tab that never visits it never reaches for a radio, and two tabs do
+not race to reconnect the same node. While a node is connected, every other
+page's header shows it (**Connecting** while it opens), linking back to
+`/connect`, and `/nodes` and the node's own page mark it **Connected here**.
+For a signed-in member, a node's details on `/connect` offer **Open node
+page** once the node is registered, linking to `/nodes/:id`.
+Closing or reloading the tab closes owned connections and removes listeners
+while retaining saved identities.
 **Remove from list** also removes the stored identity and observation snapshot; an existing browser
 permission must not make the entry reappear. For ten seconds a **Removed · Undo**
 line above the list puts the entry back in its place, without a confirmation
@@ -546,8 +557,9 @@ server data. Any later backend integration needs its own specification update.
   previous values as historical observations.
 - Canceling pairing, denied permissions, timeouts, and unsupported services leave
   the page usable and allow another attempt.
-- Removing a node, switching nodes, and leaving the page release connections
-  and listeners without affecting another node's observations.
+- Removing a node, switching nodes, and closing the tab release connections
+  and listeners without affecting another node's observations. Moving to
+  another page of the site does not.
 - Unsupported browsers receive clear guidance instead of broken controls.
 - Local readings and secrets are not transmitted to the backend or analytics.
 - Reload restores saved identities, reconnects only the last active allowed

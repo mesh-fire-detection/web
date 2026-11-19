@@ -37,12 +37,15 @@ under the facts.
   parameter yet, so for now the link opens the whole map.
 - Empty states: nothing registered, none of yours (both point at `/connect`),
   and no matches (offers **Clear filters**).
+- **Connected here** marks a node this tab holds a radio connection to now.
 
 ## One node, `/nodes/:id`
 
 - **Use**: **Live in the field** (heard, not offline), **Quiet** (heard before,
   now offline) or **Not in use** (never heard, or disabled), with **Yours** and
-  **Disabled** marks. It says so if this browser has connected the node before.
+  **Disabled** marks, and **Connected here** while this tab holds a radio
+  connection to it. Otherwise it says so if this browser has connected the
+  node before.
 - **View on map** links to `/map?nodes=<id>` when the node has a position.
   **Open in Connect**, for the people on the node, opens `/connect` as it is.
 - Identity, none of it typed in: mesh ID, type, hardware, firmware, build, last
