@@ -102,25 +102,54 @@ describe('status and power words', () => {
 
     it('shows plugged in and a battery level together', () => {
         const power = { pluggedIn: false, charging: false, at: null } as const
-        expect(powerText(null)).toEqual({ text: '—', tone: 'faint' })
-        expect(powerText({ ...power, batteryPct: 64, battery: 'ok' })).toEqual({
+        const online = (p: Parameters<typeof powerText>[0]['power']) =>
+            powerText({ power: p, status: 'online' }, 0)
+        expect(online(null)).toEqual({ text: '—', tone: 'faint' })
+        expect(online({ ...power, batteryPct: 64, battery: 'ok' })).toEqual({
             text: '64%',
             tone: 'default',
         })
-        expect(powerText({ ...power, pluggedIn: true, batteryPct: 95, battery: 'ok' })).toEqual({
+        expect(online({ ...power, pluggedIn: true, batteryPct: 95, battery: 'ok' })).toEqual({
             text: 'Plugged in · 95%',
             tone: 'live',
         })
-        expect(
-            powerText({ ...power, pluggedIn: true, batteryPct: null, battery: 'none' }).text
-        ).toBe('Plugged in · No battery')
-        expect(powerText({ ...power, batteryPct: 12, battery: 'low' })).toEqual({
+        expect(online({ ...power, pluggedIn: true, batteryPct: null, battery: 'none' }).text).toBe(
+            'Plugged in · No battery'
+        )
+        expect(online({ ...power, batteryPct: 12, battery: 'low' })).toEqual({
             text: 'Battery low · 12%',
             tone: 'dead',
         })
-        expect(powerText({ ...power, charging: true, batteryPct: 61, battery: 'ok' }).text).toBe(
+        expect(online({ ...power, charging: true, batteryPct: 61, battery: 'ok' }).text).toBe(
             'Charging · 61%'
         )
+    })
+
+    it('gives an offline node only the level it last reported, and when', () => {
+        const now = Date.parse('2026-11-19T03:45:00Z')
+        const offline = (p: Parameters<typeof powerText>[0]['power']) =>
+            powerText({ power: p, status: 'offline' }, now)
+        const at = '2026-11-19T00:44:30Z'
+        expect(
+            offline({ pluggedIn: true, charging: false, batteryPct: 100, battery: 'ok', at })
+        ).toEqual({ text: '100% · 3 h ago', tone: 'faint' })
+        expect(
+            offline({ pluggedIn: false, charging: false, batteryPct: 12, battery: 'low', at }).text
+        ).toBe('12% · 3 h ago')
+        expect(
+            offline({ pluggedIn: true, charging: false, batteryPct: null, battery: 'none', at })
+                .text
+        ).toBe('No battery · 3 h ago')
+        // Always plugged in by its people, with nothing reported: nothing to say.
+        expect(
+            offline({
+                pluggedIn: true,
+                charging: false,
+                batteryPct: null,
+                battery: 'unknown',
+                at: null,
+            })
+        ).toEqual({ text: '—', tone: 'faint' })
     })
 })
 

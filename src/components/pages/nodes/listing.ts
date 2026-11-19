@@ -1,5 +1,6 @@
 import type { Node, NodeRole, NodeStatus, NodeType } from '@core/api/nodes'
 import { nodesContent } from '@core/content/nodes/nodes'
+import { sinceMinutes } from '@core/format/format'
 
 export const NODE_TYPES = ['base', 'cellular', 'sensor', 'vision'] as const satisfies NodeType[]
 export const NODE_ROLES = ['gateway', 'sensor', 'base', 'vision'] as const satisfies NodeRole[]
@@ -33,13 +34,30 @@ type PowerTone = 'live' | 'warn' | 'dead' | 'default' | 'faint'
 /**
  * What powers a node, in a few words: `Plugged in · 95%`, `Battery low · 12%`,
  * `Plugged in · No battery`. Plugged in and a battery level can both be shown.
+ *
+ * Plugged in, charging and low are about now, so an offline node gets none of
+ * them: only the battery level it last reported and how long ago, `100% · 3 h ago`.
  */
-export function powerText(power: Node['power']): {
+export function powerText(
+    node: Pick<Node, 'power' | 'status'>,
+    now: number
+): {
     readonly text: string
     readonly tone: PowerTone
 } {
+    const { power } = node
     if (power === null) return { text: '—', tone: 'faint' }
     const words = nodesContent.power
+    if (node.status === 'offline') {
+        const level =
+            power.battery === 'none'
+                ? words.none
+                : power.batteryPct === null
+                  ? null
+                  : `${String(power.batteryPct)}%`
+        const ago = sinceMinutes(minutesSince(power.at, now))
+        return { text: level === null ? '—' : `${level} · ${ago}`, tone: 'faint' }
+    }
     const parts = [
         power.pluggedIn ? words.plugged : power.charging ? words.charging : null,
         power.battery === 'none' ? words.none : power.battery === 'low' ? words.low : null,
@@ -159,8 +177,10 @@ export function sortValue(node: Node, key: SortKey, now: number): string | numbe
             return STATUS_RANK[node.status]
         }
         case 'battery': {
-            // Plugged in ranks above any battery level.
-            return node.power?.pluggedIn === true ? 101 : (node.power?.batteryPct ?? null)
+            // Plugged in ranks above any battery level, while the node is heard.
+            return node.power?.pluggedIn === true && node.status !== 'offline'
+                ? 101
+                : (node.power?.batteryPct ?? null)
         }
         case 'heard': {
             // Never heard is the quietest of all.

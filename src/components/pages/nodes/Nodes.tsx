@@ -137,7 +137,7 @@ function columnsFor(now: number, here: ReadonlySet<string>): readonly Column<Nod
             sortValue: (node) => sortValue(node, 'battery', now),
             align: 'end',
             render: (node) => {
-                const { text, tone } = powerText(node.power)
+                const { text, tone } = powerText(node, now)
                 return <Value tone={tone}>{text}</Value>
             },
         },

@@ -70,6 +70,7 @@ export function NodeTelemetry({ node }: { readonly node: Node }) {
                 node={nearby}
                 title={copy.sensors}
                 power={node.power}
+                offline={node.status === 'offline'}
                 active={activeMetric}
                 onSelect={setPicked}
                 history={{ source: 'server', samples: nearby.history[activeMetric] ?? [] }}

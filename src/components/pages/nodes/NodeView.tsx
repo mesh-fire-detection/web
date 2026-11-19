@@ -152,7 +152,7 @@ function Identity({ node, now }: { readonly node: Node; readonly now: number }) 
                     .filter((part) => part !== null)
                     .join(' · ')}
             />
-            <Metric label={nodesContent.table.power} size='sm' value={powerText(node.power).text} />
+            <Metric label={nodesContent.table.power} size='sm' value={powerText(node, now).text} />
         </Grid>
     )
 }

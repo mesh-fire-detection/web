@@ -5,6 +5,12 @@ releases are cut is in [RELEASING.md](RELEASING.md).
 
 ## Unreleased
 
+### Fixed
+
+- An offline node no longer reads **Plugged in**, **Charging** or **Battery
+  low** from its last report. Power shows the level it last reported and how
+  long ago, such as `100% · 3 h ago`, on `/nodes` and on its page.
+
 ## 0.5.0 — 2026-11-18
 
 Needs backend 0.4.0 for status, how a node was heard, and power. Released

@@ -25,9 +25,13 @@ under the facts.
 
 ## The list, `/nodes`
 
-- Columns: node (name, ID and position), type, status, battery, last heard.
+- Columns: node (name, ID and position), role, status, power, last heard.
   Every column sorts; status puts offline first, and last heard pressed twice
   puts the quietest first, never-heard nodes before all others.
+- Power says **Plugged in**, **Charging** and **Battery low** only while a node
+  is heard: they are about now. An offline node shows the battery level it last
+  reported and how long ago, such as `100% · 3 h ago`, and its page's Battery
+  tile drops "external power" the same way.
 - Filters: **Show** (all or yours), **Type**, **Status**, and a search over ID
   and name. Filters and sort live in the URL (`mine=1`, `type`, `status`, `q`,
   `sort`, `dir=desc`), so a view survives a reload and can be shared. Changes

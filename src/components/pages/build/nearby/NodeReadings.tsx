@@ -161,8 +161,19 @@ function Pick({
     )
 }
 
-/** The server's word on power, so the tile agrees with the node's Power line. */
-function ServerBatteryTile({ node, power }: { readonly node: NearbyNode; readonly power: Power }) {
+/**
+ * The server's word on power, so the tile agrees with the node's Power line.
+ * Offline, it is the last level reported, with no claim about being plugged in.
+ */
+function ServerBatteryTile({
+    node,
+    power,
+    offline,
+}: {
+    readonly node: NearbyNode
+    readonly power: Power
+    readonly offline: boolean
+}) {
     const metric = 'deviceMetrics.batteryLevel'
     const value =
         power.battery === 'none'
@@ -175,7 +186,7 @@ function ServerBatteryTile({ node, power }: { readonly node: NearbyNode; readonl
             label={copy.battery}
             value={value}
             tone={
-                power.batteryPct === null || power.battery === 'none'
+                offline || power.batteryPct === null || power.battery === 'none'
                     ? 'muted'
                     : power.battery === 'low'
                       ? 'dead'
@@ -184,7 +195,7 @@ function ServerBatteryTile({ node, power }: { readonly node: NearbyNode; readonl
             size='md'
             spark={node.history[metric] ?? []}
         >
-            {power.pluggedIn ? (
+            {!offline && power.pluggedIn ? (
                 <Text as='span' size='inherit' tone='inherit' weight={600}>
                     {copy.externalPower}
                     {power.at === null ? null : ' · '}
@@ -343,6 +354,7 @@ export function ReadingsPanel({
     headingLevel = 2,
     showStatus = false,
     power,
+    offline = false,
     footnote,
 }: Picker & {
     readonly node: NearbyNode
@@ -354,6 +366,8 @@ export function ReadingsPanel({
     readonly showStatus?: boolean
     /** What the server worked out about power, for a node's page; /connect reads its own. */
     readonly power?: Power | null
+    /** The node is offline, so its power is what it last said, not what it is doing. */
+    readonly offline?: boolean
     readonly footnote?: ReactNode
 }) {
     const picker = { active, onSelect }
@@ -407,7 +421,11 @@ export function ReadingsPanel({
                                         power === undefined || power === null ? (
                                             <BatteryTile node={node} />
                                         ) : (
-                                            <ServerBatteryTile node={node} power={power} />
+                                            <ServerBatteryTile
+                                                node={node}
+                                                power={power}
+                                                offline={offline}
+                                            />
                                         )
                                     ) : (
                                         <VoltageTile node={node} />
