@@ -21,6 +21,14 @@ const TYPE_OPTIONS = [
     ...NODE_TYPES.map((type) => ({ value: type, label: nodesContent.types[type] })),
 ] as const
 
+const sources = nodesContent.sources
+const POWER_OPTIONS = [
+    { value: 'none', label: copy.notSet },
+    { value: 'battery', label: sources.battery },
+    { value: 'solar', label: sources.solar },
+    { value: 'mains', label: sources.mains },
+] as const
+
 const SAVE_ERRORS = ['bad_request', 'rate_limited', 'unreachable'] as const
 
 const saveError = (error: string): string =>
@@ -88,6 +96,14 @@ export function NodeEditor({
                     onChange={field('type')}
                     options={TYPE_OPTIONS}
                     value={draft.type}
+                />
+                <SelectField
+                    label={sources.label}
+                    name='powerSource'
+                    description={sources.hint}
+                    onChange={field('powerSource')}
+                    options={POWER_OPTIONS}
+                    value={draft.powerSource}
                 />
                 <Stack gap={1}>
                     <Heading level={3} size='sm'>

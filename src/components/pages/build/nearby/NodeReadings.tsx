@@ -1,13 +1,14 @@
 import type { ReactNode } from 'react'
 
-import { Age, Timestamp } from '@components/pages/build/nearby/Indicators'
+import { Age, SensorStatus, Timestamp } from '@components/pages/build/nearby/Indicators'
 import { DescriptionItem, DescriptionList } from '@components/shared/page/List'
 import { Box, Grid, Row, Stack } from '@components/shared/primitives/Layout'
 import { Pressable } from '@components/shared/primitives/Pressable'
 import { Heading } from '@components/shared/typography/Heading'
 import { Text } from '@components/shared/typography/Text'
 import { Metric } from '@components/shared/widgets/Badge'
-import { LineChart } from '@components/shared/widgets/LineChart'
+import { LineChart, Sparkline } from '@components/shared/widgets/LineChart'
+import type { Power } from '@core/api/nodes'
 import { nearbyDetailsContent as copy } from '@core/content/build/nearby/nodeDetails'
 import { sensorGuideContent as guide } from '@core/content/build/nearby/sensorGuide'
 import { cx } from '@core/format/cx'
@@ -16,14 +17,18 @@ import { toneSegments } from '@core/format/tones'
 import {
     averageRate,
     batteryCharge,
+    batteryFromVoltage,
     batteryTone,
     bestLink,
     duration,
     EXPECTED_SENSOR_METRICS,
     formatNumber,
+    hasBattery,
     historyValue,
+    isSensorMetric,
     localTime,
     metricLabel,
+    metricRank,
     metricStats,
     metricValue,
     POWER_METRICS,
@@ -32,11 +37,10 @@ import {
     signedChange,
     signalQuality,
     trend,
-    voltageTrend,
 } from '@core/nearby/metrics'
 import type { MetricHistory, Rate } from '@core/nearby/metrics'
 import { meshId } from '@core/nearby/model'
-import type { NearbyNode, History, Reading, Sample } from '@core/nearby/model'
+import type { NearbyNode, Reading, Sample } from '@core/nearby/model'
 
 type Tone = 'default' | 'live' | 'warn' | 'dead' | 'muted'
 
@@ -45,12 +49,15 @@ function Tile({
     value,
     tone = 'default',
     size = 'lg',
+    spark,
     children,
 }: {
     readonly label: string
     readonly value: string
     readonly tone?: Tone | undefined
     readonly size?: 'md' | 'lg' | undefined
+    /** History drawn small under the note: a tile with one shows it can be charted. */
+    readonly spark?: readonly Sample[] | undefined
     readonly children: ReactNode
 }) {
     return (
@@ -60,151 +67,41 @@ function Tile({
                 <Text as='div' size='2xs' tone='faint' clamp={2} className='nearby_tile_note'>
                     {children}
                 </Text>
+                {spark === undefined ? null : <Sparkline points={spark} />}
             </Stack>
         </Box>
     )
 }
 
 const TREND_ARROW = { rising: '↑', falling: '↓', steady: '→' } as const
-const TREND_TONE = { rising: 'live', falling: 'warn', steady: 'default' } as const
 
-/**
- * Battery, solar charging and LoRa signal: the first things checked on a node.
- * The server keeps no neighbours per node, so its view leaves the signal out.
- */
-/** A tile that, given `onSelect`, picks its metric for the history below. */
-function Selectable({
-    metric,
-    active,
-    onSelect,
-    children,
-}: {
-    readonly metric: string
-    readonly active: string | undefined
-    readonly onSelect: ((metric: string) => void) | undefined
-    readonly children: ReactNode
-}) {
-    return onSelect === undefined ? (
-        children
-    ) : (
-        <Pressable
-            className='bare nearby_reading'
-            pressed={active === metric}
-            accessibleLabel={metricLabel(metric)}
-            onActivate={() => {
-                onSelect(metric)
-            }}
-        >
-            {children}
-        </Pressable>
-    )
-}
-
-export function Vitals({
-    node,
-    source = 'browser',
-    active,
-    onSelect,
-}: {
-    readonly node: NearbyNode
-    readonly source?: MetricHistory['source']
-    /** With `onSelect`, battery and voltage pick the metric the history shows. */
-    readonly active?: string
-    readonly onSelect?: (metric: string) => void
-}) {
-    const [batteryMetric, voltageMetric] = POWER_METRICS
-    const battery = node.readings['deviceMetrics.batteryLevel']
-    const voltage = node.readings['deviceMetrics.voltage']
-    const { powered, percent } = batteryCharge(node)
-    const voltageChange = voltageTrend(node)
-    const voltages = node.history['deviceMetrics.voltage'] ?? []
-    // Without stored history (private window, blocked site data) the latest reading still counts.
-    const latestVoltage =
-        voltages.at(-1) ?? (voltage ? { value: voltage.value, at: voltage.receivedAt } : undefined)
+/** Best direct LoRa link and channel use. Only a connected browser hears the radio's neighbours. */
+export function SignalTile({ node }: { readonly node: NearbyNode }) {
     const utilization = node.readings['deviceMetrics.channelUtilization']
     const link = bestLink(node)
     const quality = link?.snr == null ? null : signalQuality(link.snr)
     return (
         <Grid minColumnWidth={140} gap={3} className='nearby_vitals'>
-            <Selectable metric={batteryMetric} active={active} onSelect={onSelect}>
-                <Tile
-                    label={copy.battery}
-                    value={
-                        percent === null
-                            ? battery
-                                ? readingValue(battery)
-                                : '—'
-                            : `${powered ? '≈' : ''}${String(percent)} %`
-                    }
-                    tone={percent === null ? (battery ? 'default' : 'muted') : batteryTone(percent)}
-                >
-                    {powered ? (
-                        <Text as='span' size='inherit' tone='inherit' weight={600}>
-                            {copy.externalPower}
-                            {percent === null ? null : `, ${copy.byVoltage}`}
-                        </Text>
-                    ) : null}
-                    {voltage ? `${readingValue(voltage)} · ` : null}
-                    {battery ? <Age time={battery.receivedAt} /> : copy.notReported}
-                </Tile>
-            </Selectable>
-            <Selectable metric={voltageMetric} active={active} onSelect={onSelect}>
-                <Tile
-                    label={powered ? copy.charging : copy.solar}
-                    value={
-                        voltageChange
-                            ? `${TREND_ARROW[voltageChange.direction]} ${signedChange('deviceMetrics.voltage', voltageChange.change)}`
-                            : latestVoltage
-                              ? formatNumber(latestVoltage.value, 'V')
-                              : '—'
-                    }
-                    tone={
-                        voltageChange
-                            ? TREND_TONE[voltageChange.direction]
-                            : latestVoltage
-                              ? 'default'
-                              : 'muted'
-                    }
-                >
-                    {voltageChange ? (
-                        <>
-                            {formatNumber(voltageChange.reference.value, 'V')} →{' '}
-                            {formatNumber(voltageChange.latest.value, 'V')} {copy.voltageOver}{' '}
-                            {duration(voltageChange.latest.at - voltageChange.reference.at)}
-                            <div>
-                                {voltages.length}{' '}
-                                {source === 'browser' ? copy.voltageSaved : copy.voltageSavedServer}
-                            </div>
-                        </>
-                    ) : latestVoltage ? (
-                        copy.voltageWaiting
-                    ) : (
-                        copy.voltageNone
-                    )}
-                </Tile>
-            </Selectable>
-            {source === 'browser' ? (
-                <Tile
-                    label={copy.signal}
-                    value={quality ? copy.quality[quality] : '—'}
-                    tone={quality === null ? 'muted' : SIGNAL_TONE[quality]}
-                >
-                    {link?.snr == null ? (
-                        copy.signalMissing
-                    ) : (
-                        <>
-                            SNR {formatNumber(link.snr, 'dB')}
-                            {link.rssi === null
-                                ? ''
-                                : ` · RSSI ${formatNumber(link.rssi, 'dBm')}`}{' '}
-                            · {copy.bestLink}: {link.name || link.shortName || meshId(link.num)}
-                        </>
-                    )}
-                    <div>
-                        {copy.channelUse} {utilization ? readingValue(utilization) : '—'}
-                    </div>
-                </Tile>
-            ) : null}
+            <Tile
+                label={copy.signal}
+                value={quality ? copy.quality[quality] : '—'}
+                tone={quality === null ? 'muted' : SIGNAL_TONE[quality]}
+            >
+                {link?.snr == null ? (
+                    copy.signalMissing
+                ) : (
+                    <>
+                        SNR {formatNumber(link.snr, 'dB')}
+                        {link.rssi === null
+                            ? ''
+                            : ` · RSSI ${formatNumber(link.rssi, 'dBm')}`} · {copy.bestLink}:{' '}
+                        {link.name || link.shortName || meshId(link.num)}
+                    </>
+                )}
+                <div>
+                    {copy.channelUse} {utilization ? readingValue(utilization) : '—'}
+                </div>
+            </Tile>
         </Grid>
     )
 }
@@ -238,60 +135,300 @@ function ReadingTime({ reading }: { readonly reading: Reading }) {
     )
 }
 
-/** Expected sensors keep their slot while empty; anything else reported is appended. */
-export function SensorGrid({
-    readings,
+type Picker = {
+    readonly active: string
+    readonly onSelect: (metric: string) => void
+}
+
+/** Any reading: a button that shows its history in the panel below. */
+function Pick({
+    metric,
+    active,
+    onSelect,
+    children,
+}: Picker & { readonly metric: string; readonly children: ReactNode }) {
+    return (
+        <Pressable
+            className='bare nearby_reading'
+            pressed={active === metric}
+            accessibleLabel={metricLabel(metric)}
+            onActivate={() => {
+                onSelect(metric)
+            }}
+        >
+            {children}
+        </Pressable>
+    )
+}
+
+/** The server's word on power, so the tile agrees with the node's Power line. */
+function ServerBatteryTile({ node, power }: { readonly node: NearbyNode; readonly power: Power }) {
+    const metric = 'deviceMetrics.batteryLevel'
+    const value =
+        power.battery === 'none'
+            ? copy.panel.noBattery
+            : power.batteryPct === null
+              ? '—'
+              : `${String(power.batteryPct)} %`
+    return (
+        <Tile
+            label={copy.battery}
+            value={value}
+            tone={
+                power.batteryPct === null || power.battery === 'none'
+                    ? 'muted'
+                    : power.battery === 'low'
+                      ? 'dead'
+                      : batteryTone(power.batteryPct)
+            }
+            size='md'
+            spark={node.history[metric] ?? []}
+        >
+            {power.pluggedIn ? (
+                <Text as='span' size='inherit' tone='inherit' weight={600}>
+                    {copy.externalPower}
+                    {power.at === null ? null : ' · '}
+                </Text>
+            ) : null}
+            {power.at === null ? null : <Age time={Date.parse(power.at)} />}
+        </Tile>
+    )
+}
+
+/** Charge, or `No battery` when the voltage says none is connected. */
+function BatteryTile({ node }: { readonly node: NearbyNode }) {
+    const metric = 'deviceMetrics.batteryLevel'
+    const battery = node.readings[metric]
+    const voltage = node.readings['deviceMetrics.voltage']
+    const { powered, percent } = batteryCharge(node)
+    const missing = voltage !== undefined && !hasBattery(voltage.value)
+    const value = missing
+        ? copy.panel.noBattery
+        : percent === null
+          ? battery
+              ? readingValue(battery)
+              : '—'
+          : `${powered ? '≈' : ''}${String(percent)} %`
+    return (
+        <Tile
+            label={copy.battery}
+            value={value}
+            tone={missing || percent === null ? 'muted' : batteryTone(percent)}
+            size='md'
+            spark={node.history[metric] ?? []}
+        >
+            {powered ? (
+                <Text as='span' size='inherit' tone='inherit' weight={600}>
+                    {copy.externalPower}
+                    {percent === null || missing ? null : `, ${copy.byVoltage}`}
+                    {battery ? ' · ' : null}
+                </Text>
+            ) : null}
+            {battery ? <Age time={battery.receivedAt} /> : copy.notReported}
+        </Tile>
+    )
+}
+
+/** The battery's voltage and the charge it stands for, with its trend. */
+function VoltageTile({ node }: { readonly node: NearbyNode }) {
+    const metric = 'deviceMetrics.voltage'
+    const samples = node.history[metric] ?? []
+    const reading = node.readings[metric]
+    const latest = samples.at(-1)?.value ?? reading?.value
+    const missing = latest !== undefined && !hasBattery(latest)
+    const percent = latest === undefined ? null : batteryFromVoltage(latest)
+    return (
+        <Tile
+            label={metricLabel(metric)}
+            value={latest === undefined || missing ? '—' : formatNumber(latest, 'V')}
+            tone={latest === undefined || missing ? 'muted' : 'default'}
+            size='md'
+            spark={samples}
+        >
+            {latest === undefined ? (
+                copy.notReported
+            ) : missing ? (
+                copy.panel.noBatteryNote
+            ) : (
+                <>
+                    <div>
+                        {percent === null ? null : `≈ ${String(percent)} % · `}
+                        {reading ? <Age time={reading.receivedAt} /> : null}
+                    </div>
+                    <TrendLine metric={metric} samples={samples} />
+                </>
+            )}
+        </Tile>
+    )
+}
+
+function SensorTile({ node, metric }: { readonly node: NearbyNode; readonly metric: string }) {
+    const reading = node.readings[metric]
+    const samples = node.history[metric] ?? []
+    const last = samples.at(-1)
+    return (
+        <Tile
+            label={metricLabel(metric)}
+            value={reading ? readingValue(reading) : last ? metricValue(metric, last.value) : '—'}
+            tone={reading || last ? 'default' : 'muted'}
+            size='md'
+            spark={samples}
+        >
+            {reading ? (
+                <>
+                    <div>
+                        <ReadingTime reading={reading} />
+                    </div>
+                    <TrendLine metric={metric} samples={samples} />
+                </>
+            ) : last ? (
+                <Timestamp time={last.at} />
+            ) : (
+                copy.notReported
+            )}
+        </Tile>
+    )
+}
+
+const SENSOR_GROUPS = [
+    { group: 'environment', prefix: 'environmentMetrics.' },
+    { group: 'particles', prefix: 'airQualityMetrics.' },
+] as const
+
+const seen = (node: NearbyNode, metric: string) =>
+    node.readings[metric] !== undefined || (node.history[metric]?.length ?? 0) > 0
+
+/** What a sensor group reported: its usual readings in their fixed order, then any others. */
+function groupMetrics(node: NearbyNode, prefix: string): string[] {
+    const expected: readonly string[] = EXPECTED_SENSOR_METRICS.filter((metric) =>
+        metric.startsWith(prefix)
+    )
+    const extra = [...new Set([...Object.keys(node.readings), ...Object.keys(node.history)])]
+        .filter((metric) => metric.startsWith(prefix) && isSensorMetric(metric))
+        .filter((metric) => !expected.includes(metric))
+        .toSorted((a, b) => metricRank(a) - metricRank(b) || a.localeCompare(b))
+    return [...expected, ...extra].filter((metric) => seen(node, metric))
+}
+
+function Group({ title, children }: { readonly title: ReactNode; readonly children: ReactNode }) {
+    return (
+        <Stack gap={3}>
+            {title}
+            {children}
+        </Stack>
+    )
+}
+
+function GroupTitle({ children }: { readonly children: string }) {
+    return (
+        <Text as='div' size='sm' weight={600}>
+            {children}
+        </Text>
+    )
+}
+
+/**
+ * The readings a node has reported, sensors first and power after, as tiles
+ * that each open their history in the chart at the bottom. Nothing is shown
+ * for a reading the node never sent. `showStatus`, for a live connection,
+ * keeps each sensor's status line even before it reports, so a missing
+ * sensor can be diagnosed.
+ */
+export function ReadingsPanel({
+    node,
     history,
     active,
     onSelect,
-}: {
-    readonly readings: readonly Reading[]
-    readonly history: History
-    readonly active: string
-    readonly onSelect: (metric: string) => void
+    title,
+    headingLevel = 2,
+    showStatus = false,
+    power,
+    footnote,
+}: Picker & {
+    readonly node: NearbyNode
+    /** The selected metric's history. */
+    readonly history: MetricHistory
+    readonly title: string
+    readonly headingLevel?: 2 | 3
+    /** Live sensor status per group, for a node this browser is connected to. */
+    readonly showStatus?: boolean
+    /** What the server worked out about power, for a node's page; /connect reads its own. */
+    readonly power?: Power | null
+    readonly footnote?: ReactNode
 }) {
-    const byMetric = new Map(readings.map((reading) => [reading.metric, reading]))
-    const expected: ReadonlySet<string> = new Set(EXPECTED_SENSOR_METRICS)
-    const metrics = [
-        ...EXPECTED_SENSOR_METRICS,
-        ...readings.map((reading) => reading.metric).filter((metric) => !expected.has(metric)),
-    ]
+    const picker = { active, onSelect }
+    const sensors = SENSOR_GROUPS.map(({ group, prefix }) => ({
+        group,
+        metrics: groupMetrics(node, prefix),
+    }))
+    const powerMetrics = POWER_METRICS.filter((metric) => seen(node, metric))
+    const anything = powerMetrics.length > 0 || sensors.some(({ metrics }) => metrics.length > 0)
     return (
-        <Grid minColumnWidth={160} gap={3}>
-            {metrics.map((metric) => {
-                const reading = byMetric.get(metric)
-                const label = metricLabel(metric)
-                return (
-                    <Pressable
-                        key={metric}
-                        className='bare nearby_reading'
-                        pressed={active === metric}
-                        accessibleLabel={label}
-                        onActivate={() => {
-                            onSelect(metric)
-                        }}
-                    >
-                        <Tile
-                            label={label}
-                            value={reading ? readingValue(reading) : '—'}
-                            tone={reading ? 'default' : 'muted'}
-                            size='md'
+        <Box tone='surface' padding={5} radius='md'>
+            <Stack gap={5}>
+                <Stack gap={1}>
+                    <Heading level={headingLevel} size='sm'>
+                        {title}
+                    </Heading>
+                    <Text size='sm' tone='muted'>
+                        {anything ? copy.panel.pick : copy.panel.groupEmpty}
+                    </Text>
+                </Stack>
+                {sensors.map(({ group, metrics }) =>
+                    !showStatus && metrics.length === 0 ? null : (
+                        <Group
+                            key={group}
+                            title={
+                                showStatus ? (
+                                    <SensorStatus node={node} group={group} />
+                                ) : (
+                                    <GroupTitle>{copy.sensors[group]}</GroupTitle>
+                                )
+                            }
                         >
-                            {reading ? (
-                                <>
-                                    <div>
-                                        <ReadingTime reading={reading} />
-                                    </div>
-                                    <TrendLine metric={metric} samples={history[metric]} />
-                                </>
-                            ) : (
-                                copy.notReported
+                            {metrics.length === 0 ? null : (
+                                <Grid minColumnWidth={160} gap={3}>
+                                    {metrics.map((metric) => (
+                                        <Pick key={metric} metric={metric} {...picker}>
+                                            <SensorTile node={node} metric={metric} />
+                                        </Pick>
+                                    ))}
+                                </Grid>
                             )}
-                        </Tile>
-                    </Pressable>
-                )
-            })}
-        </Grid>
+                        </Group>
+                    )
+                )}
+                {powerMetrics.length === 0 ? null : (
+                    <Group title={<GroupTitle>{copy.panel.power}</GroupTitle>}>
+                        <Grid minColumnWidth={160} gap={3}>
+                            {powerMetrics.map((metric) => (
+                                <Pick key={metric} metric={metric} {...picker}>
+                                    {metric === 'deviceMetrics.batteryLevel' ? (
+                                        power === undefined || power === null ? (
+                                            <BatteryTile node={node} />
+                                        ) : (
+                                            <ServerBatteryTile node={node} power={power} />
+                                        )
+                                    ) : (
+                                        <VoltageTile node={node} />
+                                    )}
+                                </Pick>
+                            ))}
+                        </Grid>
+                    </Group>
+                )}
+                {footnote === undefined ? null : (
+                    <Text size='xs' tone='faint'>
+                        {footnote}
+                    </Text>
+                )}
+                {anything ? (
+                    <div className='nearby_history'>
+                        <MetricHistoryStats metric={active} history={history} />
+                    </div>
+                ) : null}
+            </Stack>
+        </Box>
     )
 }
 

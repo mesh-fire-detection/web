@@ -73,12 +73,7 @@ export function MapPage() {
 
                     <MetricGrid>
                         <MetricCard label='Online' value={counts.online} tone='live' size='lg' />
-                        <MetricCard
-                            label='Degraded'
-                            value={counts.degraded}
-                            tone='warn'
-                            size='lg'
-                        />
+                        <MetricCard label='Late' value={counts.late} tone='warn' size='lg' />
                         <MetricCard label='Offline' value={counts.offline} tone='dead' size='lg' />
                         <MetricCard
                             label='Marginal links'

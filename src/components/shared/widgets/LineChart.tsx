@@ -24,6 +24,67 @@ function usualSpacing(points: readonly ChartPoint[]): number {
     return gaps[Math.floor(gaps.length / 2)] ?? 0
 }
 
+/**
+ * A path through the points, broken where the gap is much longer than usual.
+ * A point with no neighbour is drawn as a dot: a zero-length round-capped stroke.
+ */
+function linePath(
+    points: readonly ChartPoint[],
+    x: (at: number) => number,
+    y: (value: number) => number
+): string {
+    const breakAfter = Math.max(usualSpacing(points) * GAP_FACTOR, MIN_GAP_MS)
+    return points
+        .map((point, index) => {
+            const previous = points[index - 1]
+            const starts = previous === undefined || point.at - previous.at > breakAfter
+            const next = points[index + 1]
+            const alone = starts && (next === undefined || next.at - point.at > breakAfter)
+            const at = `${x(point.at).toFixed(1)} ${y(point.value).toFixed(2)}`
+            return alone ? `M ${at} l 0 0` : `${starts ? 'M' : 'L'} ${at}`
+        })
+        .join(' ')
+}
+
+/** Scales that fit the points to the plot; a flat series sits in the middle. */
+function scales(points: readonly ChartPoint[], first: ChartPoint, last: ChartPoint) {
+    const values = points.map((point) => point.value)
+    const lowest = Math.min(...values)
+    const highest = Math.max(...values)
+    const flat = highest === lowest
+    const bottom = flat ? lowest - 1 : lowest
+    const top = flat ? highest + 1 : highest
+    const span = last.at - first.at
+    return {
+        lowest,
+        highest,
+        flat,
+        span,
+        x: (at: number) => (span === 0 ? W / 2 : ((at - first.at) / span) * W),
+        y: (value: number) => H - ((value - bottom) / (top - bottom)) * H,
+    }
+}
+
+/** The shape of a reading's history, small enough for a tile. Space is kept when empty. */
+export function Sparkline({ points }: { readonly points: readonly ChartPoint[] }) {
+    const first = points[0]
+    const last = points.at(-1)
+    const scaled = first && last && points.length > 1 ? scales(points, first, last) : null
+    return (
+        <div className='sparkline' aria-hidden='true'>
+            {scaled === null ? null : (
+                <svg viewBox={`0 0 ${String(W)} ${String(H)}`} preserveAspectRatio='none'>
+                    <path
+                        className='sparkline_line'
+                        d={linePath(points, scaled.x, scaled.y)}
+                        vectorEffect='non-scaling-stroke'
+                    />
+                </svg>
+            )}
+        </div>
+    )
+}
+
 function nearestIndex(points: readonly ChartPoint[], at: number): number {
     let best = 0
     for (const [index, point] of points.entries()) {
@@ -55,28 +116,8 @@ export function LineChart({
     const last = points.at(-1)
     if (!first || !last) return null
 
-    const values = points.map((point) => point.value)
-    const lowest = Math.min(...values)
-    const highest = Math.max(...values)
-    const flat = highest === lowest
-    const bottom = flat ? lowest - 1 : lowest
-    const top = flat ? highest + 1 : highest
-    const span = last.at - first.at
-    const x = (at: number) => (span === 0 ? W / 2 : ((at - first.at) / span) * W)
-    const y = (value: number) => H - ((value - bottom) / (top - bottom)) * H
-
-    const breakAfter = Math.max(usualSpacing(points) * GAP_FACTOR, MIN_GAP_MS)
-    const line = points
-        .map((point, index) => {
-            const previous = points[index - 1]
-            const starts = previous === undefined || point.at - previous.at > breakAfter
-            const next = points[index + 1]
-            const alone = starts && (next === undefined || next.at - point.at > breakAfter)
-            const at = `${x(point.at).toFixed(1)} ${y(point.value).toFixed(2)}`
-            // A point with no neighbour is drawn as a dot: a zero-length round-capped stroke.
-            return alone ? `M ${at} l 0 0` : `${starts ? 'M' : 'L'} ${at}`
-        })
-        .join(' ')
+    const { lowest, highest, flat, span, x, y } = scales(points, first, last)
+    const line = linePath(points, x, y)
 
     const shown = hovered === null ? last : (points[hovered] ?? last)
     const track = (event: PointerEvent<HTMLDivElement>) => {

@@ -15,6 +15,13 @@ const METRICS: Readonly<Record<string, readonly [string, string]>> = {
     'airQualityMetrics.pm10Environmental': ['PM1.0', 'µg/m³'],
     'airQualityMetrics.pm25Environmental': ['PM2.5', 'µg/m³'],
     'airQualityMetrics.pm100Environmental': ['PM10', 'µg/m³'],
+    // Plantower particle counts: particles at least this size in 0.1 L of air.
+    'airQualityMetrics.particles03um': ['Particles ≥ 0.3 µm', '/0.1 L'],
+    'airQualityMetrics.particles05um': ['Particles ≥ 0.5 µm', '/0.1 L'],
+    'airQualityMetrics.particles10um': ['Particles ≥ 1 µm', '/0.1 L'],
+    'airQualityMetrics.particles25um': ['Particles ≥ 2.5 µm', '/0.1 L'],
+    'airQualityMetrics.particles50um': ['Particles ≥ 5 µm', '/0.1 L'],
+    'airQualityMetrics.particles100um': ['Particles ≥ 10 µm', '/0.1 L'],
     'deviceMetrics.channelUtilization': ['Channel utilization', '%'],
     'deviceMetrics.airUtilTx': ['Transmit airtime', '%'],
     'powerMetrics.ch1Voltage': ['Power monitor ch1 voltage', 'V'],
@@ -119,6 +126,17 @@ const RATE_MIN_GAP_MS = 4 * 60 * 1000
 
 /** Battery and voltage: the readings a power test is about. */
 export const POWER_METRICS = ['deviceMetrics.batteryLevel', 'deviceMetrics.voltage'] as const
+
+/** The reading a node's history opens on: its first sensor, else its battery. */
+export function defaultMetric(node: Pick<NearbyNode, 'readings' | 'history'>): string {
+    const has = (metric: string) =>
+        node.readings[metric] !== undefined || (node.history[metric]?.length ?? 0) > 0
+    return (
+        EXPECTED_SENSOR_METRICS.find((metric) => has(metric)) ??
+        POWER_METRICS.find((metric) => has(metric)) ??
+        EXPECTED_SENSOR_METRICS[0]
+    )
+}
 
 /** Meshtastic reports a battery level above 100 when a node runs on external power. */
 const POWERED_LEVEL = 100
@@ -236,6 +254,12 @@ export function isSensorMetric(metric: string): boolean {
     )
 }
 
+/** Where a metric sits in the list above, so related readings stay together and in size order. */
+export function metricRank(metric: string): number {
+    const rank = Object.keys(METRICS).indexOf(metric)
+    return rank === -1 ? Infinity : rank
+}
+
 export function metricLabel(metric: string): string {
     return METRICS[metric]?.[0] ?? metric
 }
@@ -258,6 +282,11 @@ const NO_BATTERY_VOLTS = 2.6
  * the firmware reports 101 instead of a percentage, so this is the only figure;
  * charging lifts the voltage, so it reads high while plugged in.
  */
+/** False when the voltage says no battery is connected, or it is flat. */
+export function hasBattery(volts: number): boolean {
+    return Number.isFinite(volts) && volts >= NO_BATTERY_VOLTS
+}
+
 export function batteryFromVoltage(volts: number): number | null {
     if (!Number.isFinite(volts) || volts < NO_BATTERY_VOLTS) return null
     if (volts >= OCV[0]) return 100
@@ -295,7 +324,9 @@ export function batteryTone(percent: number): 'live' | 'dead' | 'default' {
 const number = new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 })
 
 export function formatNumber(value: number, unit = ''): string {
-    return unit ? `${number.format(value)} ${unit}` : number.format(value)
+    // A value that rounds to zero is zero: -0.001 V reads `0 V`, not `-0 V`.
+    const shown = number.format(Math.abs(value) < 0.005 ? 0 : value)
+    return unit ? `${shown} ${unit}` : shown
 }
 
 export function epochTime(seconds: number, now: number): number | null {

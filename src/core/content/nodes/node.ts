@@ -20,6 +20,14 @@ export const nodeContent = {
             label: 'Live in the field',
             body: 'The network has heard this node recently, through a gateway.',
         },
+        computer: {
+            label: 'On a computer',
+            body: 'Last heard through a browser on Connect a Node: plugged into a computer, or near one over Bluetooth, rather than out in the field.',
+        },
+        recent: {
+            label: 'Heard recently',
+            body: 'The network has heard this node recently.',
+        },
         quiet: {
             label: 'Quiet',
             body: 'The network has heard this node before, but not recently.',
@@ -133,7 +141,7 @@ export const nodeContent = {
     readings: {
         loading: 'Loading readings…',
         failed: 'Readings could not be loaded.',
-        sensors: 'Sensor readings',
+        sensors: 'Readings',
         range: 'From the last 7 days of readings on the server, including what browsers have backed up.',
     },
     edit: {

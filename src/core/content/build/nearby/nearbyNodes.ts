@@ -89,5 +89,6 @@ export const nearbyNodesContent = {
         disconnect: 'Disconnect',
         remove: 'Remove from list',
         undo: 'Undo',
+        page: 'Open node page',
     },
 } as const satisfies NearbyNodesContent

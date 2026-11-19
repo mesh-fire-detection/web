@@ -4,7 +4,7 @@ import { StatusDot } from '@components/shared/widgets/Badge'
 
 const STATUSES = [
     { kind: 'live' as const, label: 'Online' },
-    { kind: 'warn' as const, label: 'Degraded' },
+    { kind: 'warn' as const, label: 'Late' },
     { kind: 'dead' as const, label: 'Offline' },
 ]
 

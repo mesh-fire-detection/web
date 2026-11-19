@@ -34,7 +34,6 @@ export const APP_ROUTES = [
         label: 'Connect a Node',
         navLabel: 'Connect',
         nav: true,
-        newTab: true,
     },
     { id: 'firmware', path: '/firmware', label: 'Firmware', nav: false },
     {

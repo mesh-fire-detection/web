@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom'
 
 import { useNavMenu, OVERLAY_NAV_ID, OVERLAY_TOGGLE_ID } from '@components/app/NavMenuProvider'
 import { useSession } from '@components/app/SessionProvider'
+import { RadioChip } from '@components/layout/RadioChip'
 import { UnitsToggle } from '@components/layout/UnitsToggle'
 import { Wordmark } from '@components/layout/Wordmark'
 import { Container, Row, Stack } from '@components/shared/primitives/Layout'
@@ -95,6 +96,7 @@ export function Header() {
                         {/*<Row className='header_units' gap={0} wrap={false}>*/}
                         {/*    <UnitsToggle />*/}
                         {/*</Row>*/}
+                        <RadioChip />
                         <AccountLink size='sm' className='header_account' />
                         <ButtonLink to='/build' size='sm' className='header_cta'>
                             Build a Node

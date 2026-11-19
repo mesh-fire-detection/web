@@ -346,12 +346,23 @@
     border-color: var(--line_hover);
 }
 
+/* The chosen tile and its sparkline take the chart's colour, tying the two together. */
 .nearby_reading[aria-pressed='true'] .nearby_tile {
-    border-color: var(--warn);
+    border-color: var(--fire);
+}
+
+.nearby_reading:hover .sparkline_line,
+.nearby_reading[aria-pressed='true'] .sparkline_line {
+    stroke: var(--fire);
+}
+
+.nearby_history {
+    padding-top: var(--s_5);
+    border-top: 1px solid var(--line);
 }
 
 .nearby_reading:focus-visible {
-    outline: 2px solid var(--warn);
+    outline: 2px solid var(--fire);
     outline-offset: 2px;
 }
 

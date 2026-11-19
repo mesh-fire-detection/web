@@ -8,7 +8,7 @@ import type { NetworkSource } from '@core/content/types'
  * one-line change and nothing on the site silently starts lying.
  */
 export type NodeType = 'base' | 'cellular' | 'sensor' | 'vision'
-export type NodeStatus = 'online' | 'degraded' | 'offline'
+export type NodeStatus = 'online' | 'late' | 'offline'
 
 export type MeshNode = {
     id: string
@@ -123,7 +123,7 @@ export const NODES = [
         id: 'bas-03',
         name: 'Grand Prospect',
         type: 'base',
-        status: 'degraded',
+        status: 'late',
         position: [-121.7218, 47.4076],
         elevationM: 811,
         antennaHeightM: 8,
@@ -303,7 +303,7 @@ export function nodesByType(type: NodeType): readonly MeshNode[] {
 }
 
 export function countByStatus(): Record<NodeStatus, number> {
-    const counts: Record<NodeStatus, number> = { online: 0, degraded: 0, offline: 0 }
+    const counts: Record<NodeStatus, number> = { online: 0, late: 0, offline: 0 }
     for (const node of NODES) {
         const current = counts[node.status]
         counts[node.status] = current + 1

@@ -3,11 +3,19 @@ import { Navigate, useLocation, useParams } from 'react-router-dom'
 
 import { useConnectedNodes } from '@components/account/connectedNodes'
 import { signInToSee } from '@components/account/flow'
+import { useRadioSnapshot } from '@components/app/RadioProvider'
 import { useSession } from '@components/app/SessionProvider'
 import { useUnitSystem } from '@components/app/UnitsProvider'
 import { Page } from '@components/layout/Page'
 import { FirmwareBuild, FirmwareVersion } from '@components/pages/build/nearby/Indicators'
-import { mapLink, minutesSince, nodeUse, STATUS_KIND } from '@components/pages/nodes/listing'
+import {
+    heardViaText,
+    mapLink,
+    minutesSince,
+    nodeUse,
+    powerText,
+    STATUS_KIND,
+} from '@components/pages/nodes/listing'
 import { NodeEditor } from '@components/pages/nodes/NodeEditor'
 import { NodePathView } from '@components/pages/nodes/NodePath'
 import { NodeTelemetry } from '@components/pages/nodes/NodeTelemetry'
@@ -24,6 +32,7 @@ import { nodesContent } from '@core/content/nodes/nodes'
 import { coordinate, sinceMinutes } from '@core/format/format'
 import { formatLength } from '@core/format/units'
 import { meshId } from '@core/nearby/model'
+import { connectedMeshIds } from '@core/nearby/radio'
 
 const copy = nodeContent
 
@@ -38,22 +47,23 @@ const shownPosition = (position: readonly [number, number] | null): string =>
 
 const USE_KIND = { quiet: 'dead', unused: 'neutral' } as const
 
+/** A node that is being heard takes its status colour, wherever it is. */
 function kindOf(node: Node) {
     const use = nodeUse(node)
-    return use === 'field' ? STATUS_KIND[node.status] : USE_KIND[use]
+    return use === 'quiet' || use === 'unused' ? USE_KIND[use] : STATUS_KIND[node.status]
 }
 
 /** Whether the node is out there, what it can be done with, and whether this computer knows it. */
-function UseLine({ node }: { readonly node: Node }) {
+function UseLine({ node, now }: { readonly node: Node; readonly now: boolean }) {
     const connected = useConnectedNodes()
-    const here = connected.some((report) => meshId(report.nodeNum) === node.meshId)
+    const before = !now && connected.some((report) => meshId(report.nodeNum) === node.meshId)
     const onMap = mapLink([node])
 
     return (
         <Stack gap={3}>
             <Text size='sm' tone='muted'>
                 {copy.use[nodeUse(node)].body}
-                {here ? ` ${copy.connectedHere}.` : null}
+                {before ? ` ${copy.connectedHere}.` : null}
             </Text>
             <Row gap={3}>
                 {onMap === null ? null : (
@@ -135,7 +145,14 @@ function Identity({ node, now }: { readonly node: Node; readonly now: number }) 
                 size='sm'
                 value={sinceMinutes(minutesSince(node.lastHeardAt, now))}
             />
-            <Metric label={words.status} size='sm' value={nodesContent.statuses[node.status]} />
+            <Metric
+                label={words.status}
+                size='sm'
+                value={[nodesContent.statuses[node.status], heardViaText(node.heardVia)]
+                    .filter((part) => part !== null)
+                    .join(' · ')}
+            />
+            <Metric label={nodesContent.table.power} size='sm' value={powerText(node.power).text} />
         </Grid>
     )
 }
@@ -286,6 +303,7 @@ function Details({ details }: { readonly details: NonNullable<Node['details']> }
 
 function NodeBody({ id }: { readonly id: string }) {
     const [loaded, setLoaded] = useState<Loaded>({ kind: 'loading' })
+    const radio = useRadioSnapshot()
     const [attempt, setAttempt] = useState(0)
     const [editing, setEditing] = useState(false)
     const [saved, setSaved] = useState(false)
@@ -342,6 +360,7 @@ function NodeBody({ id }: { readonly id: string }) {
     }
 
     const { node, at } = loaded
+    const here = connectedMeshIds(radio).has(node.meshId)
 
     return (
         <Page
@@ -350,15 +369,22 @@ function NodeBody({ id }: { readonly id: string }) {
                     <Row gap={3}>
                         <StatusLabel
                             kind={kindOf(node)}
-                            pulse={nodeUse(node) === 'field' && node.status === 'online'}
+                            pulse={node.status === 'online' && nodeUse(node) !== 'unused'}
                         >
                             {copy.use[nodeUse(node)].label}
                         </StatusLabel>
                         {node.mine ? <Badge kind='fire'>{copy.yours}</Badge> : null}
                         {node.enabled ? null : <Badge>{copy.disabled}</Badge>}
+                        {here ? <Badge kind='live'>{nodesContent.connectedHere}</Badge> : null}
                     </Row>
                     <Text mono size='sm' tone='faint'>
-                        {node.id} · {node.meshId}
+                        {[
+                            node.id,
+                            node.meshId,
+                            node.status === 'offline' ? null : heardViaText(node.heardVia),
+                        ]
+                            .filter((part) => part !== null)
+                            .join(' · ')}
                     </Text>
                     {back}
                 </Stack>
@@ -369,7 +395,7 @@ function NodeBody({ id }: { readonly id: string }) {
                 <Stack gap={4}>
                     <Box tone='surface' padding={5} radius='md'>
                         <Stack gap={5}>
-                            <UseLine node={node} />
+                            <UseLine node={node} now={here} />
                             <Identity node={node} now={at} />
                         </Stack>
                     </Box>
