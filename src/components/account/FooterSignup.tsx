@@ -4,8 +4,8 @@ import { useConnectedNodes } from '@components/account/connectedNodes'
 import { formErrorMessage, looksLikeEmail } from '@components/account/flow'
 import { useSession } from '@components/app/SessionProvider'
 import { TextField } from '@components/shared/forms/Field'
-import { Form, FormActions } from '@components/shared/forms/Form'
-import { Row, Stack } from '@components/shared/primitives/Layout'
+import { Form } from '@components/shared/forms/Form'
+import { Divider, Row, Stack } from '@components/shared/primitives/Layout'
 import { Text } from '@components/shared/typography/Text'
 import { Button, ButtonLink } from '@components/shared/widgets/Action'
 import { subscribe } from '@core/api/people'
@@ -35,6 +35,7 @@ function SubscribeForm() {
         <Form
             ariaLabel={copy.title}
             busy={busy}
+            className='footer_subscribe'
             onSubmit={(event) => {
                 event.preventDefault()
                 setError(undefined)
@@ -52,25 +53,28 @@ function SubscribeForm() {
             }}
         >
             <Stack gap={3}>
-                <TextField
-                    autoComplete='email'
-                    error={error}
-                    inputMode='email'
-                    label={copy.label}
-                    name='email'
-                    onChange={setEmail}
-                    required
-                    type='email'
-                    value={email}
-                />
+                {/* The button sits in the input's row, whatever shows under it. */}
+                <div className='footer_subscribe_row'>
+                    <div className='footer_subscribe_field'>
+                        <TextField
+                            autoComplete='email'
+                            error={error}
+                            inputMode='email'
+                            label={copy.label}
+                            name='email'
+                            onChange={setEmail}
+                            required
+                            type='email'
+                            value={email}
+                        />
+                    </div>
+                    <Button loading={busy} type='submit' variant='secondary'>
+                        {copy.submit}
+                    </Button>
+                </div>
                 <Text size='xs' tone='faint'>
                     {copy.consent}
                 </Text>
-                <FormActions>
-                    <Button loading={busy} size='sm' type='submit' variant='secondary'>
-                        {copy.submit}
-                    </Button>
-                </FormActions>
             </Stack>
         </Form>
     )
@@ -84,24 +88,32 @@ function SubscribeForm() {
 export function FooterSignup() {
     const { session } = useSession()
     const nodes = useConnectedNodes()
-    if (session.status !== 'signed_out') return null
-
-    return nodes.length > 0 ? (
-        <Stack gap={3}>
-            <Title>{membershipContent.footer.title}</Title>
-            <Text size='sm' tone='muted' measure={60}>
-                {membershipContent.footer.body}
-            </Text>
-            <Row>
-                <ButtonLink size='sm' to='/join'>
-                    {membershipContent.footer.cta}
-                </ButtonLink>
-            </Row>
-        </Stack>
-    ) : (
-        <Stack gap={3}>
-            <Title>{copy.title}</Title>
-            <SubscribeForm />
-        </Stack>
-    )
+    // The divider comes with the signup, so a signed-in footer has no stray rule.
+    return session.status === 'signed_out' ? (
+        <>
+            <Divider space={0} />
+            {nodes.length > 0 ? <BecomeMember /> : <GetUpdates />}
+        </>
+    ) : null
 }
+
+const BecomeMember = () => (
+    <Stack gap={3}>
+        <Title>{membershipContent.footer.title}</Title>
+        <Text size='sm' tone='muted' measure={60}>
+            {membershipContent.footer.body}
+        </Text>
+        <Row>
+            <ButtonLink size='sm' to='/join'>
+                {membershipContent.footer.cta}
+            </ButtonLink>
+        </Row>
+    </Stack>
+)
+
+const GetUpdates = () => (
+    <Stack gap={3}>
+        <Title>{copy.title}</Title>
+        <SubscribeForm />
+    </Stack>
+)

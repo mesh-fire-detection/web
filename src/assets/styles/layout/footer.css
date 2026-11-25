@@ -12,3 +12,29 @@
 .footer_legal_links .tlink[href^='https://'] {
     display: inline;
 }
+
+/* Get updates: a compact input with the button beside it, not full width. */
+.footer_subscribe {
+    max-width: 32rem;
+}
+
+.footer_subscribe_row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: var(--s_2) var(--s_3);
+}
+
+/* The field's label, input and error become rows of the grid above. */
+.footer_subscribe_field,
+.footer_subscribe_field > * {
+    display: contents;
+}
+
+.footer_subscribe_field > * > * {
+    grid-column: 1;
+}
+
+.footer_subscribe_row > button {
+    grid-row: 2;
+    grid-column: 2;
+}

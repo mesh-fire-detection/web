@@ -40,8 +40,10 @@ export function Footer() {
                                 </Stack>
                             </Stack>
                         ))}
-                        <FooterSignup />
                     </Grid>
+
+                    {/* The signup is its own full-width row, not a fifth column. */}
+                    <FooterSignup />
 
                     <Divider space={0} />
 
