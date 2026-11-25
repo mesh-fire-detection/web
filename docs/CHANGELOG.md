@@ -5,6 +5,27 @@ releases are cut is in [RELEASING.md](RELEASING.md).
 
 ## Unreleased
 
+## 0.7.0 — 2026-11-25
+
+Needs nothing new from the backend.
+
+### Changed
+
+- **Account** is laid out as settings: titled groups of rows, each with what
+  the setting is on the left and its value or action on the right, stacking
+  on phones. Your nodes show as a table.
+- Search and filter bars stay on one line: the help text under the search
+  fields on `/nodes` and the node table is gone. `/nodes` uses the standard
+  page width.
+- The footer's **signup** is its own full-width row, with the button beside
+  the email field.
+- `/design` shows the whole UI kit, section by section.
+
+### Added
+
+- `npm run dev:live` runs the site locally against the live API, through a
+  dev-server proxy. Sign-ins send real email and writes are real.
+
 ## 0.6.0 — 2026-11-19
 
 Needs backend 0.5.0 for the Expected line and server-clock ages; works
