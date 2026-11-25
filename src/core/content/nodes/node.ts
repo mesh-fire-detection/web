@@ -166,7 +166,7 @@ export const nodeContent = {
             'For keeping track of a node while deploying it. These values are typed in by hand and are not a GPS reading from the node; anything the node reports itself is kept separately.',
         positionHint: 'Decimal degrees. Leave both empty to clear.',
         elevation: 'Elevation, metres',
-        antenna: 'Antenna height above ground, metres',
+        antenna: 'Antenna above ground, m',
         deployed: 'Deployed on',
         deployedHint: 'YYYY-MM-DD',
         note: 'Note',

@@ -272,6 +272,7 @@
 .segmented_item {
     padding: var(--s_2) var(--s_3);
     color: var(--text_3);
+    font-size: var(--fs_sm);
     white-space: nowrap;
     transition:
         background 120ms var(--ease),

@@ -211,7 +211,6 @@ function NodeFilters({
                     value={filters.status ?? 'all'}
                 />
                 <SearchField
-                    description={copy.filters.searchDescription}
                     label={copy.filters.search}
                     onChange={(next) => {
                         setDraft(next)
@@ -353,7 +352,7 @@ export function NodesPage() {
         <Page title={copy.title}>{null}</Page>
     ) : (
         <Page lede={copy.lede} title={copy.title}>
-            <Section width='wide'>
+            <Section>
                 <ServerTime>
                     <NodeDirectory />
                 </ServerTime>

@@ -36,7 +36,22 @@ const inlineStyleRule = {
         'Inline style objects are banned. Use CSS classes and tokens; CSS custom properties may be set only in allowlisted components.',
 }
 
-const markupRestrictedSyntax = [hostElementRule(ALLOWED_ELEMENTS), hrefRule, inlineStyleRule]
+// A toolbar is one control line. Help or error text under a single field makes
+// that field taller, and the bottom-aligned row then lifts its control above the
+// others. Explain filters in the label, placeholder or surrounding copy instead.
+const toolbarLineRule = {
+    selector:
+        'JSXElement[openingElement.name.name="CollectionToolbar"] JSXElement > JSXOpeningElement > JSXAttribute[name.name=/^(description|error)$/]',
+    message:
+        'Controls in CollectionToolbar share one line: no per-field description or error. Use the label, placeholder or surrounding copy.',
+}
+
+const markupRestrictedSyntax = [
+    hostElementRule(ALLOWED_ELEMENTS),
+    hrefRule,
+    inlineStyleRule,
+    toolbarLineRule,
+]
 
 const contentPlugin = {
     rules: {

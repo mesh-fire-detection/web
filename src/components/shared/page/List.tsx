@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 
+import { Heading } from '@components/shared/typography/Heading'
 import { Text } from '@components/shared/typography/Text'
 import { cx } from '@core/format/cx'
 
@@ -62,6 +63,69 @@ export function DescriptionItem({ term, children }: { term: ReactNode; children:
                     {children}
                 </Text>
             </dd>
+        </div>
+    )
+}
+
+/**
+ * A titled group of settings: a heading, an optional action level with it,
+ * and the rows below, each set off by a rule.
+ */
+export function SettingList({
+    title,
+    action,
+    children,
+}: {
+    title: string
+    action?: ReactNode | undefined
+    children: ReactNode
+}) {
+    return (
+        <div className='setting_list'>
+            <div className='setting_list_head'>
+                <Heading level={2} size='md'>
+                    {title}
+                </Heading>
+                {action}
+            </div>
+            {children}
+        </div>
+    )
+}
+
+/**
+ * One setting: what it is and where it stands on the left, its value or what
+ * to do about it on the right. On a phone the right side drops below.
+ */
+export function SettingRow({
+    label,
+    description,
+    children,
+    action,
+    align = 'center',
+}: {
+    label?: ReactNode | undefined
+    description?: ReactNode | undefined
+    children?: ReactNode | undefined
+    action?: ReactNode | undefined
+    align?: 'center' | 'end' | undefined
+}) {
+    return (
+        <div className={cx('setting_row', align === 'end' && 'setting_row_end')}>
+            <div className='setting_row_text'>
+                {label === undefined ? null : (
+                    <Text as='div' weight={600}>
+                        {label}
+                    </Text>
+                )}
+                {description === undefined ? null : (
+                    <Text size='sm' tone='muted'>
+                        {description}
+                    </Text>
+                )}
+                {children}
+            </div>
+            {action === undefined ? null : <div className='setting_row_action'>{action}</div>}
         </div>
     )
 }

@@ -174,7 +174,6 @@ export function NodeTable({
             >
                 <CollectionToolbar itemLabel='node' resultCount={filteredNodes.length}>
                     <SearchField
-                        description='Search by node name, ID, or type.'
                         label='Search nodes'
                         onChange={(next) => {
                             setQueryDraft(next)

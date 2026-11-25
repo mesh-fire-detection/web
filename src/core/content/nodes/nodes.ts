@@ -18,7 +18,6 @@ export const nodesContent = {
         status: 'Status',
         anyStatus: 'All statuses',
         search: 'Search nodes',
-        searchDescription: 'Search by node ID or name.',
         searchPlaceholder: 'ID or name',
         submit: 'Search',
     },

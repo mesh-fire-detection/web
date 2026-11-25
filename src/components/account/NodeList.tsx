@@ -1,6 +1,6 @@
 import { List, ListItem } from '@components/shared/page/List'
 import { Text } from '@components/shared/typography/Text'
-import type { MyNode, NodeReport } from '@core/api/people'
+import type { NodeReport } from '@core/api/people'
 import { meshId } from '@core/nearby/model'
 
 type ListedNode = {
@@ -17,14 +17,6 @@ export const fromReport = (node: NodeReport): ListedNode => ({
     name: node.name,
     ids: meshId(node.nodeNum),
     hardware: node.hardware,
-})
-
-/** A registered node, by the ID the server gave it as well. */
-export const fromMine = (node: MyNode): ListedNode => ({
-    key: node.id,
-    name: node.name,
-    ids: `${node.id} · ${node.meshId}`,
-    hardware: node.details?.hardware ?? null,
 })
 
 /** Nodes by name and ID, as the person would recognise them on the bench. */

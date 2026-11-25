@@ -2,8 +2,7 @@ import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 
 import { formErrorMessage } from '@components/account/flow'
-import { Row, Stack } from '@components/shared/primitives/Layout'
-import { Heading } from '@components/shared/typography/Heading'
+import { SettingList, SettingRow } from '@components/shared/page/List'
 import { Text } from '@components/shared/typography/Text'
 import { Button } from '@components/shared/widgets/Action'
 import {
@@ -72,24 +71,10 @@ export function SignInMethods() {
     }
 
     return (
-        <Stack gap={3}>
-            <Heading level={2} size='md'>
-                {copy.title}
-            </Heading>
-            <Stack gap={1}>
-                <Text weight={600}>{copy.code}</Text>
-                <Text size='sm' tone='muted'>
-                    {copy.codeNote}
-                </Text>
-            </Stack>
-            <Stack gap={2}>
-                <Text weight={600}>{copy.google}</Text>
-                {google ? null : (
-                    <Text size='sm' tone='muted'>
-                        {copy.googleNote}
-                    </Text>
-                )}
-                <Row>
+        <SettingList title={copy.title}>
+            <SettingRow description={copy.codeNote} label={copy.code} />
+            <SettingRow
+                action={
                     <Button
                         loading={busy}
                         onClick={() => {
@@ -99,13 +84,16 @@ export function SignInMethods() {
                     >
                         {google ? copy.remove : copy.add}
                     </Button>
-                </Row>
+                }
+                description={google ? undefined : copy.googleNote}
+                label={copy.google}
+            >
                 {error === undefined ? null : (
                     <Text role='alert' size='sm' tone='dead'>
                         {error}
                     </Text>
                 )}
-            </Stack>
-        </Stack>
+            </SettingRow>
+        </SettingList>
     )
 }

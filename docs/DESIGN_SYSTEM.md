@@ -106,7 +106,12 @@ Use `Callout`, `EmptyState`, and `ErrorState` for notices and collection/load
 feedback; `SectionHead` for section introductions; `CollectionToolbar` for search
 controls and result counts; `MetricGrid` for responsive metric arrangements;
 `List`, `DescriptionList`, `StepList`, `Timeline`, and `DataTable` for their
-corresponding semantic patterns. `SampleDataBanner` and `CostComparison` are
+corresponding semantic patterns. `SettingList` and `SettingRow` lay out
+settings: a titled group of ruled rows, each with what the setting is and where
+it stands on the left and its value or action on the right, stacking on phones.
+`CollectionToolbar` keeps every control on one line: its
+fields carry a label and a control only, with no `description` or `error` under
+a single field (lint enforced), so the bottom-aligned row stays level. `SampleDataBanner` and `CostComparison` are
 composed content widgets. Keep domain content in the owning page and content
 module.
 

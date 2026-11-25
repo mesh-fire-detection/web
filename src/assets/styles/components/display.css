@@ -411,6 +411,66 @@
     margin: 0;
 }
 
+/* -------------------------------------------------------------- Settings --- */
+.setting_list {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.setting_list_head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    padding-bottom: var(--s_3);
+    gap: var(--s_3);
+}
+
+.setting_row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--s_4) 0;
+    gap: var(--s_5);
+    border-top: 1px solid var(--line);
+}
+
+.setting_row_end {
+    align-items: flex-end;
+}
+
+.setting_row_text {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-width: 0;
+    max-width: var(--setting_text_max);
+    gap: var(--s_1);
+}
+
+.setting_row_action {
+    display: flex;
+    flex: 0 0 auto;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: var(--s_2);
+    text-align: right;
+}
+
+@media (width <= 560px) {
+    .setting_row {
+        flex-direction: column;
+        align-items: stretch;
+        gap: var(--s_3);
+    }
+
+    .setting_row_action {
+        align-items: flex-start;
+        text-align: left;
+    }
+}
+
 /* ----------------------------------------------------------- Line chart --- */
 .line_chart {
     display: grid;

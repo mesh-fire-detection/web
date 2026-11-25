@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react'
 
 import { formErrorMessage } from '@components/account/flow'
-import { List, ListItem } from '@components/shared/page/List'
-import { Row, Stack } from '@components/shared/primitives/Layout'
-import { Heading } from '@components/shared/typography/Heading'
+import { SettingList, SettingRow } from '@components/shared/page/List'
+import { Row } from '@components/shared/primitives/Layout'
 import { Text } from '@components/shared/typography/Text'
 import { Button } from '@components/shared/widgets/Action'
 import { Badge } from '@components/shared/widgets/Badge'
@@ -83,41 +82,35 @@ export function Sessions({ onSignedOut }: { readonly onSignedOut: () => void }) 
     }
 
     return (
-        <Stack gap={3}>
-            <Heading level={2} size='md'>
-                {copy.title}
-            </Heading>
-            <List marker='none' gap={3}>
-                {sessions.map((session) => (
-                    <ListItem key={session.id} tone='default'>
-                        <Row gap={3} justify='between'>
-                            <Stack gap={1}>
-                                <Row gap={2}>
-                                    <Text weight={600}>{deviceName(session.userAgent)}</Text>
-                                    {session.current ? <Badge>{copy.thisBrowser}</Badge> : null}
-                                </Row>
-                                <Text size='sm' tone='muted'>
-                                    {`${copy.lastActive} ${dayFormat.format(new Date(session.lastActiveAt))}`}
-                                </Text>
-                            </Stack>
-                            {session.current ? null : (
-                                <Button
-                                    loading={busy === session.id}
-                                    onClick={() => {
-                                        void end(session.id)
-                                    }}
-                                    size='sm'
-                                    variant='ghost'
-                                >
-                                    {copy.end}
-                                </Button>
-                            )}
+        <SettingList title={copy.title}>
+            {sessions.map((session) => (
+                <SettingRow
+                    key={session.id}
+                    action={
+                        session.current ? null : (
+                            <Button
+                                loading={busy === session.id}
+                                onClick={() => {
+                                    void end(session.id)
+                                }}
+                                size='sm'
+                                variant='ghost'
+                            >
+                                {copy.end}
+                            </Button>
+                        )
+                    }
+                    description={`${copy.lastActive} ${dayFormat.format(new Date(session.lastActiveAt))}`}
+                    label={
+                        <Row gap={2}>
+                            {deviceName(session.userAgent)}
+                            {session.current ? <Badge>{copy.thisBrowser}</Badge> : null}
                         </Row>
-                    </ListItem>
-                ))}
-            </List>
-            <Stack gap={1}>
-                <Row>
+                    }
+                />
+            ))}
+            <SettingRow
+                action={
                     <Button
                         loading={busy === 'all'}
                         onClick={() => {
@@ -127,16 +120,15 @@ export function Sessions({ onSignedOut }: { readonly onSignedOut: () => void }) 
                     >
                         {copy.everywhere}
                     </Button>
-                </Row>
-                <Text size='xs' tone='faint'>
-                    {copy.everywhereNote}
-                </Text>
-            </Stack>
-            {error === undefined ? null : (
-                <Text role='alert' size='sm' tone='dead'>
-                    {error}
-                </Text>
-            )}
-        </Stack>
+                }
+                description={copy.everywhereNote}
+            >
+                {error === undefined ? null : (
+                    <Text role='alert' size='sm' tone='dead'>
+                        {error}
+                    </Text>
+                )}
+            </SettingRow>
+        </SettingList>
     )
 }

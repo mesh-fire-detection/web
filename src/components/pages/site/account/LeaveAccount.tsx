@@ -1,8 +1,8 @@
 import { useState } from 'react'
 
 import { formErrorMessage } from '@components/account/flow'
-import { Row, Stack } from '@components/shared/primitives/Layout'
-import { Heading } from '@components/shared/typography/Heading'
+import { SettingList, SettingRow } from '@components/shared/page/List'
+import { Row } from '@components/shared/primitives/Layout'
 import { Text } from '@components/shared/typography/Text'
 import { Button } from '@components/shared/widgets/Action'
 import { deleteMe } from '@core/api/auth'
@@ -33,59 +33,59 @@ export function LeaveAccount({ onSignedOut }: { readonly onSignedOut: () => void
     }
 
     return (
-        <Stack gap={3}>
-            <Heading level={2} size='md'>
-                {copy.title}
-            </Heading>
-            {copy.body.map((paragraph) => (
-                <Text key={paragraph} tone='muted'>
-                    {paragraph}
-                </Text>
-            ))}
-            {confirming ? (
-                <Stack gap={2}>
-                    <Row gap={3}>
+        <SettingList title={copy.title}>
+            <SettingRow
+                action={
+                    confirming ? (
+                        <>
+                            <Row gap={2}>
+                                <Button
+                                    disabled={busy}
+                                    onClick={() => {
+                                        setConfirming(false)
+                                        setError(undefined)
+                                    }}
+                                    variant='ghost'
+                                >
+                                    {copy.cancel}
+                                </Button>
+                                <Button
+                                    loading={busy}
+                                    onClick={() => {
+                                        void leave()
+                                    }}
+                                    variant='danger'
+                                >
+                                    {copy.confirm}
+                                </Button>
+                            </Row>
+                            <Text size='xs' tone='faint'>
+                                {copy.confirmNote}
+                            </Text>
+                        </>
+                    ) : (
                         <Button
-                            loading={busy}
                             onClick={() => {
-                                void leave()
+                                setConfirming(true)
                             }}
-                            variant='danger'
+                            variant='secondary'
                         >
-                            {copy.confirm}
+                            {copy.start}
                         </Button>
-                        <Button
-                            disabled={busy}
-                            onClick={() => {
-                                setConfirming(false)
-                                setError(undefined)
-                            }}
-                            variant='ghost'
-                        >
-                            {copy.cancel}
-                        </Button>
-                    </Row>
-                    <Text size='xs' tone='faint'>
-                        {copy.confirmNote}
+                    )
+                }
+            >
+                {copy.body.map((paragraph) => (
+                    <Text key={paragraph} size='sm' tone='muted'>
+                        {paragraph}
                     </Text>
-                </Stack>
-            ) : (
-                <Row>
-                    <Button
-                        onClick={() => {
-                            setConfirming(true)
-                        }}
-                        variant='secondary'
-                    >
-                        {copy.start}
-                    </Button>
-                </Row>
-            )}
-            {error === undefined ? null : (
-                <Text role='alert' size='sm' tone='dead'>
-                    {error}
-                </Text>
-            )}
-        </Stack>
+                ))}
+                {error === undefined ? null : (
+                    <Text role='alert' size='sm' tone='dead'>
+                        {error}
+                    </Text>
+                )}
+            </SettingRow>
+        </SettingList>
     )
 }

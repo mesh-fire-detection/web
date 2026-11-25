@@ -304,6 +304,7 @@ export type CodeStepContent = {
 export type AccountContent = {
     readonly title: string
     readonly details: {
+        readonly title: string
         readonly name: string
         readonly nameInvalid: string
         readonly email: string
@@ -313,6 +314,7 @@ export type AccountContent = {
         readonly joined: string
     }
     readonly signOut: string
+    readonly signOutNote: string
     readonly signIn: {
         readonly title: string
         readonly code: string
@@ -348,6 +350,12 @@ export type AccountContent = {
         readonly unnamed: string
         readonly connect: string
         readonly all: string
+        readonly columns: {
+            readonly name: string
+            readonly id: string
+            readonly meshId: string
+            readonly hardware: string
+        }
     }
 }
 
@@ -368,7 +376,6 @@ export type NodesContent = PageHeading & {
         | 'status'
         | 'anyStatus'
         | 'search'
-        | 'searchDescription'
         | 'searchPlaceholder'
         | 'submit'
     >

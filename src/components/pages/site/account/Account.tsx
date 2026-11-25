@@ -3,7 +3,6 @@ import { Navigate, useNavigate } from 'react-router-dom'
 
 import { formErrorMessage, signInToSee } from '@components/account/flow'
 import { backUpConnectedNodes } from '@components/account/nodeBackup'
-import { fromMine, NodeList } from '@components/account/NodeList'
 import { useSession } from '@components/app/SessionProvider'
 import { Page } from '@components/layout/Page'
 import { LeaveAccount } from '@components/pages/site/account/LeaveAccount'
@@ -11,11 +10,11 @@ import { Sessions } from '@components/pages/site/account/Sessions'
 import { SignInMethods } from '@components/pages/site/account/SignInMethods'
 import { TextField } from '@components/shared/forms/Field'
 import { Form } from '@components/shared/forms/Form'
-import { DescriptionItem, DescriptionList } from '@components/shared/page/List'
-import { Row, Section, Stack } from '@components/shared/primitives/Layout'
-import { Heading } from '@components/shared/typography/Heading'
+import { DataTable } from '@components/shared/page/DataTable'
+import { SettingList, SettingRow } from '@components/shared/page/List'
+import { Box, Row, Section, Stack } from '@components/shared/primitives/Layout'
 import { Text } from '@components/shared/typography/Text'
-import { Button, TextLink } from '@components/shared/widgets/Action'
+import { Button, ButtonLink, TextLink } from '@components/shared/widgets/Action'
 import { renameMe, type SessionUser } from '@core/api/auth'
 import {
     fetchMyNodes,
@@ -69,43 +68,45 @@ function YourDetails({ user }: { readonly user: SessionUser }) {
                 })
             }}
         >
-            <Stack gap={4}>
-                <TextField
-                    autoComplete='name'
-                    error={error}
-                    label={copy.details.name}
-                    name='name'
-                    onChange={(next) => {
-                        setName(next)
-                        setSaved(false)
-                    }}
-                    required
-                    value={name}
+            <SettingList title={copy.details.title}>
+                <SettingRow
+                    action={
+                        <Row gap={3}>
+                            {saved ? (
+                                <Text role='status' size='sm' tone='live'>
+                                    {copy.details.saved}
+                                </Text>
+                            ) : null}
+                            <Button disabled={unchanged} loading={busy} type='submit'>
+                                {copy.details.save}
+                            </Button>
+                        </Row>
+                    }
+                    align={error === undefined ? 'end' : 'center'}
+                >
+                    <TextField
+                        autoComplete='name'
+                        error={error}
+                        label={copy.details.name}
+                        name='name'
+                        onChange={(next) => {
+                            setName(next)
+                            setSaved(false)
+                        }}
+                        required
+                        value={name}
+                    />
+                </SettingRow>
+                <SettingRow
+                    action={<Text size='sm'>{user.email}</Text>}
+                    description={copy.details.emailFixed}
+                    label={copy.details.email}
                 />
-                <Stack gap={1}>
-                    <DescriptionList columns={1}>
-                        <DescriptionItem term={copy.details.email}>{user.email}</DescriptionItem>
-                    </DescriptionList>
-                    <Text size='xs' tone='faint'>
-                        {copy.details.emailFixed}
-                    </Text>
-                </Stack>
-                <DescriptionList columns={1}>
-                    <DescriptionItem term={copy.details.joined}>
-                        {dayFormat.format(new Date(user.createdAt))}
-                    </DescriptionItem>
-                </DescriptionList>
-                <Row gap={3}>
-                    <Button disabled={unchanged} loading={busy} type='submit'>
-                        {copy.details.save}
-                    </Button>
-                    {saved ? (
-                        <Text role='status' size='sm' tone='live'>
-                            {copy.details.saved}
-                        </Text>
-                    ) : null}
-                </Row>
-            </Stack>
+                <SettingRow
+                    action={<Text size='sm'>{dayFormat.format(new Date(user.createdAt))}</Text>}
+                    label={copy.details.joined}
+                />
+            </SettingList>
         </Form>
     )
 }
@@ -125,27 +126,65 @@ function YourNodes() {
     }, [])
 
     return (
-        <Stack gap={3}>
-            <Heading level={2} size='md'>
-                {copy.nodes.title}
-            </Heading>
+        <SettingList
+            action={
+                <TextLink size='sm' to='/nodes'>
+                    {copy.nodes.all}
+                </TextLink>
+            }
+            title={copy.nodes.title}
+        >
             {nodes === null ? null : nodes.length === 0 ? (
-                <Stack gap={2}>
-                    <Text tone='muted'>{copy.nodes.empty}</Text>
-                    <Row>
-                        <TextLink to='/connect'>{copy.nodes.connect}</TextLink>
-                    </Row>
-                </Stack>
+                <SettingRow
+                    action={
+                        <ButtonLink to='/connect' variant='secondary'>
+                            {copy.nodes.connect}
+                        </ButtonLink>
+                    }
+                    description={copy.nodes.empty}
+                />
             ) : (
-                <NodeList
-                    nodes={nodes.map((node) => fromMine(node))}
-                    unnamed={copy.nodes.unnamed}
+                <DataTable
+                    columns={[
+                        {
+                            key: 'name',
+                            header: copy.nodes.columns.name,
+                            render: (node) => (node.name === '' ? copy.nodes.unnamed : node.name),
+                        },
+                        {
+                            key: 'id',
+                            header: copy.nodes.columns.id,
+                            render: (node) => (
+                                <Text as='span' mono size='sm'>
+                                    {node.id}
+                                </Text>
+                            ),
+                        },
+                        {
+                            key: 'meshId',
+                            header: copy.nodes.columns.meshId,
+                            render: (node) => (
+                                <Text as='span' mono size='sm'>
+                                    {node.meshId}
+                                </Text>
+                            ),
+                        },
+                        {
+                            key: 'hardware',
+                            header: copy.nodes.columns.hardware,
+                            render: (node) => (
+                                <Text as='span' size='sm' tone='muted'>
+                                    {node.details?.hardware ?? '—'}
+                                </Text>
+                            ),
+                        },
+                    ]}
+                    getRowKey={(node) => node.id}
+                    label={copy.nodes.title}
+                    rows={nodes}
                 />
             )}
-            <Row>
-                <TextLink to='/nodes'>{copy.nodes.all}</TextLink>
-            </Row>
-        </Stack>
+        </SettingList>
     )
 }
 
@@ -169,27 +208,26 @@ function UpdatesSetting() {
     const on = status === 'confirmed'
 
     return (
-        <Stack gap={3}>
-            <Heading level={2} size='md'>
-                {words.title}
-            </Heading>
-            <Text tone='muted'>{on ? words.on : words.off}</Text>
-            <Row>
-                <Button
-                    loading={busy}
-                    onClick={() => {
-                        setBusy(true)
-                        void setMySubscription(!on).then((result) => {
-                            setBusy(false)
-                            if (result.ok) setStatus(result.data)
-                        })
-                    }}
-                    variant='secondary'
-                >
-                    {on ? words.turnOff : words.turnOn}
-                </Button>
-            </Row>
-        </Stack>
+        <SettingList title={words.title}>
+            <SettingRow
+                action={
+                    <Button
+                        loading={busy}
+                        onClick={() => {
+                            setBusy(true)
+                            void setMySubscription(!on).then((result) => {
+                                setBusy(false)
+                                if (result.ok) setStatus(result.data)
+                            })
+                        }}
+                        variant='secondary'
+                    >
+                        {on ? words.turnOff : words.turnOn}
+                    </Button>
+                }
+                description={on ? words.on : words.off}
+            />
+        </SettingList>
     )
 }
 
@@ -213,28 +251,35 @@ export function AccountPage() {
 
     return (
         <Page title={copy.title}>
-            <Section width='narrow'>
-                <Stack gap={7}>
+            <Section>
+                <Stack gap={8}>
                     <YourDetails key={user.id} user={user} />
                     <YourNodes />
                     <UpdatesSetting />
                     <SignInMethods />
-                    <Sessions onSignedOut={leave} />
-                    <Row>
-                        <Button
-                            onClick={() => {
-                                // Leave first: once the session reads signed out,
-                                // this page's own guard would send the person to
-                                // /sign-in instead of home.
-                                void navigate('/', { replace: true })
-                                void signOut()
-                            }}
-                            variant='secondary'
-                        >
-                            {copy.signOut}
-                        </Button>
-                    </Row>
-                    <LeaveAccount onSignedOut={leave} />
+                    <Stack gap={0}>
+                        <Sessions onSignedOut={leave} />
+                        <SettingRow
+                            action={
+                                <Button
+                                    onClick={() => {
+                                        // Leave first: once the session reads signed out,
+                                        // this page's own guard would send the person to
+                                        // /sign-in instead of home.
+                                        void navigate('/', { replace: true })
+                                        void signOut()
+                                    }}
+                                    variant='secondary'
+                                >
+                                    {copy.signOut}
+                                </Button>
+                            }
+                            description={copy.signOutNote}
+                        />
+                    </Stack>
+                    <Box tone='dead'>
+                        <LeaveAccount onSignedOut={leave} />
+                    </Box>
                 </Stack>
             </Section>
         </Page>

@@ -3,6 +3,7 @@ import type { AccountContent } from '@core/content/types'
 export const accountContent = {
     title: 'Account',
     details: {
+        title: 'Your details',
         name: 'Name',
         nameInvalid: 'Enter your name.',
         email: 'Email',
@@ -12,6 +13,7 @@ export const accountContent = {
         joined: 'Joined',
     },
     signOut: 'Sign out',
+    signOutNote: 'Ends your session in this browser. Other devices stay signed in.',
     signIn: {
         title: 'How you sign in',
         code: 'Emailed code',
@@ -51,5 +53,6 @@ export const accountContent = {
         unnamed: 'Unnamed node',
         connect: 'Connect a Node',
         all: 'See every node',
+        columns: { name: 'Name', id: 'ID', meshId: 'Mesh ID', hardware: 'Hardware' },
     },
 } as const satisfies AccountContent
