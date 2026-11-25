@@ -9,6 +9,7 @@
     },
     "scripts": {
         "dev": "vite --config config/build/vite.config.ts",
+        "dev:live": "VITE_API_URL=/live-api vite --config config/build/vite.config.ts",
         "build": "vite build --config config/build/vite.config.ts",
         "preview": "vite preview --config config/build/vite.config.ts",
         "prepare": "husky",

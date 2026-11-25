@@ -5,6 +5,8 @@ import { fileURLToPath } from 'node:url'
 import react from '@vitejs/plugin-react'
 import { defineConfig, type Plugin } from 'vite'
 
+import { SITE } from '../../src/core/config/site.ts'
+
 import { writeGithubPagesSpaFiles } from './githubPagesSpa.ts'
 
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
@@ -73,6 +75,22 @@ export default defineConfig({
         open: false,
         // Post sources sit outside the Vite root, so dev has to be told.
         fs: { allow: [rootDir, blogDir] },
+        proxy: {
+            /**
+             * The live API, reached from a local site. Its CORS and Better Auth
+             * admit only `SITE.url`, so the browser calls this same-origin path
+             * and the dev server forwards it as if from the real site. Opt in
+             * with `npm run dev:live` (VITE_API_URL=/live-api). It is the
+             * production backend: sign-ins send real email, writes are real.
+             */
+            '/live-api': {
+                target: SITE.api,
+                changeOrigin: true,
+                secure: true,
+                rewrite: (url) => url.replace(/^\/live-api/u, ''),
+                headers: { origin: SITE.url },
+            },
+        },
     },
     optimizeDeps: {
         // MapLibre v6's worker fails during Vite's dependency pre-bundle.

@@ -15,6 +15,7 @@ Code layout and contribution rules live in [`AGENTS.md`](AGENTS.md).
 npm install
 cp config/.env.example .env   # optional; edit as needed
 npm run dev            # http://localhost:5173
+npm run dev:live       # same, against the live API via the /live-api dev proxy (real data, real emails)
 ```
 
 ```bash
