@@ -1,0 +1,183 @@
+/* UI kit page: specimens of the design tokens themselves. */
+
+.design_swatch {
+    height: var(--s_8);
+    border: 1px solid var(--line);
+    border-radius: var(--r_md);
+}
+
+.design_swatch_bg {
+    background: var(--bg);
+}
+
+.design_swatch_bg_sunken {
+    background: var(--bg_sunken);
+}
+
+.design_swatch_surface {
+    background: var(--surface);
+}
+
+.design_swatch_surface_2 {
+    background: var(--surface_2);
+}
+
+.design_swatch_surface_3 {
+    background: var(--surface_3);
+}
+
+.design_swatch_line {
+    background: var(--line);
+}
+
+.design_swatch_line_strong {
+    background: var(--line_strong);
+}
+
+.design_swatch_text {
+    background: var(--text);
+}
+
+.design_swatch_text_2 {
+    background: var(--text_2);
+}
+
+.design_swatch_text_3 {
+    background: var(--text_3);
+}
+
+.design_swatch_fire {
+    background: var(--fire);
+}
+
+.design_swatch_fire_dim {
+    background: var(--fire_dim);
+}
+
+.design_swatch_fire_wash {
+    background: var(--fire_wash);
+}
+
+.design_swatch_live {
+    background: var(--live);
+}
+
+.design_swatch_live_wash {
+    background: var(--live_wash);
+}
+
+.design_swatch_warn {
+    background: var(--warn);
+}
+
+.design_swatch_warn_wash {
+    background: var(--warn_wash);
+}
+
+.design_swatch_dead {
+    background: var(--dead);
+}
+
+.design_swatch_dead_wash {
+    background: var(--dead_wash);
+}
+
+.design_swatch_link {
+    background: var(--link);
+}
+
+.design_swatch_bluetooth {
+    background: var(--bluetooth);
+}
+
+.design_swatch_usb {
+    background: var(--usb);
+}
+
+.design_space {
+    height: var(--s_3);
+    border-radius: var(--r_sm);
+    background: var(--fire);
+}
+
+.design_space_1 {
+    width: var(--s_1);
+}
+
+.design_space_2 {
+    width: var(--s_2);
+}
+
+.design_space_3 {
+    width: var(--s_3);
+}
+
+.design_space_4 {
+    width: var(--s_4);
+}
+
+.design_space_5 {
+    width: var(--s_5);
+}
+
+.design_space_6 {
+    width: var(--s_6);
+}
+
+.design_space_7 {
+    width: var(--s_7);
+}
+
+.design_space_8 {
+    width: var(--s_8);
+}
+
+.design_space_9 {
+    width: var(--s_9);
+}
+
+.design_space_10 {
+    width: var(--s_10);
+}
+
+.design_radius {
+    width: var(--s_8);
+    height: var(--s_8);
+    border: 1px solid var(--line_strong);
+    background: var(--surface_3);
+}
+
+.design_radius_sm {
+    border-radius: var(--r_sm);
+}
+
+.design_radius_md {
+    border-radius: var(--r_md);
+}
+
+.design_radius_lg {
+    border-radius: var(--r_lg);
+}
+
+.design_radius_full {
+    border-radius: var(--r_full);
+}
+
+.design_motion {
+    width: var(--s_8);
+    height: var(--s_8);
+    border: 1px solid var(--line_strong);
+    border-radius: var(--r_md);
+    background: var(--surface_3);
+    transition: transform var(--duration_standard) var(--ease);
+}
+
+.design_motion:hover {
+    transform: translateY(calc(var(--lift_distance) * -1));
+    box-shadow: var(--shadow_lg);
+}
+
+/* Keeps the skip link specimen in view instead of off-screen. */
+.design_skip .skip {
+    position: static;
+}

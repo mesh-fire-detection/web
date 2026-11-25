@@ -33,17 +33,36 @@ export function RadioChip() {
               ? shortName(first)
               : `${String(connected.length)} connected`
     return (
-        <ButtonLink
-            to='/connect'
-            variant='ghost'
-            size='sm'
-            className='header_radio'
+        <RadioChipView
+            connecting={first === undefined}
+            words={words}
             label={
                 first === undefined
                     ? 'Connecting to a node. Open Connect a Node'
                     : `Connected to ${connected.map((node) => shortName(node)).join(', ')}. Open Connect a Node`
             }
-            iconBefore={<StatusDot kind={first === undefined ? 'warn' : 'live'} pulse />}
+        />
+    )
+}
+
+/** The chip itself, apart from the radio state that decides what it says. */
+export function RadioChipView({
+    connecting,
+    words,
+    label,
+}: {
+    readonly connecting: boolean
+    readonly words: string
+    readonly label: string
+}) {
+    return (
+        <ButtonLink
+            to='/connect'
+            variant='ghost'
+            size='sm'
+            className='header_radio'
+            label={label}
+            iconBefore={<StatusDot kind={connecting ? 'warn' : 'live'} pulse />}
         >
             <Text as='span' mono size='xs' uppercase weight={600} truncate tone='inherit'>
                 {words}
